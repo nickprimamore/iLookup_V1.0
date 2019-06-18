@@ -35,7 +35,7 @@ CREATE TABLE Cluster
 (
 	cluster_id INT AUTO_INCREMENT, 
     name VARCHAR(50),
-    environmnet VARCHAR(50),
+    environment VARCHAR(50),
     region VARCHAR(50),
     PRIMARY KEY(cluster_id)
 );
