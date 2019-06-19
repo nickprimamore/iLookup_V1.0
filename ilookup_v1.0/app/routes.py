@@ -7,4 +7,4 @@ import boto3
 
 @app.route('/', methods=['GET', 'POST'])
 def search():
-	return Hello World
+	return "Hello World"
