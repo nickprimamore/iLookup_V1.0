@@ -1,1 +1,1 @@
-FLASK_APP=./app/routes.py
+FLASK_APP=./ilookup.py
