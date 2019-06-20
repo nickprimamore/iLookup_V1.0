@@ -7,7 +7,7 @@ Click==7.0
 docutils==0.14
 Flask==1.0.3
 Flask-Migrate==2.5.2
-Flask-SQLAlchemy==2.4.0
+flask-sqlalchemy==2.4.0
 futures==3.2.0
 idna==2.8
 itsdangerous==1.1.0
@@ -16,7 +16,7 @@ jmespath==0.9.4
 Mako==1.0.12
 MarkupSafe==1.1.1
 pkg-resources==0.0.0
-PyMySQL==0.9.3
+pymysql==0.9.3
 python-dateutil==2.8.0
 python-editor==1.0.4
 requests==2.22.0

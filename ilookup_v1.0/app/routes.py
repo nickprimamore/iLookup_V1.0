@@ -7,8 +7,9 @@ import boto3
 
 @app.route('/', methods=['GET', 'POST'])
 def search():
-<<<<<<< HEAD
 	return render_template('search.html')
-=======
-	return "Hello World"
->>>>>>> 37e8c9ef20153f01a1ba050b6baf534a9fd1389d
+
+@app.route('/result', methods=['POST'])
+def result():
+	result=request.form
+	return render_template('result.html', result=result)

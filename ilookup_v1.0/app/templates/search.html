@@ -1,4 +1,64 @@
 {% extends "layout.html"%}
 {% block content%}
-<h1>Hello World</h1>
+<h1>Welcome to iLookUp</h1>
+
+<datalist id="clients">
+  <option>ASG</option>
+  <option>Aon</option>
+  <option>Marsh</option>
+  <option>Willis</option>
+</datalist>
+
+<datalist id="products">
+  <option>iForms</option>
+  <option>iConductor</option>
+  <option>iConversion</option>
+  <option>iVerify</option>
+</datalist>
+
+<datalist id="regions">
+  <option>London</option>
+  <option>North Virginia</option>
+</datalist>
+
+<datalist id="components">
+  <option>Security</option>
+  <option>Logging</option>
+  <option>UI</option>
+  <option>Admin</option>
+</datalist>
+
+<datalist id="releases">
+  <option>1.1.1.2</option>
+  <option>2.2.2.1</option>
+</datalist>
+
+<datalist id="environments">
+  <option>UAT</option>
+  <option>DEV</option>
+  <option>QA</option>
+  <option>Production</option>
+</datalist>
+
+<datalist id="clusters">
+  <option>asg-dev-iForms</option>
+  <option>asg-qa-iConductor</option>
+</datalist>
+
+
+
+<form action="http://localhost:5000/result" method="POST">
+  Client: <br> <input type="text" name="Client" list="clients" /> <br>
+  Regions: <br> <input type="text" name="Region" list="regions" /> <br>
+  Products: <br> <input type="text" name="Product" list="products" /> <br>
+  Components: <br> <input type="text" name="Components" list="components" /> <br>
+  Date: <br>
+    From:      <input type="date" name="From" /> <br>
+    Till:      <input type="date" name="Till" /> <br>
+  Release: <br> <input type="text" name="Release" list="releases" /> <br>
+  Environment: <br> <input type="text" name="Environment" list="environments" /> <br>
+  Cluster: <br> <input type="text" name="Cluster" list="clusters" /> <br>
+  <input type="submit" />
+</form>
+
 {% endblock %}
