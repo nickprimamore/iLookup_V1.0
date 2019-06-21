@@ -1,91 +1,101 @@
 from app import db
-from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base
  
-Base = declarative_base()
 
-class Client(Base):
+class Client(db.Model):
     __tablename__ = 'client'
-    client_id = Column(Integer, primary_key=True)
-    name = Column(String(100))
+    client_id = db.Column(db.Integer, primary_key=True)
+    client_name = db.Column(db.String(100))
     
+    def __repr__(self):
+        return '<Client {}>'.format(self.name)    
 
-class Product(Base):
+class Product(db.Model):
     __tablename__ = 'product'
-    product_id = Column(Integer, primary_key=True)
-    name = Column(String(100))
+    __table_args__ = {'sqlite_autoincrement': True}
+    product_id = db.Column(db.Integer, primary_key=True)
+    product_name = db.Column(db.String(100))
+
+
+    def __repr__(self):
+        return '<Product {}>'.format(self.name)
  
-class Product_Release(Base):
+class Product_Release(db.Model):
     __tablename__ = 'product_release'
-    product_release_id = Column(Integer, primary_key=True)
-    name = Column(String(100))
-    product_id = Column(Integer, ForeignKey('product.product_id'))
-    product = relationship(
-        Product,
-        backref=backref('product_releases'))
+    product_release_id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.product_id'))
+    release = db.Column(db.String(100))
+    product = db.relationship('Product', backref='product_releases')
+
+
+    def __repr__(self):
+        return '<Product_Release {}>'.format(self.name, self.product_id)
         
 
-class Cluster(Base):
+class Cluster(db.Model):
     __tablename__ = 'cluster'
-    cluster_id = Column(Integer, primary_key=True)
-    name = Column(String(100))
-    environment = Column(String(100))
-    region = Column(String(100))
+    cluster_id = db.Column(db.Integer, primary_key=True)
+    cluster_name = db.Column(db.String(100))
+    environment = db.Column(db.String(100))
+    region = db.Column(db.String(100))
+
+
+    def __repr__(self):
+        return '<Cluster {}>'.format(self.name, self.environment, self.region)
  
-class Component_Type(Base):
+class Component_Type(db.Model):
     __tablename__ = 'component_type'
-    component_type_id = Column(Integer, primary_key=True)
-    name = Column(String(100))
-    product_id = Column(Integer, ForeignKey('product.product_id'))
-    product = relationship(
-        Product,
-        backref=backref('component_types'))
+    component_type_id = db.Column(db.Integer, primary_key=True)
+    component_type_name = db.Column(db.String(100))
+    product_id = db.Column(db.Integer, db.ForeignKey('product.product_id'))
+    product = db.relationship('Product', backref='product_ref')
+
+
+    def __repr__(self):
+        return '<Component_Type {}>'.format(self.name, self.product_id)
         
-class Component(Base):
+class Component(db.Model):
     __tablename__ = 'component'
-    component_id = Column(Integer, primary_key=True)
-    name = Column(String(100))
-    cluster_id = Column(Integer, ForeignKey('cluster.cluster_id'))
-    component_type_id = Column(Integer, ForeignKey('component_type.component_type_id'))
-    cluster = relationship(
-        Cluster,
-        backref=backref('component_cluster'))
-    component_type = relationship(
-        Component_Type,
-        backref=backref('components'))
+    component_id = db.Column(db.Integer, primary_key=True)
+    component_name = db.Column(db.String(100))
+    cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.cluster_id'))
+    component_type_id = db.Column(db.Integer, db.ForeignKey('component_type.component_type_id'))
+    cluster = db.relationship('Cluster', backref='component_cluster')
+    component_type = db.relationship('Component_Type', backref='components')
+
+
+    def __repr__(self):
+        return '<Component {}>'.format(self.name, self.cluster_id, self.component_type_id)
         
         
-class Task_Definition(Base):
+class Task_Definition(db.Model):
     __tablename__ = 'task_definition'
-    task_definition_id = Column(Integer, primary_key=True)
-    name = Column(String(100))
-    image_tag = Column(String(100))
-    revision = Column(Integer)
-    date = Column(String(100))
-    cpu = Column(String(100))
-    memory = Column(String(100))
-    component_type_id = Column(Integer, ForeignKey('component_type.component_type_id'))
-    component_type = relationship(
-        Component_Type,
-        backref=backref('task_definitions'))
+    task_definition_id = db.Column(db.Integer, primary_key=True)
+    task_definition_name = db.Column(db.String(100))
+    image_tag = db.Column(db.String(100))
+    revision = db.Column(db.Integer)
+    date = db.Column(db.String(100))
+    cpu = db.Column(db.String(100))
+    memory = db.Column(db.String(100))
+    component_type_id = db.Column(db.Integer, db.ForeignKey('component_type.component_type_id'))
+    component_type = db.relationship('Component_Type', backref='task_definitions')
+
+
+    def __repr__(self):
+        return '<Task_Definition {}>'.format(self.name, self.image_tag, self.revision, self.date, self.cpu, self.memory, self.component_type_id)
         
-class CPRC(Base):
+class CPRC(db.Model):
     __tablename__ = 'cprc'
-    cprc_id = Column(Integer, primary_key=True)
-    cluster_id = Column(Integer, ForeignKey('cluster.cluster_id'))
-    product_release_id = Column(Integer, ForeignKey('product_release.product_release_id'))
-    client_id = Column(Integer, ForeignKey('client.client_id'))
-    cluster = relationship(
-        Cluster,
-        backref=backref('clusters'))
-    product_release = relationship(
-        Product_Release,
-        backref=backref('product_releases'))
-    client = relationship(
-        Client,
-        backref=backref('clients'))
+    cprc_id = db.Column(db.Integer, primary_key=True)
+    cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.cluster_id'))
+    product_release_id = db.Column(db.Integer, db.ForeignKey('product_release.product_release_id'))
+    client_id = db.Column(db.Integer, db.ForeignKey('client.client_id'))
+    cluster = db.relationship('Cluster', backref='clusters')
+    product_release = db.relationship('Product_Release', backref='product_releases')
+    client = db.relationship('Client', backref='clients')
     
+
+    def __repr__(self):
+        return '<CPRC {}>'.format(self.cluster_id, self.product_release_id, self.cluster_id)
     
     
     
