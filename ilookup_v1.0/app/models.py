@@ -6,8 +6,8 @@ class Client(db.Model):
     client_id = db.Column(db.Integer, primary_key=True)
     client_name = db.Column(db.String(100))
     
-    def __repr__(self):
-        return '<Client {}>'.format(self.name)    
+    # def __repr__(self):
+    #     return '<Client {}>'.format(self.name)    
 
 class Product(db.Model):
     __tablename__ = 'product'
@@ -16,8 +16,8 @@ class Product(db.Model):
     product_name = db.Column(db.String(100))
 
 
-    def __repr__(self):
-        return '<Product {}>'.format(self.name)
+    # def __repr__(self):
+    #     return '<Product {}>'.format(self.name)
  
 class Product_Release(db.Model):
     __tablename__ = 'product_release'
