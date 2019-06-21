@@ -7,7 +7,9 @@ import boto3
 
 @app.route('/', methods=['GET', 'POST'])
 def search():
-	return render_template('search.html')
+	clients=['ASG', 'Aon', 'Willis','Marsh']
+	products=['iForms', 'iVerify', 'iConductor', 'iConversion']
+	return render_template('search.html', clients=clients, products=products)
 
 @app.route('/result', methods=['POST'])
 def result():

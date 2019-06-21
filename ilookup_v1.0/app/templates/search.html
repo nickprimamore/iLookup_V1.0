@@ -1,54 +1,44 @@
 {% extends "layout.html"%}
+
+
 {% block content%}
-<h1>Welcome to iLookUp</h1>
 
-<datalist id="clients">
-  <option>ASG</option>
-  <option>Aon</option>
-  <option>Marsh</option>
-  <option>Willis</option>
-</datalist>
+<script>
+  $(document).ready(function() {
+    $('.dropdowns').select2();
+  });
 
-<datalist id="products">
-  <option>iForms</option>
-  <option>iConductor</option>
-  <option>iConversion</option>
-  <option>iVerify</option>
-</datalist>
+  function sendValues() {
+    console.log($('.clients').val().concat($('.products').val()))
+  }
 
-<datalist id="regions">
-  <option>London</option>
-  <option>North Virginia</option>
-</datalist>
+  function dependentColumns() {
 
-<datalist id="components">
-  <option>Security</option>
-  <option>Logging</option>
-  <option>UI</option>
-  <option>Admin</option>
-</datalist>
+  }
 
-<datalist id="releases">
-  <option>1.1.1.2</option>
-  <option>2.2.2.1</option>
-</datalist>
+</script>
 
-<datalist id="environments">
-  <option>UAT</option>
-  <option>DEV</option>
-  <option>QA</option>
-  <option>Production</option>
-</datalist>
 
-<datalist id="clusters">
-  <option>asg-dev-iForms</option>
-  <option>asg-qa-iConductor</option>
-</datalist>
+<select class="dropdowns clients" style="width:50%" name="clients[]" multiple="multiple">
+  {% for client in clients %}
+    <option value="{{ client }}">{{ client }}</option>
+  {% endfor %}
+</select>
+
+<select class="dropdowns products" style="width:50%" name="products[]" multiple="multiple">
+  {% for product in products %}
+    <option value="{{ product }}">{{ product }}</option>
+  {% endfor %}
+</select>
+
+<button onclick="sendValues()" id="search" type="button">Submit</button>
 
 
 
-<form action="http://localhost:5000/result" method="POST">
-  Client: <br> <input type="text" name="Client" list="clients" /> <br>
+
+
+<!-- <form action="http://localhost:5000/result" method="POST">
+  Client: <br> <input type="text" onclick="ajaxd()" name="Client" list="clients" /> <br>
   Regions: <br> <input type="text" name="Region" list="regions" /> <br>
   Products: <br> <input type="text" name="Product" list="products" /> <br>
   Components: <br> <input type="text" name="Components" list="components" /> <br>
@@ -58,7 +48,7 @@
   Release: <br> <input type="text" name="Release" list="releases" /> <br>
   Environment: <br> <input type="text" name="Environment" list="environments" /> <br>
   Cluster: <br> <input type="text" name="Cluster" list="clusters" /> <br>
-  <input type="submit" />
-</form>
+  <input type="submit" onclick="ajaxd()" />
+</form> -->
 
 {% endblock %}
