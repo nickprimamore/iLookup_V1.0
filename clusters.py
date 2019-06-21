@@ -16,10 +16,14 @@ for cluster in clusters:
 	tasks = tasks["taskArns"]
 	task_descriptions = client.describe_tasks(cluster = cluster, tasks = tasks)
 	task_descriptions = task_descriptions["tasks"]
+	cluster_split = cluster.split(":")
+	region = cluster_split[3]
+	if region=="us-east-1":
+		region = "N. Virginia"
 	# Start
 
 	mysplit= cluster.split("/")
-	cluster_name = str(cluster_count)+ ". Cluster Name: " + mysplit[1] 
+	cluster_name = str(cluster_count)+ ". Cluster Name: " + mysplit[1] + ", "+region 
 
 	print(cluster_name)
 	print("|")
