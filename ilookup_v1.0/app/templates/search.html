@@ -10,10 +10,7 @@
 
   function sendValues() {
     console.log($('.clients').val().concat($('.products').val()))
-  }
-
-  function dependentColumns() {
-
+    console.log({'Clients': $('.clients').val()})
   }
 
 </script>
@@ -50,21 +47,5 @@
   Cluster: <br> <input type="text" name="Cluster" list="clusters" /> <br>
   <input type="submit" onclick="ajaxd()" />
 </form> -->
-
-<button class="ui facebook button">
-  <i class="facebook icon"></i>
-  Facebook
-</button>
-
-<div class="card">
-  <div class="card-header">
-    Featured
-  </div>
-  <div class="card-body">
-    <h5 class="card-title">Special title treatment</h5>
-    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-    <a href="#" class="btn btn-primary">Go somewhere</a>
-  </div>
-</div>
 
 {% endblock %}
