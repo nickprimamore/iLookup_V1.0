@@ -9,7 +9,10 @@ import boto3
 def search():
 	clients = Client.query.all()
 	products = Product.query.all()
-	return render_template('search.html', clients=clients, products=products)
+	releases = Product_Release.query.all()
+	clusters = Cluster.query.all()
+	components = Component.query.all()
+	return render_template('search.html', clients=clients, products=products, releases=releases, clusters=clusters, components=components)
 
 @app.route('/result', methods=['GET','POST'])
 def result():
