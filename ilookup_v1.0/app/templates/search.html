@@ -8,27 +8,55 @@
     $('.dropdowns').select2();
   });
 
-  function sendValues() {
-    console.log($('.clients').val().concat($('.products').val()))
-    console.log({'Clients': $('.clients').val()})
+
+  // console.log($('.clients').val().concat($('.products').val()))
+  function sendData() {
+    var clients = $('.clients').val()
+    var clientList = []
+    for (var prop in clients) {
+      clientList.push(clients[prop])
+    }
+      $.ajax({
+      url: '/result',
+      type: 'POST',
+      data: JSON.stringify({
+        Clients: clientList,
+        Products: ['iForms', 'iConductor']
+      }),
+      success: function (request) {
+      }
+    })
   }
+
+
+
+
+
 
 </script>
 
-
 <select class="dropdowns clients" style="width:50%" name="clients[]" multiple="multiple">
   {% for client in clients %}
-    <option value="{{ client }}">{{ client }}</option>
+    <option value="{{ client.client_name }}">{{ client.client_name }}</option>
   {% endfor %}
 </select>
 
 <select class="dropdowns products" style="width:50%" name="products[]" multiple="multiple">
   {% for product in products %}
-    <option value="{{ product }}">{{ product }}</option>
+    <option value="{{ { 'Product': product.product_name} }}">{{ product.product_name }}</option>
   {% endfor %}
 </select>
 
-<button onclick="sendValues()" id="search" type="button">Submit</button>
+<!-- <select class="dropdowns clusters" style="width:50%" name="clusters[]" multiple="multiple">
+  {% for cluster in clusters %}
+    <option value="{{ { 'Cluster': cluster.cluster_name} }}">{{ cluster.cluster_name }}</option>
+  {% endfor %}
+</select> -->
+
+<button onClick="sendData()">Submit</button>
+
+
+
 
 
 
