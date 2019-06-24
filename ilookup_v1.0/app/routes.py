@@ -13,30 +13,10 @@ def search():
 
 @app.route('/result', methods=['GET','POST'])
 def result():
-	print("Hello")
-	data = request.form
-	data = data.values()
+	data = request.form.keys()
 	print(data)
-	data = json.dumps(data)
-	data = json.loads(data)
-	print(type(data))
-	data = json.dumps(data)
-	# client = data[0]
-	# client = json.loads(client)
-	data = json.loads(data)
-	print(data[0])
-	client = data[0]
-
-	client = str(client)
-	print(type(client))
-	print(client)
-	# client = json.dumps(client)
-	# client = json.loads(client)
-	# print(type(client))
-	# value = data["Client"]
-	# print(data[0])
-	# data = json.loads(data[0])
-	# # data = json.dumps(data[0])
-	# print(type(data))
-	# client = data["Client"]
-	return "<h1>Hello WOrld</h1>"
+	for values in data:
+		stringified = values
+		objectified = json.loads(values)
+		print(objectified['Clients'], objectified['Products'])
+	return "<h1>Hello World</h1>"

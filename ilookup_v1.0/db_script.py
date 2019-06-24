@@ -12,19 +12,19 @@ from app.models import Product, Client, Cluster
 # db.session.add(iconversion)
 
 # db.session.commit()
-# Checks for existing records	
-exists = db.session.query(Client.client_name).filter_by(client_name="Aon").scalar() is not None
+# Checks for existing records
+exists = db.session.query(Client.client_name).filter_by(client_name="Marsh").scalar() is not None
 
 if exists:
 	print("Already Exists")
 else:
-	aon = Client(client_name="Aon")
-	# marsh = Client(client_name="Marsh")
-	# wills = Client(client_name="Wills")
+	# aon = Client(client_name="Aon")
+	marsh = Client(client_name="Marsh")
+	wills = Client(client_name="Wills")
 	print("Adding Aon")
-	db.session.add(aon)
-	# db.session.add(marsh)
-	# db.session.add(wills)
+	#db.session.add(aon)
+	db.session.add(marsh)
+	db.session.add(wills)
 
 	db.session.commit()
 
