@@ -14,7 +14,7 @@
     $.ajax({
       url: '/result',
       type: 'POST',
-      data: {'Clients': $('.clients').val()},
+      data: {"Clients": $('.clients').val()},
       success: function (request) {
         console.log(request)
         alert("Hip Hip Hurray")
