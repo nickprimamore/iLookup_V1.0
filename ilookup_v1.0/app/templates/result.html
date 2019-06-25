@@ -1,16 +1,34 @@
-{% extends "layout.html"%}
-{% block content%}
-<!-- <table border=1>
-  {% for key, value in result.items() %}
+{% extends "search.html"%}
+{% block resultContent%}
+
+<table class="table table-striped">
+  <thead>
     <tr>
-      <th> {{key}} </th>
-      <td> {{ value }} </td>
+      <th scope="col">#</th>
+      <th scope="col">Client</th>
+      <th scope="col">Product</th>
+      <th scope="col">Release</th>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
     </tr>
-  {% endfor %}
-</table> -->
-
-
-
-
+    <tr>
+      <th scope="row">2</th>
+      <td>Jacob</td>
+      <td>Thornton</td>
+      <td>@fat</td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td>Larry</td>
+      <td>the Bird</td>
+      <td>@twitter</td>
+    </tr>
+  </tbody>
+</table>
 
 {% endblock %}

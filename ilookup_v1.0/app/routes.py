@@ -12,7 +12,7 @@ def search():
 	releases = Product_Release.query.all()
 	clusters = Cluster.query.all()
 	components = Component.query.all()
-	return render_template('search.html', clientsQ=clients, productsQ=products, releasesQ=releases, clustersQ=clusters, componentsQ=components)
+	return render_template('result.html', clientsQ=clients, productsQ=products, releasesQ=releases, clustersQ=clusters, componentsQ=components)
 
 @app.route('/result', methods=['GET','POST'])
 def result():
@@ -21,4 +21,5 @@ def result():
 	for values in data:
 		stringified = values
 		objectified = json.loads(values)
-	return "<h1>Hello WOrld</h1>"
+		print(objectified)
+	return render_template('result.html')

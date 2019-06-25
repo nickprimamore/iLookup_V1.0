@@ -1,10 +1,8 @@
 {% extends "layout.html"%}
 
-
-{% block content%}
-
+{% block content %}
 <script>
-  //
+
   $(document).ready(function() {
     $('.dropdowns').select2();
   });
@@ -116,19 +114,23 @@
       <option value="{{ component.component_name }}">{{ component.component_name }}</option>
     {% endfor %}
   </select>
+
   <br />
   <br />
+
   <button onClick="sendData()">Submit</button>
 </div>
-<script>
 
+<script>
 // $('#products').on("select2:select", function (e) {
 //   for x in productsQ {
 //     console.log(x)
 //   }
 //   alert("We In This?")
 // })
-
 </script>
+
+{% block resultContent%}
+{% endblock %}
 
 {% endblock %}
