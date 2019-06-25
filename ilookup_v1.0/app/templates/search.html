@@ -3,12 +3,14 @@
 {% block content %}
 <script>
 
+  //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
   $(document).ready(function() {
     $('.dropdowns').select2();
   });
 
   // Sends the selected search tags to the backend
   function sendData() {
+    //The format of $('._____').val() gives the results from the select2 Tables
     var clientVal = $('.clients').val()
     var productVal = $('.products').val()
     var releaseVal = $('.releases').val()
@@ -16,6 +18,7 @@
     var clusterVal = $('.clusters').val()
     var environmentVal = $('.environments').val()
     var componentVal = $('components').val()
+    //Generated empty arrays, and filled them with the values from above to send to the backend as an array.
     var clientList = []
     var productList = []
     var releaseList = []
@@ -44,6 +47,7 @@
     for (var com in componentVal) {
       componentList.push(componentVal[com])
     }
+    //send back and Ajax Request with the following information.
       $.ajax({
       url: '/result',
       type: 'POST',
@@ -62,63 +66,95 @@
   }
 </script>
 
+<style>
+  div.searchContainer {
+    display:flex;
+    flex-wrap:wrap;
+    margin-left:17%
+  }
+  div.searchBar {
+    text-align:left;
+    width:48%
+  }
+  p.searchLabel {
+    color:#2867b1;
+    margin-bottom:0px;
+  }
+  select.dropdowns {
+    width: 70%
+  }
+</style>
+
 <hr />
-<h1 align="center">Welcome To iLookUp</h1>
+<h1 style="color:#2867b1" align="center">Search <span style="color:#FF9900">aws</span> Resources:</h1>
+<hr />
+<div class="searchContainer">
+  <div class="searchBar">
+    <p class="searchLabel" > <b> Clients </b> </p>
+    <select class="dropdowns clients"  name="clients[]" multiple="multiple">
+      {% for client in clientsQ %}
+        <option value="{{ client.client_name }}">{{ client.client_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Products </b> </p>
+    <select class="dropdowns products" id="products"  name="products[]" multiple="multiple">
+      {% for product in productsQ %}
+        <option value="{{ product.product_name }}">{{ product.product_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Releases </b> </p>
+    <select class="dropdowns releases"  name="releases[]" multiple="multiple">
+      {% for release in releasesQ %}
+        <option value="{{ release.release_number }}">{{ release.release_number }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Regions </b> </p>
+    <select class="dropdowns regions"  name="regions[]" multiple="multiple">
+      {% for region in regionsQ %}
+        <option value="{{ region }}">{{ region }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Clusters </b> </p>
+    <select class="dropdowns clusters"  name="clusters[]" multiple="multiple">
+      {% for cluster in clustersQ %}
+        <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Environments </b> </p>
+    <select class="dropdowns environments"  name="environments[]" multiple="multiple">
+      {% for environment in environmentsQ %}
+        <option value="{{ environment }}">{{ environment }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Components </b> </p>
+    <select class="dropdowns components"  name="components[]" multiple="multiple">
+      {% for component in componentsQ %}
+        <option value="{{ component.component_name }}">{{ component.component_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Search Now: </b> </p>
+    <button type="button" class="btn btn-info" style="width:70%"  onClick="sendData()">Search</button>
+  </div>
 
-<div align="center">
-  <p> Clients </p>
-  <select class="dropdowns clients" style="width:50%" name="clients[]" multiple="multiple">
-    {% for client in clientsQ %}
-      <option value="{{ client.client_name }}">{{ client.client_name }}</option>
-    {% endfor %}
-  </select>
+  <br>
+  <br>
+  <br>
+  <br>
 
-  <p> Products </p>
-  <select class="dropdowns products" id="products" style="width:50%" name="products[]" multiple="multiple">
-    {% for product in productsQ %}
-      <option value="{{ product.product_name }}">{{ product.product_name }}</option>
-    {% endfor %}
-  </select>
-
-  <p> Releases </p>
-  <select class="dropdowns releases" style="width:50%" name="releases[]" multiple="multiple">
-    {% for release in releasesQ %}
-      <option value="{{ release.release_number }}">{{ release.release_number }}</option>
-    {% endfor %}
-  </select>
-
-  <p> Regions </p>
-  <select class="dropdowns regions" style="width:50%" name="regions[]" multiple="multiple">
-    {% for region in clustersQ %}
-      <option value="{{ region.region }}">{{ region.region }}</option>
-    {% endfor %}
-  </select>
-
-  <p> Clusters </p>
-  <select class="dropdowns clusters" style="width:50%" name="clusters[]" multiple="multiple">
-    {% for cluster in clustersQ %}
-      <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
-    {% endfor %}
-  </select>
-
-  <p> Environments </p>
-  <select class="dropdowns environments" style="width:50%" name="environments[]" multiple="multiple">
-    {% for environment in clustersQ %}
-      <option value="{{ environment.environment }}">{{ environment.environment }}</option>
-    {% endfor %}
-  </select>
-
-  <p> Components </p>
-  <select class="dropdowns components" style="width:50%" name="components[]" multiple="multiple">
-    {% for component in componentsQ %}
-      <option value="{{ component.component_name }}">{{ component.component_name }}</option>
-    {% endfor %}
-  </select>
-
-  <br />
-  <br />
-
-  <button onClick="sendData()">Submit</button>
 </div>
 
 <script>
