@@ -78,7 +78,7 @@
   }
   p.searchLabel {
     color:#2867b1;
-    margin-bottom:0px;
+    margin-bottom:5px;
   }
   select.dropdowns {
     width: 70%
@@ -145,9 +145,19 @@
       {% endfor %}
     </select>
   </div>
+  <div class="form-group" style = padding-right:18px>
+      <!--<label for="date (from)">Date (From)</label>!-->
+      <p class="searchLabel"> <b> Date (From) </b> </p>
+      <input type="date" class="form-control mx-sm-2" id="date(from)"name="Date (From)">
+  </div>
+  <div class="form-group">
+      <!--<label for="date (until)">Date (Until)</label>-->
+      <p class="searchLabel"> <b> Date (Until) </b> </p>
+      <input type="date" class="form-control mx-sm-2" id="date (until)" name="Date (Until)">
+  </div>
   <div class="searchBar">
     <p class="searchLabel"> <b> Search Now: </b> </p>
-    <button type="button" class="btn btn-info" style="width:70%"  onClick="sendData()">Search</button>
+    <button type="button" class="btn btn-info" style="width:170.5%" onClick="sendData()">Search</button>
   </div>
 
   <br>
