@@ -64,51 +64,62 @@
   }
 </script>
 
-<h1>Welcome To iLookUp</h1>
-<select class="dropdowns clients" style="width:50%" name="clients[]" multiple="multiple">
-  {% for client in clientsQ %}
-    <option value="{{ client.client_name }}">{{ client.client_name }}</option>
-  {% endfor %}
-</select>
+<hr />
+<h1 align="center">Welcome To iLookUp</h1>
 
-<select class="dropdowns products" id="products" style="width:50%" name="products[]" multiple="multiple">
-  {% for product in productsQ %}
-    <option value="{{ product.product_name }}">{{ product.product_name }}</option>
-  {% endfor %}
-</select>
+<div align="center">
+  <p> Clients </p>
+  <select class="dropdowns clients" style="width:50%" name="clients[]" multiple="multiple">
+    {% for client in clientsQ %}
+      <option value="{{ client.client_name }}">{{ client.client_name }}</option>
+    {% endfor %}
+  </select>
 
-<select class="dropdowns releases" style="width:50%" name="releases[]" multiple="multiple">
-  {% for release in releasesQ %}
-    <option value="{{ release.release_number }}">{{ release.release_number }}</option>
-  {% endfor %}
-</select>
+  <p> Products </p>
+  <select class="dropdowns products" id="products" style="width:50%" name="products[]" multiple="multiple">
+    {% for product in productsQ %}
+      <option value="{{ product.product_name }}">{{ product.product_name }}</option>
+    {% endfor %}
+  </select>
 
-<select class="dropdowns regions" style="width:50%" name="regions[]" multiple="multiple">
-  {% for region in clustersQ %}
-    <option value="{{ region.region }}">{{ region.region }}</option>
-  {% endfor %}
-</select>
+  <p> Releases </p>
+  <select class="dropdowns releases" style="width:50%" name="releases[]" multiple="multiple">
+    {% for release in releasesQ %}
+      <option value="{{ release.release_number }}">{{ release.release_number }}</option>
+    {% endfor %}
+  </select>
 
-<select class="dropdowns clusters" style="width:50%" name="clusters[]" multiple="multiple">
-  {% for cluster in clustersQ %}
-    <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
-  {% endfor %}
-</select>
+  <p> Regions </p>
+  <select class="dropdowns regions" style="width:50%" name="regions[]" multiple="multiple">
+    {% for region in clustersQ %}
+      <option value="{{ region.region }}">{{ region.region }}</option>
+    {% endfor %}
+  </select>
 
-<select class="dropdowns environments" style="width:50%" name="environments[]" multiple="multiple">
-  {% for environment in clustersQ %}
-    <option value="{{ environment.environment }}">{{ environment.environment }}</option>
-  {% endfor %}
-</select>
+  <p> Clusters </p>
+  <select class="dropdowns clusters" style="width:50%" name="clusters[]" multiple="multiple">
+    {% for cluster in clustersQ %}
+      <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
+    {% endfor %}
+  </select>
 
-<select class="dropdowns components" style="width:50%" name="components[]" multiple="multiple">
-  {% for component in componentsQ %}
-    <option value="{{ component.component_name }}">{{ component.component_name }}</option>
-  {% endfor %}
-</select>
+  <p> Environments </p>
+  <select class="dropdowns environments" style="width:50%" name="environments[]" multiple="multiple">
+    {% for environment in clustersQ %}
+      <option value="{{ environment.environment }}">{{ environment.environment }}</option>
+    {% endfor %}
+  </select>
 
-<button onClick="sendData()">Submit</button>
-
+  <p> Components </p>
+  <select class="dropdowns components" style="width:50%" name="components[]" multiple="multiple">
+    {% for component in componentsQ %}
+      <option value="{{ component.component_name }}">{{ component.component_name }}</option>
+    {% endfor %}
+  </select>
+  <br />
+  <br />
+  <button onClick="sendData()">Submit</button>
+</div>
 <script>
 
 // $('#products').on("select2:select", function (e) {

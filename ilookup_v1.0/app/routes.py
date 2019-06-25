@@ -21,5 +21,4 @@ def result():
 	for values in data:
 		stringified = values
 		objectified = json.loads(values)
-		print(objectified['Clients'], objectified['Products'])
 	return "<h1>Hello WOrld</h1>"
