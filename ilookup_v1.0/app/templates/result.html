@@ -1,20 +1,10 @@
-{% extends "search.html"%}
-{% block resultContent%}
+<br>
+<br>
+{% for client in client_results%}
+{% for result in client%}
+<h1>{{ result["task_definition_name"]}}</h1>
+{% endfor %}
+{% endfor %}
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Client</th>
-      <th scope="col">Product</th>
-      <th scope="col">Release #</th>
-      <th scope="col">Cluster</th>
-      <th scope="col">Environment</th>
-      <th scope="col">Region</th>
-  </thead>
-  <tbody>
-    
-  </tbody>
-</table>
 
-{% endblock %}
+

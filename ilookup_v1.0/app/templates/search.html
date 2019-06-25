@@ -60,10 +60,12 @@
         Environments: environmentList,
         Components: componentList
       }),
-      success: function (request) {
+      success: function (response) {
+        $('#result-tag').html(response)
       }
     })
   }
+
 </script>
 
 <style>
@@ -166,6 +168,7 @@
   <br>
 
 </div>
+<div id="result-tag"></div>
 
 <script>
 // $('#products').on("select2:select", function (e) {
