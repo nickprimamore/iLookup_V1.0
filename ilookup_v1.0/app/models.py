@@ -30,7 +30,6 @@ class Product_Release(db.Model):
     def __repr__(self):
         return '<Product_Release {}>'.format(self.release_number, self.product_id)
 
-
 class Cluster(db.Model):
     __tablename__ = 'cluster'
     cluster_id = db.Column(db.Integer, primary_key=True)
@@ -65,7 +64,6 @@ class Component(db.Model):
 
     def __repr__(self):
         return '<Component {}>'.format(self.component_name, self.cluster_id, self.component_type_id)
-
 
 class Task_Definition(db.Model):
     __tablename__ = 'task_definition'

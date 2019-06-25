@@ -1,5 +1,11 @@
-{% extends "search.html"%}
-{% block resultContent%}
+<br>
+<br>
+{% for client in client_results%}
+{% for result in client%}
+<h1>{{ result["task_definition_name"]}}</h1>
+{% endfor %}
+{% endfor %}
+
 
 
 <table class="table table-striped">
@@ -35,5 +41,3 @@
     </tr>
   </tbody>
 </table>
-
-{% endblock %}
