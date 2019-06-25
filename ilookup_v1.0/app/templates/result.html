@@ -1,17 +1,26 @@
-<br>
-<br>
-{% for client in client_results%}
-{% for result in client%}
-<h1>{{ result["task_definition_name"]}}</h1>
-{% endfor %}
-{% endfor %}
-
-
+<!-- Modal -->
+<div class="modal fade" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <table class="table table-striped">
   <thead>
     <tr>
-      <th scope="col">#</th>
       <th scope="col">Client</th>
       <th scope="col">Product</th>
       <th scope="col">Release #</th>
@@ -21,23 +30,20 @@
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <th scope="row"> 1 </th>
-      <td> Aon </td>
-      <td> iForms </td>
-      <td> 1.1.1.1 </td>
-      <td> Aon-dev-iForms</td>
-      <td> Dev </td>
-      <td> N Virginia </td>
+
+    {% for client in client_results %}
+    {% for result in client %}
+
+    <tr data-toggle="modal" data-target="#clusterDetail">
+      <th scope="row">{{result.client_name}}</th>
+      <td> {{result.product_name}} </td>
+      <td> {{result.release}} </td>
+      <td> {{result.cluster_name}} </td>
+      <td> {{result.environment}} </td>
+      <td> {{result.region}} </td>
     </tr>
-    <tr>
-      <th scope="row"> 2 </th>
-      <td> Willis </td>
-      <td> iConductor </td>
-      <td> 2.1.2.1 </td>
-      <td> Marsh-Willis-dev-iForms </td>
-      <td> Dev </td>
-      <td> London </td>
-    </tr>
+
+    {% endfor %}
+    {% endfor %}
   </tbody>
 </table>
