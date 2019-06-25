@@ -23,12 +23,12 @@ class Product_Release(db.Model):
     __tablename__ = 'product_release'
     product_release_id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.product_id'))
-    release = db.Column(db.String(100))
+    release_number = db.Column(db.String(100))
     product = db.relationship('Product', backref='product_releases')
 
 
     def __repr__(self):
-        return '<Product_Release {}>'.format(self.name, self.product_id)
+        return '<Product_Release {}>'.format(self.release_number, self.product_id)
         
 
 class Cluster(db.Model):
@@ -40,7 +40,7 @@ class Cluster(db.Model):
 
 
     def __repr__(self):
-        return '<Cluster {}>'.format(self.name, self.environment, self.region)
+        return '<Cluster {}>'.format(self.cluster_name, self.environment, self.region)
  
 class Component_Type(db.Model):
     __tablename__ = 'component_type'
@@ -51,7 +51,7 @@ class Component_Type(db.Model):
 
 
     def __repr__(self):
-        return '<Component_Type {}>'.format(self.name, self.product_id)
+        return '<Component_Type {}>'.format(self.component_type_name, self.product_id)
         
 class Component(db.Model):
     __tablename__ = 'component'
@@ -64,7 +64,7 @@ class Component(db.Model):
 
 
     def __repr__(self):
-        return '<Component {}>'.format(self.name, self.cluster_id, self.component_type_id)
+        return '<Component {}>'.format(self.component_name, self.cluster_id, self.component_type_id)
         
         
 class Task_Definition(db.Model):
@@ -76,12 +76,12 @@ class Task_Definition(db.Model):
     date = db.Column(db.String(100))
     cpu = db.Column(db.String(100))
     memory = db.Column(db.String(100))
-    component_type_id = db.Column(db.Integer, db.ForeignKey('component_type.component_type_id'))
-    component_type = db.relationship('Component_Type', backref='task_definitions')
+    component_id = db.Column(db.Integer, db.ForeignKey('component.component_id'))
+    component = db.relationship('Component', backref='task_definitions')
 
 
     def __repr__(self):
-        return '<Task_Definition {}>'.format(self.name, self.image_tag, self.revision, self.date, self.cpu, self.memory, self.component_type_id)
+        return '<Task_Definition {}>'.format(self.task_definition_name, self.image_tag, self.revision, self.date, self.cpu, self.memory, self.component_id)
         
 class CPRC(db.Model):
     __tablename__ = 'cprc'
