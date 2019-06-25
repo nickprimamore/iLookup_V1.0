@@ -8,20 +8,43 @@ import json
 import boto3
 
 @app.route('/', methods=['GET', 'POST'])
-def search():
+#This function gathers all the data from the SQL tables to generate the search filters
+def search():	
+	# print("Result page")
+	###############################################################
 	clients = Client.query.all()
 	products = Product.query.all()
-	return render_template('search.html', clients=clients, products=products)
+	releases = Product_Release.query.all()
+	clusters = Cluster.query.all()
+	environments = []
+	regions = []
+	#Remove duplicate values such as "dev" and "qa"
+	for cluster in clusters:
+	 	if cluster.environment not in environments:
+		 	environments.append(cluster.environment)
+		if cluster.region not in regions:
+			regions.append(cluster.region)
+	components = Component.query.all()
+	#Renders the Result.html file which extends Search.html which extends Layout.html
+	return render_template('search.html', clientsQ=clients,
+	 productsQ=products, releasesQ=releases, clustersQ=clusters, 
+	 componentsQ=components, environmentsQ=environments, regionsQ=regions)
 
+#This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])
 def result():
+	client_results = []
 	data = request.form.keys()
-	print(data)
 	for values in data:
 		stringified = values
 		objectified = json.loads(values)
-		print(objectified['Clients'], objectified['Products'])
-	return "<h1>Hello World</h1>"
+		#print(objectified['Clients'], objectified['Products'])
+		clients = objectified['Clients']
+		for client in clients:
+			results = getResultByClient(client)
+			client_results.append(results)
+	return render_template('result.html',client_results=client_results)
+
 
 def getCPRC(client_name):
 	client = Client.query.filter_by(client_name=client_name).first()
@@ -70,10 +93,9 @@ def getProductByPRID(prid):
 	return product_dict
 
 @app.route('/mydb', methods=['GET', 'POST'])
-def getResultByClient():
-	input_client_name = "Marsh"
-	cprc = getCPRC(input_client_name)
-
+def getResultByClient(client_name):
+	result = []
+	cprc = getCPRC(client_name)
 	for record in cprc:
 		cluster_id = record["cluster_id"]
 		prid = record["prid"]
@@ -86,15 +108,26 @@ def getResultByClient():
 		release = product["release"]
 		task_definitions = getTaskDefinitions(cluster_id)
 		for task_definition in task_definitions:
-			client_name = input_client_name
-			task_definition_name = task_definition.task_definition_name
-			image_tag = task_definition.image_tag
-			revision = task_definition.revision
-			date = task_definition.date
-			cpu = task_definition.cpu
-			memory = task_definition.memory
-			print(client_name,product_name, release,cluster_name,task_definition_name,image_tag,revision,date, environment, region, cpu,memory)
-	return "MyDB"
+			# task_definition_name = task_definition.task_definition_name
+			# image_tag = task_definition.image_tag
+			# revision = task_definition.revision
+			# date = task_definition.date
+			# cpu = task_definition.cpu
+			# memory = task_definition.memory
+			#print(client_name,product_name, release,cluster_name,task_definition_name,image_tag,revision,date, environment, region, cpu,memory) 
+			result_record ={}
+			result_record['client_name'] = client_name
+			result_record['product_name'] = product_name
+			result_record['release'] = release
+			result_record['cluster_name'] = cluster_name 
+			result_record["task_definition_name"] = task_definition.task_definition_name
+			result_record['image_tag'] = task_definition.image_tag
+			result_record['revision'] = task_definition.revision
+			result_record['date'] = task_definition.date
+			result_record['cpu'] = task_definition.cpu
+			result_record['memory'] = task_definition.memory
+			result.append(result_record)
+	return result
 
 def getClusterInfo(cluster_id):
 	cluster_info = {}
@@ -106,3 +139,5 @@ def getClusterInfo(cluster_id):
 	cluster_info["region"] = region
 	cluster_info["environment"] = environment
 	return cluster_info
+
+

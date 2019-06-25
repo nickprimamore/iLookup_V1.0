@@ -1,79 +1,178 @@
 {% extends "layout.html"%}
 
-
-{% block content%}
-
+{% block content %}
 <script>
+
+  //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
   $(document).ready(function() {
     $('.dropdowns').select2();
   });
 
-
-  // console.log($('.clients').val().concat($('.products').val()))
+  // Sends the selected search tags to the backend
   function sendData() {
-    var clients = $('.clients').val()
+    //The format of $('._____').val() gives the results from the select2 Tables
+    var clientVal = $('.clients').val()
+    var productVal = $('.products').val()
+    var releaseVal = $('.releases').val()
+    var regionVal = $('.regions').val()
+    var clusterVal = $('.clusters').val()
+    var environmentVal = $('.environments').val()
+    var componentVal = $('components').val()
+    //Generated empty arrays, and filled them with the values from above to send to the backend as an array.
     var clientList = []
-    for (var prop in clients) {
-      clientList.push(clients[prop])
+    var productList = []
+    var releaseList = []
+    var regionList = []
+    var clusterList = []
+    var environmentList = []
+    var componentList = []
+    for (var cli in clientVal) {
+      clientList.push(clientVal[cli])
     }
+    for (var pro in productVal) {
+      productList.push(productVal[pro])
+    }
+    for (var rel in releaseVal) {
+      releaseList.push(releaseVal[rel])
+    }
+    for (var reg in regionVal) {
+      regionList.push(regionVal[reg])
+    }
+    for (var clu in clusterVal) {
+      clusterList.push(clusterVal[clu])
+    }
+    for (var env in environmentVal) {
+      environmentList.push(environmentVal[env])
+    }
+    for (var com in componentVal) {
+      componentList.push(componentVal[com])
+    }
+    //send back and Ajax Request with the following information.
       $.ajax({
       url: '/result',
       type: 'POST',
       data: JSON.stringify({
         Clients: clientList,
-        Products: ['iForms', 'iConductor']
+        Products: productList,
+        Releases: releaseList,
+        Regions: regionList,
+        Clusters: clusterList,
+        Environments: environmentList,
+        Components: componentList
       }),
-      success: function (request) {
+      success: function (response) {
+        $('#result-tag').html(response)
       }
     })
   }
 
-
-
-
-
-
 </script>
 
-<select class="dropdowns clients" style="width:50%" name="clients[]" multiple="multiple">
-  {% for client in clients %}
-    <option value="{{ client.client_name }}">{{ client.client_name }}</option>
-  {% endfor %}
-</select>
+<style>
+  div.searchContainer {
+    display:flex;
+    flex-wrap:wrap;
+    margin-left:17%
+  }
+  div.searchBar {
+    text-align:left;
+    width:48%
+  }
+  p.searchLabel {
+    color:#2867b1;
+    margin-bottom:0px;
+  }
+  select.dropdowns {
+    width: 70%
+  }
+</style>
 
-<select class="dropdowns products" style="width:50%" name="products[]" multiple="multiple">
-  {% for product in products %}
-    <option value="{{ { 'Product': product.product_name} }}">{{ product.product_name }}</option>
-  {% endfor %}
-</select>
+<hr />
+<h1 style="color:#2867b1" align="center">Search <span style="color:#FF9900">aws</span> Resources:</h1>
+<hr />
+<div class="searchContainer">
+  <div class="searchBar">
+    <p class="searchLabel" > <b> Clients </b> </p>
+    <select class="dropdowns clients"  name="clients[]" multiple="multiple">
+      {% for client in clientsQ %}
+        <option value="{{ client.client_name }}">{{ client.client_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Products </b> </p>
+    <select class="dropdowns products" id="products"  name="products[]" multiple="multiple">
+      {% for product in productsQ %}
+        <option value="{{ product.product_name }}">{{ product.product_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Releases </b> </p>
+    <select class="dropdowns releases"  name="releases[]" multiple="multiple">
+      {% for release in releasesQ %}
+        <option value="{{ release.release_number }}">{{ release.release_number }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Regions </b> </p>
+    <select class="dropdowns regions"  name="regions[]" multiple="multiple">
+      {% for region in regionsQ %}
+        <option value="{{ region }}">{{ region }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Clusters </b> </p>
+    <select class="dropdowns clusters"  name="clusters[]" multiple="multiple">
+      {% for cluster in clustersQ %}
+        <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Environments </b> </p>
+    <select class="dropdowns environments"  name="environments[]" multiple="multiple">
+      {% for environment in environmentsQ %}
+        <option value="{{ environment }}">{{ environment }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Components </b> </p>
+    <select class="dropdowns components"  name="components[]" multiple="multiple">
+      {% for component in componentsQ %}
+        <option value="{{ component.component_name }}">{{ component.component_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="searchBar">
+    <p class="searchLabel"> <b> Search Now: </b> </p>
 
-<!-- <select class="dropdowns clusters" style="width:50%" name="clusters[]" multiple="multiple">
-  {% for cluster in clusters %}
-    <option value="{{ { 'Cluster': cluster.cluster_name} }}">{{ cluster.cluster_name }}</option>
-  {% endfor %}
-</select> -->
+    <button type="button" class="btn btn-info" style="width:70%" onClick="sendData()"> Search 
+    </button>
 
-<button onClick="sendData()">Submit</button>
+  </div>
 
+  <br>
+  <br>
+  <br>
+  <br>
 
+</div>
+<div id="result-tag"></div>
 
+<script>
+// $('#products').on("select2:select", function (e) {
+//   for x in productsQ {
+//     console.log(x)
+//   }
+//   alert("We In This?")
+// })
+</script>
 
-
-
-
-
-<!-- <form action="http://localhost:5000/result" method="POST">
-  Client: <br> <input type="text" onclick="ajaxd()" name="Client" list="clients" /> <br>
-  Regions: <br> <input type="text" name="Region" list="regions" /> <br>
-  Products: <br> <input type="text" name="Product" list="products" /> <br>
-  Components: <br> <input type="text" name="Components" list="components" /> <br>
-  Date: <br>
-    From:      <input type="date" name="From" /> <br>
-    Till:      <input type="date" name="Till" /> <br>
-  Release: <br> <input type="text" name="Release" list="releases" /> <br>
-  Environment: <br> <input type="text" name="Environment" list="environments" /> <br>
-  Cluster: <br> <input type="text" name="Cluster" list="clusters" /> <br>
-  <input type="submit" onclick="ajaxd()" />
-</form> -->
+{% block resultContent%}
+{% endblock %}
 
 {% endblock %}
