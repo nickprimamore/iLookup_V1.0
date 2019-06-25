@@ -1,13 +1,13 @@
 from app import db
- 
+
 
 class Client(db.Model):
     __tablename__ = 'client'
     client_id = db.Column(db.Integer, primary_key=True)
     client_name = db.Column(db.String(100))
-    
-    # def __repr__(self):
-    #     return '<Client {}>'.format(self.name)    
+
+    def __repr__(self):
+        return '<Client {}>'.format(self.client_name)
 
 class Product(db.Model):
     __tablename__ = 'product'
@@ -16,20 +16,20 @@ class Product(db.Model):
     product_name = db.Column(db.String(100))
 
 
-    # def __repr__(self):
-    #     return '<Product {}>'.format(self.name)
- 
+    def __repr__(self):
+        return '<Product {}>'.format(self.product_name)
+
 class Product_Release(db.Model):
     __tablename__ = 'product_release'
     product_release_id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.product_id'))
-    release = db.Column(db.String(100))
+    release_number = db.Column(db.String(100))
     product = db.relationship('Product', backref='product_releases')
 
 
     def __repr__(self):
-        return '<Product_Release {}>'.format(self.name, self.product_id)
-        
+        return '<Product_Release {}>'.format(self.release_number, self.product_id)
+
 
 class Cluster(db.Model):
     __tablename__ = 'cluster'
@@ -40,8 +40,8 @@ class Cluster(db.Model):
 
 
     def __repr__(self):
-        return '<Cluster {}>'.format(self.name, self.environment, self.region)
- 
+        return '<Cluster {}>'.format(self.cluster_name, self.environment, self.region)
+
 class Component_Type(db.Model):
     __tablename__ = 'component_type'
     component_type_id = db.Column(db.Integer, primary_key=True)
@@ -51,8 +51,8 @@ class Component_Type(db.Model):
 
 
     def __repr__(self):
-        return '<Component_Type {}>'.format(self.name, self.product_id)
-        
+        return '<Component_Type {}>'.format(self.component_type_name, self.product_id)
+
 class Component(db.Model):
     __tablename__ = 'component'
     component_id = db.Column(db.Integer, primary_key=True)
@@ -64,9 +64,9 @@ class Component(db.Model):
 
 
     def __repr__(self):
-        return '<Component {}>'.format(self.name, self.cluster_id, self.component_type_id)
-        
-        
+        return '<Component {}>'.format(self.component_name, self.cluster_id, self.component_type_id)
+
+
 class Task_Definition(db.Model):
     __tablename__ = 'task_definition'
     task_definition_id = db.Column(db.Integer, primary_key=True)
@@ -76,13 +76,13 @@ class Task_Definition(db.Model):
     date = db.Column(db.String(100))
     cpu = db.Column(db.String(100))
     memory = db.Column(db.String(100))
-    component_type_id = db.Column(db.Integer, db.ForeignKey('component_type.component_type_id'))
-    component_type = db.relationship('Component_Type', backref='task_definitions')
+    component_id = db.Column(db.Integer, db.ForeignKey('component.component_id'))
+    component = db.relationship('Component', backref='task_definitions')
 
 
     def __repr__(self):
-        return '<Task_Definition {}>'.format(self.name, self.image_tag, self.revision, self.date, self.cpu, self.memory, self.component_type_id)
-        
+        return '<Task_Definition {}>'.format(self.task_definition_name, self.image_tag, self.revision, self.date, self.cpu, self.memory, self.component_id)
+
 class CPRC(db.Model):
     __tablename__ = 'cprc'
     cprc_id = db.Column(db.Integer, primary_key=True)
@@ -92,15 +92,7 @@ class CPRC(db.Model):
     cluster = db.relationship('Cluster', backref='clusters')
     product_release = db.relationship('Product_Release', backref='product_releases')
     client = db.relationship('Client', backref='clients')
-    
+
 
     def __repr__(self):
         return '<CPRC {}>'.format(self.cluster_id, self.product_release_id, self.cluster_id)
-    
-    
-    
-    
-    
- 
-
-        

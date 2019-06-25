@@ -12,7 +12,7 @@ def search():
 	releases = Product_Release.query.all()
 	clusters = Cluster.query.all()
 	components = Component.query.all()
-	return render_template('search.html', clients=clients, products=products, releases=releases, clusters=clusters, components=components)
+	return render_template('search.html', clientsQ=clients, productsQ=products, releasesQ=releases, clustersQ=clusters, componentsQ=components)
 
 @app.route('/result', methods=['GET','POST'])
 def result():

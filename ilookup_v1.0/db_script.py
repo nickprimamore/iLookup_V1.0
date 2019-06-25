@@ -18,11 +18,11 @@ exists = db.session.query(Client.client_name).filter_by(client_name="Marsh").sca
 if exists:
 	print("Already Exists")
 else:
-	# aon = Client(client_name="Aon")
+	aon = Client(client_name="Aon")
 	marsh = Client(client_name="Marsh")
 	wills = Client(client_name="Wills")
 	print("Adding Aon")
-	#db.session.add(aon)
+	db.session.add(aon)
 	db.session.add(marsh)
 	db.session.add(wills)
 

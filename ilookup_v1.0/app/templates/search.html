@@ -9,16 +9,15 @@
     $('.dropdowns').select2();
   });
 
-
   // Sends the selected search tags to the backend
   function sendData() {
-    var clients = $('.clients').val()
-    var products = $('.products').val()
-    var releases = $('.releases').val()
-    var regions = $('.regions').val()
-    var clusters = $('.clusters').val()
-    var environments = $('.environments').val()
-    var components = $('components').val()
+    var clientVal = $('.clients').val()
+    var productVal = $('.products').val()
+    var releaseVal = $('.releases').val()
+    var regionVal = $('.regions').val()
+    var clusterVal = $('.clusters').val()
+    var environmentVal = $('.environments').val()
+    var componentVal = $('components').val()
     var clientList = []
     var productList = []
     var releaseList = []
@@ -26,26 +25,26 @@
     var clusterList = []
     var environmentList = []
     var componentList = []
-    for (var cli in clients) {
-      clientList.push(clients[cli])
+    for (var cli in clientVal) {
+      clientList.push(clientVal[cli])
     }
-    for (var pro in products) {
-      productList.push(products[pro])
+    for (var pro in productVal) {
+      productList.push(productVal[pro])
     }
-    for (var rel in releases) {
-      releaseList.push(releases[rel])
+    for (var rel in releaseVal) {
+      releaseList.push(releaseVal[rel])
     }
-    for (var reg in regions) {
-      regionList.push(regions[reg])
+    for (var reg in regionVal) {
+      regionList.push(regionVal[reg])
     }
-    for (var clu in clusters) {
-      clusterList.push(clusters[clu])
+    for (var clu in clusterVal) {
+      clusterList.push(clusterVal[clu])
     }
-    for (var env in environments) {
-      environmentList.push(environments[env])
+    for (var env in environmentVal) {
+      environmentList.push(environmentVal[env])
     }
-    for (var com in components) {
-      componentList.push(components[com])
+    for (var com in componentVal) {
+      componentList.push(componentVal[com])
     }
       $.ajax({
       url: '/result',
@@ -67,68 +66,58 @@
 
 <h1>Welcome To iLookUp</h1>
 <select class="dropdowns clients" style="width:50%" name="clients[]" multiple="multiple">
-  {% for client in clients %}
+  {% for client in clientsQ %}
     <option value="{{ client.client_name }}">{{ client.client_name }}</option>
   {% endfor %}
 </select>
 
-<select class="dropdowns products" style="width:50%" name="products[]" multiple="multiple">
-  {% for product in products %}
+<select class="dropdowns products" id="products" style="width:50%" name="products[]" multiple="multiple">
+  {% for product in productsQ %}
     <option value="{{ product.product_name }}">{{ product.product_name }}</option>
   {% endfor %}
 </select>
 
 <select class="dropdowns releases" style="width:50%" name="releases[]" multiple="multiple">
-  {% for release in releases %}
-    <option value="{{ release.release }}">{{ release.release }}</option>
+  {% for release in releasesQ %}
+    <option value="{{ release.release_number }}">{{ release.release_number }}</option>
   {% endfor %}
 </select>
 
 <select class="dropdowns regions" style="width:50%" name="regions[]" multiple="multiple">
-  {% for region in clusters %}
+  {% for region in clustersQ %}
     <option value="{{ region.region }}">{{ region.region }}</option>
   {% endfor %}
 </select>
 
 <select class="dropdowns clusters" style="width:50%" name="clusters[]" multiple="multiple">
-  {% for cluster in clusters %}
+  {% for cluster in clustersQ %}
     <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
   {% endfor %}
 </select>
 
 <select class="dropdowns environments" style="width:50%" name="environments[]" multiple="multiple">
-  {% for environment in clusters %}
+  {% for environment in clustersQ %}
     <option value="{{ environment.environment }}">{{ environment.environment }}</option>
   {% endfor %}
 </select>
 
 <select class="dropdowns components" style="width:50%" name="components[]" multiple="multiple">
-  {% for component in components %}
+  {% for component in componentsQ %}
     <option value="{{ component.component_name }}">{{ component.component_name }}</option>
   {% endfor %}
 </select>
 
 <button onClick="sendData()">Submit</button>
 
+<script>
 
+// $('#products').on("select2:select", function (e) {
+//   for x in productsQ {
+//     console.log(x)
+//   }
+//   alert("We In This?")
+// })
 
-
-
-
-
-
-<!-- <form action="http://localhost:5000/result" method="POST">
-  Client: <br> <input type="text" onclick="ajaxd()" name="Client" list="clients" /> <br>
-  Regions: <br> <input type="text" name="Region" list="regions" /> <br>
-  Products: <br> <input type="text" name="Product" list="products" /> <br>
-  Components: <br> <input type="text" name="Components" list="components" /> <br>
-  Date: <br>
-    From:      <input type="date" name="From" /> <br>
-    Till:      <input type="date" name="Till" /> <br>
-  Release: <br> <input type="text" name="Release" list="releases" /> <br>
-  Environment: <br> <input type="text" name="Environment" list="environments" /> <br>
-  Cluster: <br> <input type="text" name="Cluster" list="clusters" /> <br>
-  <input type="submit" onclick="ajaxd()" />
-</form> -->
+</script>
 
 {% endblock %}
