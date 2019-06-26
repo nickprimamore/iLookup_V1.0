@@ -73,38 +73,40 @@ class AWSData:
 	def populateTaskDefinition(self, component_id,cluster, service):
 		tasks = client.list_tasks(cluster = cluster, serviceName = service)
 		tasks = tasks["taskArns"]
-		task_descriptions = client.describe_tasks(cluster = cluster, tasks = tasks)
-		task_descriptions = task_descriptions["tasks"]
+		size = len(tasks)
+		if size  > 0:
+			task_descriptions = client.describe_tasks(cluster = cluster, tasks = tasks)
+			task_descriptions = task_descriptions["tasks"]
 
-		##iterate through all the tasks in the component
-		for tasks_description in task_descriptions:
-			lastStatus=tasks_description["lastStatus"]
+			##iterate through all the tasks in the component
+			for tasks_description in task_descriptions:
+				lastStatus=tasks_description["lastStatus"]
 
-			task_def_description = tasks_description["taskDefinitionArn"]
-			newsplit = task_def_description.split("/")
-			task_def = newsplit[1]
-			task_definition = client.describe_task_definition(taskDefinition= task_def_description)
-			image = str(task_definition["taskDefinition"]["containerDefinitions"][0]["image"])
-			cpu =  str(task_definition["taskDefinition"]["cpu"])
-			memory =  str(task_definition["taskDefinition"]["memory"])
-			revision = str(task_definition["taskDefinition"]["revision"])
-			if (lastStatus == "RUNNING"):
-				date =  tasks_description["startedAt"]
-			else:
-				date = None
+				task_def_description = tasks_description["taskDefinitionArn"]
+				newsplit = task_def_description.split("/")
+				task_def = newsplit[1]
+				task_definition = client.describe_task_definition(taskDefinition= task_def_description)
+				image = str(task_definition["taskDefinition"]["containerDefinitions"][0]["image"])
+				cpu =  str(task_definition["taskDefinition"]["cpu"])
+				memory =  str(task_definition["taskDefinition"]["memory"])
+				revision = str(task_definition["taskDefinition"]["revision"])
+				if (lastStatus == "RUNNING"):
+					date =  tasks_description["startedAt"]
+				else:
+					date = None
 
-			##check if the task_definition entry exists in the database
-			exists_task_definition = db.session.query(Task_Definition.task_definition_name).filter_by(task_definition_name=task_def).scalar() is not None
+				##check if the task_definition entry exists in the database
+				exists_task_definition = db.session.query(Task_Definition.task_definition_name).filter_by(task_definition_name=task_def).scalar() is not None
 
-			if exists_task_definition:
-				print("Task_definition Already Exists")
-			else:
-				task_defi = Task_Definition(task_definition_name=task_def, image_tag= image, revision= revision, date=date, cpu=cpu, memory=memory, component_id=component_id[0])
-				db.session.add(task_defi)
-				print("Added task_definition to database: " + task_def)
+				if exists_task_definition:
+					print("Task_definition Already Exists")
+				else:
+					task_defi = Task_Definition(task_definition_name=task_def, image_tag= image, revision= revision, date=date, cpu=cpu, memory=memory, component_id=component_id[0])
+					db.session.add(task_defi)
+					print("Added task_definition to database: " + task_def)
 
 
-			print("================================")
+				print("================================")
 
 
 
