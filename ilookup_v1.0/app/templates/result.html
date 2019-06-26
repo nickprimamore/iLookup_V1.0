@@ -1,4 +1,5 @@
 
+<!-- This script is the one that takes the entry clicked on and relays the information into the modal -->
 <script>
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
@@ -21,6 +22,7 @@
   })
 </script>
 
+<!-- This is the modal and it is working with the function above to create multiple unique modal's based on which entry was pressed. -->
 <div class="modal fade" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -56,7 +58,7 @@
   </div>
 </div>
 
-<table class="table table-striped" style="">
+<table class="table table-hover table-striped" style="">
   <thead>
     <tr>
       <th scope="col">Client</th>
@@ -69,6 +71,7 @@
   </thead>
   <tbody>
 
+<!-- This is a for loop to render the search results  -->
     {% for client in client_results %}
     {% for result in client %}
 

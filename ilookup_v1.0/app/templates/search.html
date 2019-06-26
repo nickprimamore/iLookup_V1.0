@@ -165,7 +165,7 @@
       <input type="date" class="form-control" id="dateUntil" name="Date (Until)">
   </div>
   <div class="searchBar col-md-12">
-    <button type="button" class="btn btn-outline-info" style="width:100%" onClick="sendData()">Search</button>
+    <button type="button" class="btn btn-outline-warning" style="width:100%" onClick="sendData()">Search</button>
   </div>
 
   <br>
@@ -176,15 +176,6 @@
 <!-- This is where the table is being rendered in! -->
 </div>
 <div id="result-tag"></div>
-
-<script>
-// $('#products').on("select2:select", function (e) {
-//   for x in productsQ {
-//     console.log(x)
-//   }
-//   alert("We In This?")
-// })
-</script>
 
 {% block resultContent%}
 {% endblock %}
