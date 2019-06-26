@@ -22,43 +22,61 @@
   })
 </script>
 
+<style>
+  div.modal-header {
+    padding: 10px; 10px;
+    padding-bottom: 3px
+  }
+</style>
 <!-- This is the modal and it is working with the function above to create multiple unique modal's based on which entry was pressed. -->
-<div class="modal fade" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
+<div class="modal fade bd-example-modal-lg" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5> Cluster: &nbsp</h5> <h5 class="cluster-title" id="clusterLabel"></h5>
+        <h3 class="cluster-title" id="clusterLabel"></h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="cluster-info">
-        <br />
-        <b> Task Definition: </b> <span class="taskdef"></span>
-        <br />
-        <br />
-        <b> Image Tag: </b> <span class="imagetag"></span>
-        <br />
-        <br />
-        <b> Revision: </b> <span class="revision"></span>
-        <br />
-        <br />
-        <b> Date: </b> <span class="date"></span>
-        <br />
-        <br />
-        <b> CPU: </b> <span class="cpu"></span>
-        <br />
-        <br />
-        <b> Memory: </b> <span class="memory"</span>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Task Definition</th>
+              <td class="taskdef"></td>
+            </tr>
+            <tr>
+              <th scope="row">Image Tag</th>
+              <td class="imagetag"></td>
+            </tr>
+            <tr>
+              <th scope="row">Revision</th>
+              <td class="revision"></td>
+            </tr>
+            <tr>
+              <th scope="row">Date</th>
+              <td class="date"></td>
+            </tr>
+            <tr>
+              <th scope="row">CPU</th>
+              <td class="cpu"></td>
+            </tr>
+            <tr>
+              <th scope="row">Memory</th>
+              <td class="memory"></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 
-<table class="table table-hover table-striped" style="">
+<table class="table table-hover table-striped">
   <thead>
     <tr>
       <th scope="col">Client</th>
@@ -92,7 +110,6 @@
       <td> {{result.cluster_name}} </td>
       <td> {{result.environment}} </td>
       <td> {{result.region}} </td>
-      <td> {{result.components}} </td>
     </tr>
 
     {% endfor %}
