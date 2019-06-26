@@ -1,10 +1,49 @@
-<br>
-<br>
-{% for client in client_results%}
-{% for result in client%}
-<h1>{{ result["task_definition_name"]}}</h1>
-{% endfor %}
-{% endfor %}
+<!-- Modal -->
+<div class="modal fade" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Client</th>
+      <th scope="col">Product</th>
+      <th scope="col">Release #</th>
+      <th scope="col">Cluster</th>
+      <th scope="col">Environment</th>
+      <th scope="col">Region</th>
+    </tr>
+  </thead>
+  <tbody>
 
+    {% for client in client_results %}
+    {% for result in client %}
 
+    <tr data-toggle="modal" data-target="#clusterDetail">
+      <th scope="row">{{result.client_name}}</th>
+      <td> {{result.product_name}} </td>
+      <td> {{result.release}} </td>
+      <td> {{result.cluster_name}} </td>
+      <td> {{result.environment}} </td>
+      <td> {{result.region}} </td>
+    </tr>
+
+    {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>

@@ -116,11 +116,13 @@ def getResultByClient(client_name):
 			# cpu = task_definition.cpu
 			# memory = task_definition.memory
 			#print(client_name,product_name, release,cluster_name,task_definition_name,image_tag,revision,date, environment, region, cpu,memory)
-			result_record ={}
+			result_record = {}
 			result_record['client_name'] = client_name
 			result_record['product_name'] = product_name
 			result_record['release'] = release
 			result_record['cluster_name'] = cluster_name
+			result_record['region'] = region
+			result_record['environment'] = environment
 			result_record["task_definition_name"] = task_definition.task_definition_name
 			result_record['image_tag'] = task_definition.image_tag
 			result_record['revision'] = task_definition.revision
