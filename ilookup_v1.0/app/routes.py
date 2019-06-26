@@ -37,6 +37,7 @@ def search():
 @app.route('/result', methods=['GET','POST'])
 def result():
 	client_results = []
+	product_results = []
 	data = request.form.keys()
 	for values in data:
 		stringified = values
@@ -44,10 +45,14 @@ def result():
 		#print(objectified['Clients'], objectified['Products'])
 		#print(objectified['Dates'])
 		clients = objectified['Clients']
+		products = objectified['Products']
 		for client in clients:
-			results = getResultByClient(client)
-			client_results.append(results)
-	return render_template('result.html',client_results=client_results)
+			client_result = getResultByClient(client)
+			client_results.append(client_result)
+		for product in products:
+			product_result = getResultByProduct(product)
+			product_results.append(product_result)
+	return render_template('result.html',client_results=client_results, product_results=product_results)
 
 @app.route('/load', methods=['GET','POST'])
 def loadAWSData():
