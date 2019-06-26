@@ -6,12 +6,15 @@ from flask_sqlalchemy import SQLAlchemy
 import requests
 import json
 import boto3
+from awsdata import AWSData
 
 @app.route('/', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
 def search():	
 	# print("Result page")
+	getResultByProduct("iForms")
 	###############################################################
+	awsData = AWSData()
 	clients = Client.query.all()
 	products = Product.query.all()
 	releases = Product_Release.query.all()
@@ -45,6 +48,14 @@ def result():
 			client_results.append(results)
 	return render_template('result.html',client_results=client_results)
 
+@app.route('/load', methods=['GET','POST'])
+def loadAWSData():
+	print("Loading")
+	awsdata = AWSData()
+	awsdata.populateClusters()
+	db.session.commit()
+	print("Loaded")
+	return search()
 
 def getCPRC(client_name):
 	client = Client.query.filter_by(client_name=client_name).first()
@@ -139,5 +150,77 @@ def getClusterInfo(cluster_id):
 	cluster_info["region"] = region
 	cluster_info["environment"] = environment
 	return cluster_info
+
+
+
+
+################################################################
+
+def getPIDByProduct(product_name):
+	product = Product.query.filter_by(product_name=product_name).first()
+	product_id = product.product_id
+	return product_id
+
+def getPRIDByProduct(product_id):
+	product_release = Product_Release.query.filter_by(product_id=product_id).all()
+	# prid_list = []
+	# for record in product_release:
+	# 	prid_list.append(record)
+	#return prid_list
+	return product_release
+
+def getClientClusterByPRID(prid_list):
+	client_cluster_list = []
+	for prid_record in prid_list:
+		cprc_record_list = []
+		prid = prid_record["prid"]
+		cprc_record_list = CPRC.query.filter_by(product_release_id=prid).all()
+		for cprc_record in cprc_record_list:
+			client_id = cprc_record.client_id
+			cluster_id = cprc_record.cluster_id
+			client_cluster_dict = {}
+			client_cluster_dict["client_id"] = client_id
+			client_cluster_dict["cluster_id"] = cluster_id
+			client_cluster_list.append(client_cluster_dict)
+	return client_cluster_list
+
+def getClientInfo(client_id):
+	client = Client.query.get(client_id)
+	client_name = client.client_name
+	return client_name
+
+def getResultByProduct(product_name):
+	result = []
+	product_id = getPIDByProduct(product_name)
+	product_releases = getPRIDByProduct(product_id)
+	prid_list =[]
+	for product_release in product_releases:
+		product_release_record = {}
+		product_release_record["prid"] = product_release.product_release_id
+		product_release_record["release"] = product_release.release_number
+		prid_list.append(product_release_record)
+	client_cluster_list = getClientClusterByPRID(prid_list)
+	for record in client_cluster_list:
+		product_result_object = {}
+		client_id = record["client_id"]
+		cluster_id = record["cluster_id"]
+		client_name = getClientInfo(client_id)
+		cluster_info = getClusterInfo(cluster_id)
+		task_definitions = getTaskDefinitions(cluster_id)
+		for task_definition in task_definitions:
+			product_result_object["client_name"]=client_name
+			product_result_object["cluster_name"] = cluster_info["cluster_name"]
+			product_result_object["product_name"] = product_name
+			product_result_object["release_number"] = product_release.release_number
+			product_result_object["task_definition_name"] = task_definition.task_definition_name
+			product_result_object["image_tag"]= task_definition.image_tag 
+			product_result_object["revision"] = task_definition.revision
+			product_result_object["cpu"] = task_definition.cpu
+			product_result_object["memory"] = task_definition.memory
+			product_result_object["date"] = task_definition.date
+			result.append(product_result_object)
+	print(result)
+	return result
+
 
 
