@@ -38,6 +38,7 @@ def search():
 def result():
 	client_results = []
 	product_results = []
+	results = []
 	data = request.form.keys()
 	for values in data:
 		stringified = values
@@ -47,11 +48,11 @@ def result():
 		clients = objectified['Clients']
 		products = objectified['Products']
 		for client in clients:
-			client_result = getResultByClient(client)
-			client_results.append(client_result)
+			client_results = getResultByClient(client)
+			results.append(client_result)
 		for product in products:
 			product_result = getResultByProduct(product)
-			product_results.append(product_result)
+			results.append(product_result)
 	return render_template('result.html',client_results=client_results, product_results=product_results)
 
 @app.route('/load', methods=['GET','POST'])
