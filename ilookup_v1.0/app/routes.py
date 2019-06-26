@@ -36,8 +36,8 @@ def search():
 #This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])
 def result():
-	client_results = []
-	product_results = []
+
+	results = []
 	data = request.form.keys()
 	for values in data:
 		stringified = values
@@ -48,11 +48,11 @@ def result():
 		products = objectified['Products']
 		for client in clients:
 			client_result = getResultByClient(client)
-			client_results.append(client_result)
+			results.append(client_result)
 		for product in products:
 			product_result = getResultByProduct(product)
-			product_results.append(product_result)
-	return render_template('result.html',client_results=client_results, product_results=product_results)
+			results.append(product_result)
+	return render_template('result.html', results=results)
 
 @app.route('/load', methods=['GET','POST'])
 def loadAWSData():
@@ -215,10 +215,12 @@ def getResultByProduct(product_name):
 		for task_definition in task_definitions:
 			product_result_object["client_name"]=client_name
 			product_result_object["cluster_name"] = cluster_info["cluster_name"]
+			product_result_object["environment"] = cluster_info["environment"]
+			product_result_object["region"] = cluster_info["region"]
 			product_result_object["product_name"] = product_name
-			product_result_object["release_number"] = product_release.release_number
+			product_result_object["release"] = product_release.release_number
 			product_result_object["task_definition_name"] = task_definition.task_definition_name
-			product_result_object["image_tag"]= task_definition.image_tag 
+			product_result_object["image_tag"]= task_definition.image_tag
 			product_result_object["revision"] = task_definition.revision
 			product_result_object["cpu"] = task_definition.cpu
 			product_result_object["memory"] = task_definition.memory
