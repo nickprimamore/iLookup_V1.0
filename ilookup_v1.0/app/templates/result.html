@@ -72,8 +72,8 @@
   <tbody>
 
 <!-- This is a for loop to render the search results  -->
-    {% for client in client_results %}
-    {% for result in client %}
+    {% for query in results %}
+    {% for result in query %}
 
     <tr
       data-toggle="modal"
@@ -99,7 +99,3 @@
     {% endfor %}
   </tbody>
 </table>
-
-{% for result in product_results%}
-<h1>{{result}}</h1>
-{% endfor %}
