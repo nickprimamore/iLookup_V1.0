@@ -39,6 +39,7 @@ def result():
 		stringified = values
 		objectified = json.loads(values)
 		#print(objectified['Clients'], objectified['Products'])
+		#print(objectified['Dates'])
 		clients = objectified['Clients']
 		for client in clients:
 			results = getResultByClient(client)

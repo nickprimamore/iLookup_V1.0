@@ -18,6 +18,10 @@
     var clusterVal = $('.clusters').val()
     var environmentVal = $('.environments').val()
     var componentVal = $('components').val()
+
+    var dateFrom = document.getElementById("dateFrom").value;
+    var dateUntil = document.getElementById("dateUntil").value;
+
     //Generated empty arrays, and filled them with the values from above to send to the backend as an array.
     var clientList = []
     var productList = []
@@ -26,6 +30,9 @@
     var clusterList = []
     var environmentList = []
     var componentList = []
+    var dateList = [dateFrom, dateUntil];
+
+    //Populates all the lists with the search values
     for (var cli in clientVal) {
       clientList.push(clientVal[cli])
     }
@@ -47,6 +54,7 @@
     for (var com in componentVal) {
       componentList.push(componentVal[com])
     }
+
     //send back and Ajax Request with the following information.
       $.ajax({
       url: '/result',
@@ -58,7 +66,8 @@
         Regions: regionList,
         Clusters: clusterList,
         Environments: environmentList,
-        Components: componentList
+        Components: componentList,
+        Dates: dateList
       }),
       success: function (response) {
         $('#result-tag').html(response)
@@ -87,9 +96,7 @@
   }
 </style>
 
-<hr />
-  <h1 style="color:#2867b1" align="center"> Search <span style="color:#FF9900">aws</span> Resources:</h1>
-<hr />
+<h1 style="padding-top:14px; padding-bottom:11px" align="center"> Search <span style="color:#FF9900">aws</span> Resources:</h1>
 
 <div class="searchContainer">
   <div class="searchBar">
@@ -151,15 +158,15 @@
   <div class="form-group" style = padding-right:1%>
       <!--<label for="date (from)">Date (From)</label>!-->
       <p class="searchLabel"> <b> Date (From) </b> </p>
-      <input type="date" class="form-control mx-sm-2" id="date(from)"name="Date (From)">
+      <input type="date" class="form-control mx-sm-2" id="dateFrom"name="Date (From)">
   </div>
   <div class="form-group">
       <!--<label for="date (until)">Date (Until)</label>-->
       <p class="searchLabel"> <b> Date (Until) </b> </p>
-      <input type="date" class="form-control mx-sm-2" id="date (until)" name="Date (Until)">
+      <input type="date" class="form-control mx-sm-2" id="dateUntil" name="Date (Until)">
   </div>
   <div class="searchBar">
-    <button type="button" class="btn btn-info" style="width:170.5%" onClick="sendData()">Search</button>
+    <button type="button" class="btn btn-outline-info" style="width:170.5%" onClick="sendData()">Search</button>
   </div>
 
   <br>
