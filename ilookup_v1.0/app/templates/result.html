@@ -1,15 +1,53 @@
-<!-- Modal -->
-<div class="modal fade" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+<script>
+  $('#clusterDetail').on('show.bs.modal', function (event) {
+    let trigger = $(event.relatedTarget)
+    let clusterName = trigger.data('clustername')
+    let taskdef = trigger.data('taskdef')
+    let imagetag = trigger.data('imagetag')
+    let revision = trigger.data('revision')
+    let date = trigger.data('date')
+    let cpu = trigger.data('cpu')
+    let memory = trigger.data('memory')
+    let modal = $(this)
+    modal.find('.cluster-title').text(clusterName)
+    modal.find('.taskdef').text(taskdef)
+    modal.find('.imagetag').text(imagetag)
+    modal.find('.revision').text(revision)
+    modal.find('.date').text(date)
+    modal.find('.cpu').text(cpu)
+    modal.find('.memory').text(memory)
+
+  })
+</script>
+
+<div class="modal fade" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <h5> Cluster: &nbsp</h5> <h5 class="cluster-title" id="clusterLabel"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        ...
+      <div class="cluster-info">
+        <br />
+        <b> Task Definition: </b> <span class="taskdef"></span>
+        <br />
+        <br />
+        <b> Image Tag: </b> <span class="imagetag"></span>
+        <br />
+        <br />
+        <b> Revision: </b> <span class="revision"></span>
+        <br />
+        <br />
+        <b> Date: </b> <span class="date"></span>
+        <br />
+        <br />
+        <b> CPU: </b> <span class="cpu"></span>
+        <br />
+        <br />
+        <b> Memory: </b> <span class="memory"</span>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -34,13 +72,24 @@
     {% for client in client_results %}
     {% for result in client %}
 
-    <tr data-toggle="modal" data-target="#clusterDetail">
+    <tr
+      data-toggle="modal"
+      data-target="#clusterDetail"
+      data-clustername="{{result.cluster_name}}"
+      data-taskdef="{{result.task_definition_name}}"
+      data-imagetag="{{result.image_tag}}"
+      data-revision="{{result.revision}}"
+      data-date="{{result.date}}"
+      data-cpu="{{result.cpu}}"
+      data-memory="{{result.memory}}"
+      >
       <th scope="row">{{result.client_name}}</th>
       <td> {{result.product_name}} </td>
       <td> {{result.release}} </td>
       <td> {{result.cluster_name}} </td>
       <td> {{result.environment}} </td>
       <td> {{result.region}} </td>
+      <td> {{result.components}} </td>
     </tr>
 
     {% endfor %}
