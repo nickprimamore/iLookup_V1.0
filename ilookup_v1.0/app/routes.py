@@ -10,7 +10,7 @@ from awsdata import AWSData
 
 @app.route('/', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
-def search():	
+def search():
 	# print("Result page")
 	getResultByProduct("iForms")
 	###############################################################
@@ -30,7 +30,7 @@ def search():
 	components = Component.query.all()
 	#Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,
-	 productsQ=products, releasesQ=releases, clustersQ=clusters, 
+	 productsQ=products, releasesQ=releases, clustersQ=clusters,
 	 componentsQ=components, environmentsQ=environments, regionsQ=regions)
 
 #This function communicates with the HTML and gathers the responses in order to load the table data.
@@ -42,6 +42,7 @@ def result():
 		stringified = values
 		objectified = json.loads(values)
 		#print(objectified['Clients'], objectified['Products'])
+		#print(objectified['Dates'])
 		clients = objectified['Clients']
 		for client in clients:
 			results = getResultByClient(client)
@@ -95,10 +96,10 @@ def getProductByPRID(prid):
 	product_release = Product_Release.query.get(prid)
 	product_id = product_release.product_id
 	release = product_release.release_number
-	
+
 	product = Product.query.get(product_id)
 	product_name = product.product_name
-	
+
 	product_dict["product_name"] = product_name
 	product_dict["release"] = release
 	return product_dict
@@ -125,12 +126,14 @@ def getResultByClient(client_name):
 			# date = task_definition.date
 			# cpu = task_definition.cpu
 			# memory = task_definition.memory
-			#print(client_name,product_name, release,cluster_name,task_definition_name,image_tag,revision,date, environment, region, cpu,memory) 
-			result_record ={}
+			#print(client_name,product_name, release,cluster_name,task_definition_name,image_tag,revision,date, environment, region, cpu,memory)
+			result_record = {}
 			result_record['client_name'] = client_name
 			result_record['product_name'] = product_name
 			result_record['release'] = release
-			result_record['cluster_name'] = cluster_name 
+			result_record['cluster_name'] = cluster_name
+			result_record['region'] = region
+			result_record['environment'] = environment
 			result_record["task_definition_name"] = task_definition.task_definition_name
 			result_record['image_tag'] = task_definition.image_tag
 			result_record['revision'] = task_definition.revision
@@ -150,9 +153,6 @@ def getClusterInfo(cluster_id):
 	cluster_info["region"] = region
 	cluster_info["environment"] = environment
 	return cluster_info
-
-
-
 
 ################################################################
 
@@ -221,6 +221,3 @@ def getResultByProduct(product_name):
 			result.append(product_result_object)
 	print(result)
 	return result
-
-
-

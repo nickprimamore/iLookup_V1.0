@@ -18,6 +18,10 @@
     var clusterVal = $('.clusters').val()
     var environmentVal = $('.environments').val()
     var componentVal = $('components').val()
+
+    var dateFrom = document.getElementById("dateFrom").value;
+    var dateUntil = document.getElementById("dateUntil").value;
+
     //Generated empty arrays, and filled them with the values from above to send to the backend as an array.
     var clientList = []
     var productList = []
@@ -26,6 +30,9 @@
     var clusterList = []
     var environmentList = []
     var componentList = []
+    var dateList = [dateFrom, dateUntil];
+
+    //Populates all the lists with the search values
     for (var cli in clientVal) {
       clientList.push(clientVal[cli])
     }
@@ -47,6 +54,7 @@
     for (var com in componentVal) {
       componentList.push(componentVal[com])
     }
+
     //send back and Ajax Request with the following information.
       $.ajax({
       url: '/result',
@@ -58,7 +66,8 @@
         Regions: regionList,
         Clusters: clusterList,
         Environments: environmentList,
-        Components: componentList
+        Components: componentList,
+        Dates: dateList
       }),
       success: function (response) {
         $('#result-tag').html(response)
@@ -72,26 +81,24 @@
   div.searchContainer {
     display:flex;
     flex-wrap:wrap;
-    margin-left:17%
+    margin: 0% 20%
   }
   div.searchBar {
     text-align:left;
-    width:48%
   }
   p.searchLabel {
     color:#2867b1;
-    margin-bottom:0px;
+    margin-bottom:5px;
   }
   select.dropdowns {
-    width: 70%
+    width: 100%
   }
 </style>
 
-<hr />
-<h1 style="color:#2867b1" align="center">Search <span style="color:#FF9900">aws</span> Resources:</h1>
-<hr />
+<h1 style="padding-top:14px; padding-bottom:11px" align="center"> Search <span style="color:#FF9900">aws</span> Resources:</h1>
+
 <div class="searchContainer">
-  <div class="searchBar">
+  <div class="searchBar col-md-6">
     <p class="searchLabel" > <b> Clients </b> </p>
     <select class="dropdowns clients"  name="clients[]" multiple="multiple">
       {% for client in clientsQ %}
@@ -99,7 +106,7 @@
       {% endfor %}
     </select>
   </div>
-  <div class="searchBar">
+  <div class="searchBar col-md-6">
     <p class="searchLabel"> <b> Products </b> </p>
     <select class="dropdowns products" id="products"  name="products[]" multiple="multiple">
       {% for product in productsQ %}
@@ -107,7 +114,7 @@
       {% endfor %}
     </select>
   </div>
-  <div class="searchBar">
+  <div class="searchBar col-md-6">
     <p class="searchLabel"> <b> Releases </b> </p>
     <select class="dropdowns releases"  name="releases[]" multiple="multiple">
       {% for release in releasesQ %}
@@ -115,7 +122,7 @@
       {% endfor %}
     </select>
   </div>
-  <div class="searchBar">
+  <div class="searchBar col-md-6">
     <p class="searchLabel"> <b> Regions </b> </p>
     <select class="dropdowns regions"  name="regions[]" multiple="multiple">
       {% for region in regionsQ %}
@@ -123,7 +130,7 @@
       {% endfor %}
     </select>
   </div>
-  <div class="searchBar">
+  <div class="searchBar col-md-6">
     <p class="searchLabel"> <b> Clusters </b> </p>
     <select class="dropdowns clusters"  name="clusters[]" multiple="multiple">
       {% for cluster in clustersQ %}
@@ -131,7 +138,7 @@
       {% endfor %}
     </select>
   </div>
-  <div class="searchBar">
+  <div class="searchBar col-md-6">
     <p class="searchLabel"> <b> Environments </b> </p>
     <select class="dropdowns environments"  name="environments[]" multiple="multiple">
       {% for environment in environmentsQ %}
@@ -139,7 +146,7 @@
       {% endfor %}
     </select>
   </div>
-  <div class="searchBar">
+  <div class="searchBar col-md-6">
     <p class="searchLabel"> <b> Components </b> </p>
     <select class="dropdowns components"  name="components[]" multiple="multiple">
       {% for component in componentsQ %}
@@ -147,19 +154,26 @@
       {% endfor %}
     </select>
   </div>
-  <div class="searchBar">
-    <p class="searchLabel"> <b> Search Now: </b> </p>
-
-    <button type="button" class="btn btn-info" style="width:70%" onClick="sendData()"> Search 
-    </button>
-
+  <div class="form-group col-md-3" style = padding-right:1%>
+      <!--<label for="date (from)">Date (From)</label>!-->
+      <p class="searchLabel"> <b> Date (From) </b> </p>
+      <input type="date" class="form-control" id="dateFrom"name="Date (From)">
+  </div>
+  <div class="form-group col-md-3">
+      <!--<label for="date (until)">Date (Until)</label>-->
+      <p class="searchLabel"> <b> Date (Until) </b> </p>
+      <input type="date" class="form-control" id="dateUntil" name="Date (Until)">
+  </div>
+  <div class="searchBar col-md-12">
+    <button type="button" class="btn btn-outline-info" style="width:100%" onClick="sendData()">Search</button>
   </div>
 
   <br>
   <br>
   <br>
-  <br>
 
+
+<!-- This is where the table is being rendered in! -->
 </div>
 <div id="result-tag"></div>
 
