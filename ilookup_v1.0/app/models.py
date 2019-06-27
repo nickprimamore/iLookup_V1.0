@@ -94,6 +94,3 @@ class CPRC(db.Model):
 
     def __repr__(self):
         return '<CPRC {}>'.format(self.cluster_id, self.product_release_id, self.cluster_id)
-
-    db.create_all()
-    print("DB Created")

@@ -22,7 +22,7 @@ class AWSData:
 			mysplit= cluster.split("/")
 
 			cluster_name=mysplit[1]
-
+			#exists_cluster = True
 			##check if the cluster entry already exists in database tanle
 			exists_cluster = db.session.query(Cluster.cluster_name).filter_by(cluster_name=cluster_name).scalar() is not None
 			if exists_cluster:
@@ -35,7 +35,7 @@ class AWSData:
 
 
 
-			##get the cluster id by querying database
+				##get the cluster id by querying database
 			cluster_id = db.session.query(Cluster.cluster_id).filter_by(cluster_name=cluster_name).first()
 			self.populateComponent(cluster_id, cluster)
 
