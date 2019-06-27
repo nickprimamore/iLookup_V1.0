@@ -10,8 +10,11 @@
     let date = trigger.data('date')
     let cpu = trigger.data('cpu')
     let memory = trigger.data('memory')
+    let tasks = trigger.data('tasks')
+    console.log(tasks)
+    console.log(typeof(tasks))
     let modal = $(this)
-    modal.find('.cluster-title').text(clusterName)
+    modal.find('.cluster-title').text('Cluster: ' + clusterName)
     modal.find('.taskdef').text(taskdef)
     modal.find('.imagetag').text(imagetag)
     modal.find('.revision').text(revision)
@@ -19,6 +22,12 @@
     modal.find('.cpu').text(cpu)
     modal.find('.memory').text(memory)
   })
+
+  function loadCluster(tasksList) {
+    console.log(tasksList)
+
+  }
+
 </script>
 
 <style>
@@ -32,10 +41,38 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="cluster-title" id="clusterLabel"></h3>
+        <h4 class="cluster-title" id="clusterLabel"> </h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
+      </div>
+      <div id="accordion">
+        <!-- {% for query in results %}
+        {% for component in query %}
+
+        ###################
+        <div class="card">
+          <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#{{component.cluster_name}}" aria-expanded="true" aria-controls="{{component.cluster_name}}">
+                {{component.task_definition_name}}
+              </button>
+            </h5>
+          </div>
+
+          <div id="{{component.cluster_name}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+              Image Tag: {{component.image_tag}} <br />
+              Revision: {{component.revision}} <br />
+              Date: {{component.date}} <br />
+              CPU: {{component.cpu}} <br />
+              Memory: {{component.cpu}} <br />
+            </div>
+          </div>
+        </div>
+        ####################
+        {% endfor %}
+        {% endfor %} -->
       </div>
       <div class="cluster-info">
         <table class="table table-striped">
@@ -89,8 +126,8 @@
   <tbody>
 
 <!-- This is a for loop to render the search results  -->
-    {% for query in results %}
-    {% for result in query %}
+
+    {% for result in results %}
 
     <tr
       data-toggle="modal"
@@ -102,6 +139,7 @@
       data-date="{{result.date}}"
       data-cpu="{{result.cpu}}"
       data-memory="{{result.memory}}"
+      data-tasks="{{greetings}}"
       >
       <th scope="row">{{result.client_name}}</th>
       <td> {{result.product_name}} </td>
@@ -112,6 +150,6 @@
     </tr>
 
     {% endfor %}
-    {% endfor %}
+
   </tbody>
 </table>

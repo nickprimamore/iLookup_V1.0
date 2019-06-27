@@ -28,6 +28,7 @@ def search():
 		if cluster.region not in regions:
 			regions.append(cluster.region)
 	components = Component.query.all()
+
 	#Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,
 	 productsQ=products, releasesQ=releases, clustersQ=clusters,
@@ -48,10 +49,11 @@ def result():
 		products = objectified['Products']
 		for client in clients:
 			client_result = getResultByClient(client)
-			results.append(client_result)
+			print('Clients', client_result)
+			results = results + (client_result)
 		for product in products:
 			product_result = getResultByProduct(product)
-			results.append(product_result)
+			results = results + (product_result)
 	return render_template('result.html', results=results)
 
 @app.route('/load', methods=['GET','POST'])
@@ -90,10 +92,13 @@ def getClustersByClient(client_name):
 
 def getTaskDefinitions(cluster_id):
 	components = Component.query.filter_by(cluster_id=cluster_id).all()
+	print('Components', components)
 	task_definitions = []
 	for component in components:
+		print('Unique Comp', component)
 		component_id = component.component_id
 		task_definitions = Task_Definition.query.filter_by(component_id=component_id).all()
+		print('Task_Def', task_definitions)
 	return task_definitions
 
 def getProductByPRID(prid):
@@ -131,7 +136,7 @@ def getResultByClient(client_name):
 			# date = task_definition.date
 			# cpu = task_definition.cpu
 			# memory = task_definition.memory
-			#print(client_name,product_name, release,cluster_name,task_definition_name,image_tag,revision,date, environment, region, cpu,memory)
+			# print(client_name,product_name, release,cluster_name,task_definition_name,image_tag,revision,date, environment, region, cpu,memory)
 			result_record = {}
 			result_record['client_name'] = client_name
 			result_record['product_name'] = product_name
