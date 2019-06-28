@@ -74,6 +74,7 @@ class Task_Definition(db.Model):
     date = db.Column(db.String(100))
     cpu = db.Column(db.String(100))
     memory = db.Column(db.String(100))
+    release_number = db.Column(db.String(11))
     component_id = db.Column(db.Integer, db.ForeignKey('component.component_id'))
     component = db.relationship('Component', backref='task_definitions')
 

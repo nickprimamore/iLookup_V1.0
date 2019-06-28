@@ -21,6 +21,7 @@ def search():
 	components = Component.query.all()
 	environments = []
 	regions = []
+	search(fromDate = "06/06/19")
 	#Remove duplicate values such as "dev" and "qa"
 	for cluster in clusters:
 	 	if cluster.environment not in environments:
@@ -52,9 +53,10 @@ def result():
 	return render_template('result.html', results=results)
 
 
-def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None):
+def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 	search = Search()
-	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment)
+	print("calling search function.....")
+	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate)
 	pprint.pprint(search_result)
 	return search_result
 

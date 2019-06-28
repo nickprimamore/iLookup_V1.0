@@ -3,12 +3,11 @@ from app.models import Product, Client, Cluster, Task_Definition, Product_Releas
 import pprint, json
 class Search:
 
-	def getSearchResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None):
+	def getSearchResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 		
 		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id, 
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
-		    #Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id)
-		
+		   
 		results = []
 		
 		if client_name:
@@ -40,27 +39,71 @@ class Search:
 			result['cluster_name'] = res.Cluster.cluster_name
 			result['region'] = res.Cluster.region
 			result['environment'] = res.Cluster.environment
-			task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
-			task_definition_list = []
-			for task_definition in task_definition_result:
-				task = {}
-				task["task_definition_name"] = task_definition.Task_Definition.task_definition_name
-				task["image_tag"] = task_definition.Task_Definition.image_tag
-				task["revision"] = task_definition.Task_Definition.revision
-				task["date"] = task_definition.Task_Definition.date
-				task["cpu"] = task_definition.Task_Definition.cpu
-				task["memory"] = task_definition.Task_Definition.memory
-				task_definition_list.append(task)
-			#task_definitions = Task_Definition.query.filter_by(res.Cluster.cluster_id)
-			result["task_definitions"] = task_definition_list
-			results.append(result)
-			#print(res.Client.client_name,res.Product.product_name,res.Product_Release.release_number,res.Cluster.cluster_name,res.Task_Definition.task_definition_name,res.Task_Definition.image_tag,res.Task_Definition.revision,res.Task_Definition.date,res.Task_Definition.cpu,res.Task_Definition.memory,res.Cluster.environment)
-		pprint.pprint(results)
+	
+			if toDate and fromDate is None:
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
+				task_definition_list = []
+				for task_definition in task_definition_result:
+					task = {}
+					task["task_definition_name"] = task_definition.Task_Definition.task_definition_name
+					task["image_tag"] = task_definition.Task_Definition.image_tag
+					task["revision"] = task_definition.Task_Definition.revision
+					task["date"] = task_definition.Task_Definition.date
+					task["cpu"] = task_definition.Task_Definition.cpu
+					task["memory"] = task_definition.Task_Definition.memory
+					task_definition_list.append(task)
+				result["task_definitions"] = task_definition_list
+				results.append(result)
 
-			#print(count, res.Client.client_name,res.Product.product_name,res.Product_Release.release_number,res.Cluster.cluster_name)
-			#count = count+ 1
+			if toDate and fromDate:
+				print("toDate and fromDate")
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.date <= toDate).all()
+				task_definition_list = []
+				for task_definition in task_definition_result:
+					task = {}
+					task["task_definition_name"] = task_definition.Task_Definition.task_definition_name
+					task["image_tag"] = task_definition.Task_Definition.image_tag
+					task["revision"] = task_definition.Task_Definition.revision
+					task["date"] = task_definition.Task_Definition.date
+					task["cpu"] = task_definition.Task_Definition.cpu
+					task["memory"] = task_definition.Task_Definition.memory
+					task_definition_list.append(task)
+				result["task_definitions"] = task_definition_list
+				results.append(result)
+
+			if toDate:
+				print("toDate")
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date <= toDate).all()
+				task_definition_list = []
+				for task_definition in task_definition_result:
+					task = {}
+					task["task_definition_name"] = task_definition.Task_Definition.task_definition_name
+					task["image_tag"] = task_definition.Task_Definition.image_tag
+					task["revision"] = task_definition.Task_Definition.revision
+					task["date"] = task_definition.Task_Definition.date
+					task["cpu"] = task_definition.Task_Definition.cpu
+					task["memory"] = task_definition.Task_Definition.memory
+					task_definition_list.append(task)
+				result["task_definitions"] = task_definition_list
+				results.append(result)
+
+			if fromDate:
+				print("fromDate")
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).all()
+				task_definition_list = []
+				for task_definition in task_definition_result:
+					task = {}
+					task["task_definition_name"] = task_definition.Task_Definition.task_definition_name
+					task["image_tag"] = task_definition.Task_Definition.image_tag
+					task["revision"] = task_definition.Task_Definition.revision
+					task["date"] = task_definition.Task_Definition.date
+					task["cpu"] = task_definition.Task_Definition.cpu
+					task["memory"] = task_definition.Task_Definition.memory
+					task_definition_list.append(task)
+				result["task_definitions"] = task_definition_list
+				results.append(result)
 		return 	results
 
 # search_result = Search()
-# search_result.getSearchResult(product_name="iConductor")
+# search_result.getSearchResult()
 # print("done!")
