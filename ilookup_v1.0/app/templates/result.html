@@ -3,30 +3,58 @@
 <script>
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
-    let clusterName = trigger.data('clustername')
-    let taskdef = trigger.data('taskdef')
-    let imagetag = trigger.data('imagetag')
-    let revision = trigger.data('revision')
-    let date = trigger.data('date')
-    let cpu = trigger.data('cpu')
-    let memory = trigger.data('memory')
     let tasks = trigger.data('tasks')
-    console.log(tasks)
-    console.log(typeof(tasks))
+    let clusterName = trigger.data('clustername')
+    tasks = tasks.split('{')
+    tasks.shift()
+    let compTasks = []
+    for (let i = 0; i < tasks.length; i++) {
+      strObject = tasks[i]
+      strObject = "{" + strObject
+      strObject = strObject.substring(0, strObject.length-1)
+      strObject = strObject.replace(/'/g, '"').replace(/u/g, '')
+      if (i+1 != tasks.length) {
+        strObject = strObject.substring(0, strObject.length-1)
+      }
+      strObject = JSON.parse(strObject)
+      compTasks.push(strObject)
+    }
     let modal = $(this)
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
-    modal.find('.taskdef').text(taskdef)
-    modal.find('.imagetag').text(imagetag)
-    modal.find('.revision').text(revision)
-    modal.find('.date').text(date)
-    modal.find('.cpu').text(cpu)
-    modal.find('.memory').text(memory)
+
+
+    for (task of compTasks) {
+      console.log(task)
+      let image = task.image_tag.substring(task.image_tag.length-7, task.image_tag.length)
+      let memory = task.memory
+      let date = task.date
+      let cpu = task.cp
+      let revision = task.revision
+      let task_name = task.task_definition_name
+      $( "#accordion" ).append('<div class="card">' +
+        '<div class="card-header" id="headingOne">' +
+          '<h5 class="mb-0">' +
+            '<button class="btn btn-link" data-toggle="collapse" data-target="#' + image + '" aria-expanded="true" aria-controls="' + image + '">' +
+            task_name + '<br />' +
+            '</button>' +
+          '</h5>' +
+        '</div>'+
+        '<div id="' + image + '" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">' +
+          '<div class="card-body">' +
+            'Image: ' + image + '<br />' +
+            'Revision: ' + revision + '<br />' +
+            'Memory: ' + memory + '<br />' +
+            'Date Started: ' + date + '<br />' +
+            'CPU: ' + cpu + '<br />' +
+          '</div>' +
+        '</div>' +
+      '</div>')
+
+
+    }
+
+
   })
-
-  function loadCluster(tasksList) {
-    console.log(tasksList)
-
-  }
 
 </script>
 
@@ -36,45 +64,22 @@
     padding-bottom: 3px
   }
 </style>
+
 <!-- This is the modal and it is working with the function above to create multiple unique modal's based on which entry was pressed. -->
 <div class="modal fade bd-example-modal-lg" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="cluster-title" id="clusterLabel"> </h4>
+        <h4 class="cluster-title" id="clusterLabel"></h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div id="accordion">
-        <!-- {% for query in results %}
-        {% for component in query %}
 
-        ###################
-        <div class="card">
-          <div class="card-header" id="headingOne">
-            <h5 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" data-target="#{{component.cluster_name}}" aria-expanded="true" aria-controls="{{component.cluster_name}}">
-                {{component.task_definition_name}}
-              </button>
-            </h5>
-          </div>
 
-          <div id="{{component.cluster_name}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body">
-              Image Tag: {{component.image_tag}} <br />
-              Revision: {{component.revision}} <br />
-              Date: {{component.date}} <br />
-              CPU: {{component.cpu}} <br />
-              Memory: {{component.cpu}} <br />
-            </div>
-          </div>
-        </div>
-        ####################
-        {% endfor %}
-        {% endfor %} -->
       </div>
-      <div class="cluster-info">
+      <!-- <div class="cluster-info">
         <table class="table table-striped">
           <thead>
             <tr>
@@ -107,7 +112,7 @@
             </tr>
           </tbody>
         </table>
-      </div>
+      </div> -->
     </div>
   </div>
 </div>
@@ -133,13 +138,7 @@
       data-toggle="modal"
       data-target="#clusterDetail"
       data-clustername="{{result.cluster_name}}"
-      data-taskdef="{{result.task_definition_name}}"
-      data-imagetag="{{result.image_tag}}"
-      data-revision="{{result.revision}}"
-      data-date="{{result.date}}"
-      data-cpu="{{result.cpu}}"
-      data-memory="{{result.memory}}"
-      data-tasks="{{greetings}}"
+      data-tasks='{{result.task_definitions}}'
       >
       <th scope="row">{{result.client_name}}</th>
       <td> {{result.product_name}} </td>
