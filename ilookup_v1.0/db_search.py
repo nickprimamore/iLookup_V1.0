@@ -37,7 +37,7 @@ class Search:
 			result['cluster_name'] = res.Cluster.cluster_name
 			result['region'] = res.Cluster.region
 			result['environment'] = res.Cluster.environment
-			print(result)
+			#print(result)
 
 			if (toDate and fromDate) is None:
 				#print("toDate and fromDate is None")
@@ -109,5 +109,5 @@ class Search:
 
 search_result = Search()
 print("Searching for client_name")
-search_result.getSearchResult(product_name="iConductor")
+search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
 print("done!")

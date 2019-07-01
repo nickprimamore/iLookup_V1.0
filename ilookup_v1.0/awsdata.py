@@ -90,14 +90,18 @@ class AWSData:
 				cpu =  str(task_definition["taskDefinition"]["cpu"])
 				memory =  str(task_definition["taskDefinition"]["memory"])
 				revision = str(task_definition["taskDefinition"]["revision"])
-				release_number = "1.1.1.1" # To be updated in later version
+				
+				#if task_definition['taskDefinition'][release_number] is None:
+				release_number = "9.9.9.9" # To be updated in later version
+				
+
 				if (lastStatus == "RUNNING"):
 					date =  tasks_description["startedAt"]
 				else:
 					date = None
 
 				##check if the task_definition entry exists in the database
-				exists_task_definition = db.session.query(Task_Definition.task_definition_name).filter(Task_Definition.image_tag==image).scalar() is not None
+				exists_task_definition = db.session.query(Task_Definition.task_definition_name).filter(Task_Definition.image_tag==image).filter(Task_Definition.release_number==release_number).scalar() is not None
 
 				if exists_task_definition:
 					print("Task_definition Already Exists")

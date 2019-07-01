@@ -5,6 +5,7 @@ from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 from awsdata import AWSData
 from db_search import Search
+from db_update_release import Update_Release
 import requests
 import json
 import boto3
@@ -21,13 +22,14 @@ def search():
 	components = Component.query.all()
 	environments = []
 	regions = []
-	#search(product_name="iForms")
+	search(product_name="iForms")
+	updateRelease(product_name="iForms", release_number="3.3.3.3", cluster_name='asg-ecs-qa2-cluster')
 	#Remove duplicate values such as "dev" and "qa"
-	for cluster in clusters:
-	 	if cluster.environment not in environments:
-	 		environments.append(cluster.environment)
-		if cluster.region not in regions:
-			regions.append(cluster.region)
+	# for cluster in clusters:
+	#  	if cluster.environment not in environments:
+	#  		environments.append(cluster.environment)
+	# 	if cluster.region not in regions:
+	# 		regions.append(cluster.region)
 	#Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,
 	productsQ=products, releasesQ=releases, clustersQ=clusters,
@@ -60,5 +62,32 @@ def search(client_name=None, product_name=None, release=None, cluster_name=None,
 	pprint.pprint(search_result)
 	return search_result
 
+# creates a new product release record as a product has a new release
+# def updateProductRelease(product_name=None,release_number=None):
+# 	update_release = Update_Release()
+# 	product_release_id = update_release.populateProductRelease(client_name=client_name,client_name=release_number)
+# 	return product_release_id
+# 	print("Updateing Product Release table")
 
+# # creates a new cprc record as a new release is added
+# def updateCPRC(product_release_id=None, cluster_name=None):
+# 	update_release = Update_Release()
+# 	update_release.populateCPRC(product_release_id=product_release_id, cluster_name=cluster_name):
+
+# # creates a new entry for task definition as it is part of a new release pf the same cluster
+# def updateTaskDefinition(cluster_name=None, release_number=None):
+# 	AWSD
+# 	update_release = Update_Release()
+# 	update_release.populateTaskDefinition(cluster_name=cluster_name, release_number=release_number)
+
+# main function that triggers other helper functions to 
+def updateRelease(product_name=None, release_number=None, cluster_name=None):
+	update_release = Update_Release()
+	product_release_id = update_release.populateProductRelease(product_name,release_number)
+	update_release.populateCPRC(cluster_name, product_release_id)
+	update_release.populateTaskDefinition(cluster_name)
+
+
+
+	
 
