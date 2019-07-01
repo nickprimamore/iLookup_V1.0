@@ -1,5 +1,5 @@
-import os
-import pymysql
+import os;
+import pymysql;
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):

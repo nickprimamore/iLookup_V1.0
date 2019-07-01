@@ -5,7 +5,9 @@
 
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
   $(document).ready(function() {
-    $('.dropdowns').select2();
+    $('.dropdowns').select2({
+      theme: "classic"
+    });
   });
 
   // Sends the selected search tags to the backend
@@ -99,7 +101,7 @@
   }
 </style>
 
-<h1 style="padding-top:14px; padding-bottom:11px" align="center"> Search <span style="color:#FF9900">aws</span> Resources:</h1>
+<h1 style="padding-top:14px; padding-bottom:11px; text-align: center"> Search <span style="color:#FF9900">aws</span> Resources:</h1>
 
 <div class="searchContainer">
   <div class="searchBar col-md-6">
@@ -169,7 +171,7 @@
       <input type="date" class="form-control" id="dateUntil" name="Date (Until)">
   </div>
   <div class="searchBar col-md-12">
-    <button type="button" class="btn btn-outline-warning" style="width:100%" onClick="sendData()">Search</button>
+    <button type="button" class="btn btn-outline-warning" style="width:100%; font-weight:bold" onClick="sendData()">Search</button>
   </div>
 
   <br>
@@ -202,13 +204,13 @@
             <div class="form-group">
               <label class="modalLabel" for="releaseNum">Release Number:</label>
               <input type="email" class="form-control" id="releaseNum" aria-describedby="releaseFormat" placeholder="Enter release">
-              <small id="releaseFormat" class="form-text text-muted">Example format: 01.01.01.01</small>
+              <small id="releaseFormat" class="form-text text-muted">Example format: 1.1.1.1</small>
             </div>
           </form>
           <form>
             <div class="searchBar col-md-6">
-              <p class="searchLabel"> <b> Clusters:</b> </p>
-                <select class="dropdowns clusters" id="addClustersSelect2" style="width:214%" name="clusters[]" multiple="multiple">
+              <p class="searchLabel"> <b> Cluster(s):</b> </p>
+                <select class="dropdowns clusters" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
                   {% for cluster in clustersQ %}
                   <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
                   {% endfor %}
@@ -260,12 +262,12 @@
             <div class="form-group">
               <label class="modalLabel" for="releaseNum">New Release Number:</label>
               <input type="email" class="form-control" id="releaseNumUpdated" aria-describedby="releaseUpdatedFormat" placeholder="Enter new release">
-              <small id="releaseUpdatedFormat" class="form-text text-muted">Example format: 01.01.01.01</small>
+              <small id="releaseUpdatedFormat" class="form-text text-muted">Example format: 1.1.1.1</small>
             </div>
           </form>
           <form>
             <div class="searchBar col-md-6">
-              <p class="searchLabel"> <b> Clusters:</b> </p>
+              <p class="searchLabel"> <b> Cluster(s):</b> </p>
                 <select class="dropdowns clusters" id="updateClustersSelect2" style="width:214%" name="clusters[]" multiple="multiple">
                   {% for cluster in clustersQ %}
                   <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>

@@ -62,5 +62,5 @@ class Search:
 		return 	results
 
 # search_result = Search()
-# search_result.getSearchResult(product_name="iConductor")
+# search_result.getSearchResult(client_name="Aon")
 # print("done!")
