@@ -3,8 +3,8 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component_Type, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-from awsdata import AWSData
-from db_search import Search
+# from awsdata import AWSData
+# from db_search import Search
 import requests
 import json
 import boto3
@@ -21,13 +21,13 @@ def search():
 	components = Component.query.all()
 	environments = []
 	regions = []
-	search(fromDate = "06/06/19")
+	#search(product_name="iForms")
 	#Remove duplicate values such as "dev" and "qa"
-	for cluster in clusters:
-	 	if cluster.environment not in environments:
-		 	environments.append(cluster.environment)
-		if cluster.region not in regions:
-			regions.append(cluster.region)
+	# for cluster in clusters:
+	#  	if cluster.environment not in environments:
+	#  		environments.append(cluster.environment)
+	# 	if cluster.region not in regions:
+	# 		regions.append(cluster.region)
 	#Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,
 	productsQ=products, releasesQ=releases, clustersQ=clusters,
