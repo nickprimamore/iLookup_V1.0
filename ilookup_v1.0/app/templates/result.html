@@ -31,29 +31,29 @@
       let cpu = task.cp
       let revision = task.revision
       let task_name = task.task_definition_name
+
       $( "#accordion" ).append('<div class="card">' +
-        '<div class="card-header" id="headingOne">' +
-          '<h5 class="mb-0">' +
-            '<button class="btn btn-link" data-toggle="collapse" data-target="#' + image + '" aria-expanded="true" aria-controls="' + image + '">' +
-            task_name + '<br />' +
+        '<div class="card-header deleteOnClose" id="headingOne">' +
+          '<h5 class="mb-0 deleteOnClose">' +
+            '<button class="btn btn-link deleteOnClose" data-toggle="collapse" data-target="#' + image + '" aria-expanded="true" aria-controls="' + image + '">' +
+            task_name + '<br class="deleteOnClose"/>' +
             '</button>' +
           '</h5>' +
         '</div>'+
-        '<div id="' + image + '" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">' +
-          '<div class="card-body">' +
-            'Image: ' + image + '<br />' +
-            'Revision: ' + revision + '<br />' +
-            'Memory: ' + memory + '<br />' +
-            'Date Started: ' + date + '<br />' +
-            'CPU: ' + cpu + '<br />' +
+        '<div id="' + image + '" class="collapse deleteOnClose" aria-labelledby="headingOne" data-parent="#accordion">' +
+          '<div class="card-body deleteOnClose">' +
+            'Image: ' + image + '<br class="deleteOnClose" />' +
+            'Revision: ' + revision + '<br class="deleteOnClose"/>' +
+            'Memory: ' + memory + '<br class="deleteOnClose"/>' +
+            'Date Started: ' + date + '<br class="deleteOnClose"/>' +
+            'CPU: ' + cpu + '<br class="deleteOnClose" />' +
           '</div>' +
         '</div>' +
       '</div>')
-
-
     }
-
-
+  })
+  $('#clusterDetail').on('hide.bs.modal', function (event) {
+    $('.deleteOnClose').remove();
   })
 
 </script>
