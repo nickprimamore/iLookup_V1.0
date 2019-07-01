@@ -21,10 +21,11 @@ def search():
 	components = Component.query.all()
 	environments = []
 	regions = []
+	#search(product_name="iForms")
 	#Remove duplicate values such as "dev" and "qa"
 	for cluster in clusters:
 	 	if cluster.environment not in environments:
-		 	environments.append(cluster.environment)
+	 		environments.append(cluster.environment)
 		if cluster.region not in regions:
 			regions.append(cluster.region)
 	#Renders the Result.html file which extends Search.html which extends Layout.html
@@ -45,15 +46,16 @@ def result():
 		products = objectified['Products']
 		for client in clients:
 			client_result = search(client_name=client)
-			results.append(client_result)
+			results = results + (client_result)
 		for product in products:
 			product_result = search(product_name=product)
-			results.append(product_result)
+			results = results + (product_result)
 	return render_template('result.html', results=results)
 
 
-def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None):
+def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 	search = Search()
-	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment)
+	print("calling search function.....")
+	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate)
 	pprint.pprint(search_result)
 	return search_result
