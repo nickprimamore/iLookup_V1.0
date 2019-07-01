@@ -39,7 +39,7 @@ class Search:
 			result['region'] = res.Cluster.region
 			result['environment'] = res.Cluster.environment
 
-			if toDate and fromDate is None:
+			if (toDate and fromDate) is None:
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
 				task_definition_list = []
 				for task_definition in task_definition_result:
@@ -106,6 +106,6 @@ class Search:
 		print(results)
 		return 	results
 
-# search_result = Search()
-# search_result.getSearchResult()
-# print("done!")
+search_result = Search()
+search_result.getSearchResult()
+print("done!")
