@@ -5,13 +5,16 @@
 
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
   $(document).ready(function() {
-    $('.dropdowns').select2();
-
+    $('.dropdowns').select2({
+      theme: "classic"
+    });
     //Listening event to get the information
+    let changed = false
     let selectedQueries = []
     $('.dropdowns').on('select2:select', function(e) {
       let data = e.params.data
       selectedQueries.push(data.text)
+      changed = true
     })
 
     $('.dropdowns').on('select2:unselect', function(e) {
@@ -20,10 +23,11 @@
       for (let i = 0; i < selectedQueries.length; i++) {
         if (selectedQueries[i] == unselected) {
           selectedQueries.splice(i, 1)
+          changed = true
         }
       }
-
     })
+
   });
 
 
@@ -112,9 +116,13 @@
   select.dropdowns {
     width: 100%
   }
+  label.modalLabel {
+    color:#2867b1;
+    font-weight:bold;
+  }
 </style>
 
-<h1 style="padding-top:14px; padding-bottom:11px" align="center"> Search <span style="color:#FF9900">aws</span> Resources:</h1>
+<h1 style="padding-top:14px; padding-bottom:11px; text-align: center"> Search <span style="color:#FF9900">aws</span> Resources:</h1>
 
 <div class="searchContainer">
   <div class="searchBar col-md-6">
@@ -184,13 +192,174 @@
       <input type="date" class="form-control" id="dateUntil" name="Date (Until)">
   </div>
   <div class="searchBar col-md-12">
-    <button type="button" class="btn btn-outline-warning" style="width:100%" onClick="sendData()">Search</button>
+    <button type="button" class="btn btn-outline-warning" style="width:100%; font-weight:bold" onClick="sendData()">Search</button>
   </div>
 
   <br>
   <br>
   <br>
 
+<script>
+
+let addReleaseTag = {}
+let selectedCluster = []
+
+  $(document).ready(function() {
+    $('.productsTag').select2({
+      theme: "classic"
+    });
+
+    $('.clustersTag').select2({
+      theme: "classic"
+    });
+
+    $('.productsTag').on('select2:select', function(e) {
+      let data = e.params.data
+      addReleaseTag['product'] = data.text
+    })
+    $('.clustersTag').on('select2:select', function(e) {
+      let data = e.params.data
+      selectedCluster.push(data.text)
+    })
+
+    $('.clustersTag').on('select2:unselect', function(e) {
+      let data = e.params.data
+      let unselected = data.text
+      for (let i = 0; i < selectedCluster.length; i++) {
+        if (selectedCluster[i] == unselected) {
+          selectedCluster.splice(i, 1)
+        }
+      }
+    })
+  });
+
+
+  function newTag() {
+    addReleaseTag['clusters'] = selectedCluster
+    let releaseNum = document.getElementById('releaseNum').value
+    addReleaseTag['releaseNum'] = releaseNum
+
+
+  })
+  }
+
+
+  </script>
+  <!-- Modal for adding a release tag -->
+  <div class="modal fade no-reload" id="addTagModal" tabindex="-1" role="dialog" aria-labelledby="addTagLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addTagLabel">Add a New Release Tag:</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+              <div class="form-group">
+                <label class="modalLabel" for="selectProduct">Product:</label>
+                <select class="productsTag" id="selectProduct" placeholder="Select product">
+                  <option value="" disabled selected>Select product</option>
+                  {% for product in productsTag %}
+                    <option value="{{ product.product_name }}">{{ product.product_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+          </form>
+          <form>
+            <div class="form-group">
+              <label class="modalLabel" for="releaseNum">Release Number:</label>
+              <input type="email" class="form-control" id="releaseNum" aria-describedby="releaseFormat" placeholder="Enter release">
+              <small id="releaseFormat" class="form-text text-muted">Example format: 1.1.1.1</small>
+            </div>
+          </form>
+          <form>
+            <div class="searchBar col-md-6">
+              <p class="searchLabel"> <b> Cluster(s):</b> </p>
+                <select class="clustersTag" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
+                  {% for cluster in clustersTag %}
+                  <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="newTag()">Add tag</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- This script clears out the add tag modal after submission/closing -->
+  <script>
+    $('#addTagModal').on('hidden.bs.modal', function (e) {
+        $(this)
+          .find("input, select")
+          .val('')
+          .end()
+          $('#addClustersSelect2').val(null).trigger('change');
+    });
+  </script>
+
+  <!-- Modal for updating a release tag -->
+  <div class="modal fade" id="updateTagModal" tabindex="-1" role="dialog" aria-labelledby="updateTagLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateTagLabel">Update a Release Tag:</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+              <div class="form-group">
+                <label class="modalLabel" for="selectProduct">Product:</label>
+                <select class="form-control" id="selectProduct">
+                  <option value="" disabled selected>Select product</option>
+                  {% for product in productsQ %}
+                    <option value="{{ product.product_name }}">{{ product.product_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+          </form>
+          <form>
+            <div class="form-group">
+              <label class="modalLabel" for="releaseNum">New Release Number:</label>
+              <input type="email" class="form-control" id="releaseNumUpdated" aria-describedby="releaseUpdatedFormat" placeholder="Enter new release">
+              <small id="releaseUpdatedFormat" class="form-text text-muted">Example format: 1.1.1.1</small>
+            </div>
+          </form>
+          <form>
+            <div class="searchBar col-md-6">
+              <p class="searchLabel"> <b> Cluster(s):</b> </p>
+                <select class="dropdowns clusters" id="updateClustersSelect2" style="width:214%" name="clusters[]" multiple="multiple">
+                  {% for cluster in clustersQ %}
+                  <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Update tag</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- This script clears out the update tag modal after submission/closing -->
+  <script>
+    $('#updateTagModal').on('hidden.bs.modal', function (e) {
+        $(this)
+          .find("input, select")
+          .val('')
+          .end()
+          $('#updateClustersSelect2').val(null).trigger('change');
+    });
+  </script>
 
 <!-- This is where the table is being rendered in! -->
 </div>

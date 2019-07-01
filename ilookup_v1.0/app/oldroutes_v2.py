@@ -27,7 +27,7 @@ def search():
 	# 	 	environments.append(cluster.environment)
 	# 	if cluster.region not in regions:
 	# 		regions.append(cluster.region)
-	
+
 	# components = Component.query.all()
 	# #Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,

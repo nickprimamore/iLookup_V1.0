@@ -81,7 +81,7 @@ def db():
 	components = Component.query.filter_by(cluster_id=cluster_id).all()
 
 
-	## For each compnent we print the correspnding task def details using component id as foreign key 
+	## For each compnent we print the correspnding task def details using component id as foreign key
 	for component in components:
 		print(component.component_name)
 		component_id = component.component_id
@@ -115,15 +115,14 @@ def db():
 
 # def mydb():
 # 	search_result = db.session.query(Client, Product_Release, Product, Cluster,
-# 	Component, Task_Definition).innerjoin(CPRC.client_id == Client.client_id, 
-# 	CPRC.product_release_id == Product_Release.product_release_id, 
-# 	Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id, 
-# 	Component.cluster_id == Cluster.cluster_id, 
+# 	Component, Task_Definition).innerjoin(CPRC.client_id == Client.client_id,
+# 	CPRC.product_release_id == Product_Release.product_release_id,
+# 	Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id,
+# 	Component.cluster_id == Cluster.cluster_id,
 # 	Component.component_id == Task_Definition.component_id).add_columns(Client.client_name, Product.product_name).filter(Client.client_name=="Aon")
 
 	# 			#result = CPRC.query.join(Client, Client.client_id==CPRC.client_id).add_columns(Client.client_name).filter(Client.client_id==1)
 	# print(search_result)
-	# return "Hello"			
+	# return "Hello"
 # for res in search_result:
 # 	print(res.Client.client_name, res.Product.product_name, res.Product_Release.release_number, res.Cluster.cluster_name)
-
