@@ -6,7 +6,26 @@
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
   $(document).ready(function() {
     $('.dropdowns').select2();
+
+    //Listening event to get the information
+    let selectedQueries = []
+    $('.dropdowns').on('select2:select', function(e) {
+      let data = e.params.data
+      selectedQueries.push(data.text)
+    })
+
+    $('.dropdowns').on('select2:unselect', function(e) {
+      let data = e.params.data
+      let unselected = data.text
+      for (let i = 0; i < selectedQueries.length; i++) {
+        if (selectedQueries[i] == unselected) {
+          selectedQueries.splice(i, 1)
+        }
+      }
+
+    })
   });
+
 
   // Sends the selected search tags to the backend
   function sendData() {
@@ -108,7 +127,7 @@
   </div>
   <div class="searchBar col-md-6">
     <p class="searchLabel"> <b> Products </b> </p>
-    <select class="dropdowns products" id="products"  name="products[]" multiple="multiple">
+    <select class="dropdowns products"  name="products[]" multiple="multiple">
       {% for product in productsQ %}
         <option value="{{ product.product_name }}">{{ product.product_name }}</option>
       {% endfor %}
