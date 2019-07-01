@@ -183,7 +183,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addTagLabel">Add a New Release Tag:</h5>
+          <h5 class="modal-title" id="addTagLabel">Add/Update a Release Tag:</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -236,8 +236,9 @@
     });
   </script>
 
+
   <!-- Modal for updating a release tag -->
-  <div class="modal fade" id="updateTagModal" tabindex="-1" role="dialog" aria-labelledby="updateTagLabel" aria-hidden="true">
+  <!--<div class="modal fade" id="updateTagModal" tabindex="-1" role="dialog" aria-labelledby="updateTagLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -281,10 +282,11 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
+
 
   <!-- This script clears out the update tag modal after submission/closing -->
-  <script>
+  <!-- <script>
     $('#updateTagModal').on('hidden.bs.modal', function (e) {
         $(this)
           .find("input, select")
@@ -292,7 +294,7 @@
           .end()
           $('#updateClustersSelect2').val(null).trigger('change');
     });
-  </script>
+  </script> -->
 
 <!-- This is where the table is being rendered in! -->
 </div>
