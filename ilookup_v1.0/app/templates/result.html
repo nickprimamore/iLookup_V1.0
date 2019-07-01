@@ -20,18 +20,7 @@
       compTasks.push(strObject)
     }
     let modal = $(this)
-<<<<<<< HEAD
-    modal.find('.cluster-title').text(clusterName)
-    modal.find('.taskdef').text(taskdef)
-    modal.find('.imagetag').text(imagetag)
-    modal.find('.revision').text(revision)
-    modal.find('.date').text(date)
-    modal.find('.cpu').text(cpu)
-    modal.find('.memory').text(memory)
-  }) 
-=======
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
-
 
     for (task of compTasks) {
       console.log(task)
@@ -66,7 +55,6 @@
     $('.deleteOnClose').remove();
   })
 
->>>>>>> b71620af3487b56645f44786df0604349fc15f75
 </script>
 
 <style>
