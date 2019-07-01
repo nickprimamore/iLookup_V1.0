@@ -19,6 +19,9 @@ def search():
 	releases = Product_Release.query.all()
 	clusters = Cluster.query.all()
 	components = Component.query.all()
+	#These two Arrays are for the update Release Tag
+	productsQ = Product.query.all()
+	clustersQ = Cluster.query.all()
 	environments = []
 	regions = []
 	#search(product_name="iForms")
@@ -31,7 +34,13 @@ def search():
 	#Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,
 	productsQ=products, releasesQ=releases, clustersQ=clusters,
-	componentsQ=components, environmentsQ=environments, regionsQ=regions)
+	componentsQ=components, environmentsQ=environments, regionsQ=regions, productsTag=productsQ, clustersTag=clustersQ)
+
+# @app.route('/searching', methods=['GET', 'POST'])
+# #This function gathers all the data from the SQL tables to generate the search filters
+# def update():
+# 	if request.method == 'POST':
+# 		return redirect(url_for('/', cli = ['Aon'], pro = ['Pro']))
 
 
 #This function communicates with the HTML and gathers the responses in order to load the table data.

@@ -8,7 +8,28 @@
     $('.dropdowns').select2({
       theme: "classic"
     });
+    //Listening event to get the information
+    let changed = false
+    let selectedQueries = []
+    $('.dropdowns').on('select2:select', function(e) {
+      let data = e.params.data
+      selectedQueries.push(data.text)
+      changed = true
+    })
+
+    $('.dropdowns').on('select2:unselect', function(e) {
+      let data = e.params.data
+      let unselected = data.text
+      for (let i = 0; i < selectedQueries.length; i++) {
+        if (selectedQueries[i] == unselected) {
+          selectedQueries.splice(i, 1)
+          changed = true
+        }
+      }
+    })
+
   });
+
 
   // Sends the selected search tags to the backend
   function sendData() {
@@ -114,7 +135,7 @@
   </div>
   <div class="searchBar col-md-6">
     <p class="searchLabel"> <b> Products </b> </p>
-    <select class="dropdowns products" id="products"  name="products[]" multiple="multiple">
+    <select class="dropdowns products"  name="products[]" multiple="multiple">
       {% for product in productsQ %}
         <option value="{{ product.product_name }}">{{ product.product_name }}</option>
       {% endfor %}
@@ -178,6 +199,52 @@
   <br>
   <br>
 
+<script>
+
+let addReleaseTag = {}
+let selectedCluster = []
+
+  $(document).ready(function() {
+    $('.productsTag').select2({
+      theme: "classic"
+    });
+
+    $('.clustersTag').select2({
+      theme: "classic"
+    });
+
+    $('.productsTag').on('select2:select', function(e) {
+      let data = e.params.data
+      addReleaseTag['product'] = data.text
+    })
+    $('.clustersTag').on('select2:select', function(e) {
+      let data = e.params.data
+      selectedCluster.push(data.text)
+    })
+
+    $('.clustersTag').on('select2:unselect', function(e) {
+      let data = e.params.data
+      let unselected = data.text
+      for (let i = 0; i < selectedCluster.length; i++) {
+        if (selectedCluster[i] == unselected) {
+          selectedCluster.splice(i, 1)
+        }
+      }
+    })
+  });
+
+
+  function newTag() {
+    addReleaseTag['clusters'] = selectedCluster
+    let releaseNum = document.getElementById('releaseNum').value
+    addReleaseTag['releaseNum'] = releaseNum
+
+
+  })
+  }
+
+
+  </script>
   <!-- Modal for adding a release tag -->
   <div class="modal fade no-reload" id="addTagModal" tabindex="-1" role="dialog" aria-labelledby="addTagLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -192,9 +259,9 @@
           <form>
               <div class="form-group">
                 <label class="modalLabel" for="selectProduct">Product:</label>
-                <select class="form-control" id="selectProduct" placeholder="Select product">
+                <select class="productsTag" id="selectProduct" placeholder="Select product">
                   <option value="" disabled selected>Select product</option>
-                  {% for product in productsQ %}
+                  {% for product in productsTag %}
                     <option value="{{ product.product_name }}">{{ product.product_name }}</option>
                   {% endfor %}
                 </select>
@@ -210,8 +277,8 @@
           <form>
             <div class="searchBar col-md-6">
               <p class="searchLabel"> <b> Cluster(s):</b> </p>
-                <select class="dropdowns clusters" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
-                  {% for cluster in clustersQ %}
+                <select class="clustersTag" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
+                  {% for cluster in clustersTag %}
                   <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
                   {% endfor %}
                 </select>
@@ -219,7 +286,7 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">Add tag</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="newTag()">Add tag</button>
         </div>
       </div>
     </div>
