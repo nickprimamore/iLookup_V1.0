@@ -1,0 +1,21 @@
+1. Comment out the following code in routes.py file
+from awsdata import AWSData
+from db_search import Search
+
+2. Go to virtual environment usig "source venv/bin/activate"
+
+3. Create a new schema in MySQL
+
+4. Change the DATABASE_URI in the config file to point it towards new schema for example <testdb>
+
+5. Run "python db_create.py"
+
+6. Run "python awsdata.py"
+
+7. Go to MySQL Schema and Refresh and the run "Dummy_iLookup_Data_Insertion.sql" file from MySQL Workbench
+
+8. Uncomment the follwoing code in routes.py file
+from awsdata import AWSData
+from db_search import Search
+
+9. flask run
