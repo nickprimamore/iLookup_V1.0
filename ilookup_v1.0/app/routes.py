@@ -21,11 +21,11 @@ def search():
 	components = Component.query.all()
 	environments = []
 	regions = []
-	search(fromDate = "06/06/19")
+	#search(product_name="iForms")
 	#Remove duplicate values such as "dev" and "qa"
 	for cluster in clusters:
 	 	if cluster.environment not in environments:
-		 	environments.append(cluster.environment)
+	 		environments.append(cluster.environment)
 		if cluster.region not in regions:
 			regions.append(cluster.region)
 	#Renders the Result.html file which extends Search.html which extends Layout.html

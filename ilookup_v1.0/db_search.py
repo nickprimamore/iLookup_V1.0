@@ -28,9 +28,8 @@ class Search:
 		if environment:
 			search_result = search_result.filter(Cluster.environment==environment)
 
-		results = []
 		task_definitions = []
-		count = 1
+		results = []
 		for res in search_result:
 			result = {}
 			result['client_name'] = res.Client.client_name
@@ -45,6 +44,7 @@ class Search:
 				task_definition_list = []
 				for task_definition in task_definition_result:
 					task = {}
+					#print(task_definition.Task_Definition.task_definition_name)
 					task["task_definition_name"] = task_definition.Task_Definition.task_definition_name
 					task["image_tag"] = task_definition.Task_Definition.image_tag
 					task["revision"] = task_definition.Task_Definition.revision
@@ -55,7 +55,7 @@ class Search:
 				result["task_definitions"] = task_definition_list
 				results.append(result)
 
-			if toDate and fromDate:
+			if (toDate and fromDate) is not None:
 				print("toDate and fromDate")
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.date <= toDate).all()
 				task_definition_list = []
@@ -71,7 +71,7 @@ class Search:
 				result["task_definitions"] = task_definition_list
 				results.append(result)
 
-			if toDate:
+			if (toDate) is not None:
 				print("toDate")
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date <= toDate).all()
 				task_definition_list = []
@@ -87,7 +87,7 @@ class Search:
 				result["task_definitions"] = task_definition_list
 				results.append(result)
 
-			if fromDate:
+			if (fromDate) is not None:
 				print("fromDate")
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).all()
 				task_definition_list = []
@@ -102,6 +102,8 @@ class Search:
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
 				results.append(result)
+			#results.append(result)
+		print(results)
 		return 	results
 
 # search_result = Search()
