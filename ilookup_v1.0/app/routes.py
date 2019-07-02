@@ -14,7 +14,6 @@ import pprint
 @app.route('/search', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
 def search():
-	print(test)
 	clients = Client.query.all()
 	products = Product.query.all()
 	releases = Product_Release.query.all()
@@ -42,7 +41,7 @@ def search():
 def update():
 	print(request.form.keys())
 	if request.method == 'POST':
-		return redirect(url_for('search', test='hello'))
+		return redirect(url_for('search'))
 
 
 #This function communicates with the HTML and gathers the responses in order to load the table data.
