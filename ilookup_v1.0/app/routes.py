@@ -43,6 +43,20 @@ def update():
 		return redirect(url_for('search'))
 
 
+#This route is to have a POST request in order to create a new release tag or update.
+@app.route('/newTag', methods=['GET', 'POST'])
+def createTag():
+	print(request.form.keys())
+	data = request.form.keys()
+	for values in data:
+		stringified = values
+		objectified = json.loads(values)
+		print(objectified['tagQuery'])
+
+	return 'YIPPEE'
+
+
+
 #This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])
 def result():
