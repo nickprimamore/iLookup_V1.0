@@ -40,7 +40,7 @@ def search():
 		regions = request.args.getlist('regionsUpdate')
 
 	#These two Arrays are for the update Release Tag
-	
+
 	#search(product_name="iForms")
 	#updateRelease(product_name="iForms", release_number="3.3.3.3", cluster_name='asg-ecs-qa2-cluster')
 	#Remove duplicate values such as "dev" and "qa"
@@ -63,7 +63,7 @@ def update():
 		for values in data:
 			stringified = values
 			objectified = json.loads(values)
-			
+
 			client=""
 			product=""
 			release=""
@@ -71,7 +71,7 @@ def update():
 			cluster=""
 			environment=""
 
-			if len(objectified["Clients"]) > 0:		
+			if len(objectified["Clients"]) > 0:
 				client = objectified["Clients"][0]
 			if len(objectified["Products"]) > 0:
 				product = objectified["Products"][0]
@@ -111,14 +111,14 @@ def update():
 		 		environments.append(cluster.environment)
 			if cluster.region not in regions:
 				regions.append(cluster.region)
-		
+
 
 		print(clients,products,clusters,environments,regions,releases)
 		return redirect(url_for('search',updated=True,clientsUpdate=clients,
 		productsUpdate=products, releasesUpdate=releases, clustersUpdate=clusters,
 		componentsUpdate=components, environmentsUpdate=environments, regionsUpdate=regions))
 
-		return redirect(url_for('search'))
+	return redirect(url_for('search'))
 
 
 #This route is to have a POST request in order to create a new release tag or update.
@@ -139,6 +139,7 @@ def createTag():
 					if tag['key'] == 'Release':
 						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':'Release', 'value': objectified['tagQuery']['releaseNum']}])
+				updateRelease(objectifed['tagQuery']["product"], objectified['tagQuery']['releaseNum'], objectified['tag']['clusters'])
 	return 'Succeeded in updating the cluster(s)'
 
 
@@ -160,24 +161,6 @@ def result():
 			results = results + (product_result)
 	return render_template('result.html', results=results)
 
-@app.route('/values',methods=['POST'])
-def addUpdateRelease():
-	data = request.form.keys()
-	for values in data:
-		stringified = values
-		objectified = json.loads(values)
-		clusters = objectified["tag"]["clusters"]
-		cluster= clusters[0]
-		product = objectified["tag"]["product"]
-		release_number = objectified["tag"]["releaseNum"]
-		updateRelease(product,release_number,cluster)
-	return "Successfully Added/Updated Release"
-
-	# stringified = values
-	# objectified = json.loads(values)
-	# clients = objectified['Clients']
-	# products = objectified['Products']
-
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 	search = Search()
 	print("calling search function.....")
@@ -185,7 +168,7 @@ def search(client_name=None, product_name=None, release=None, cluster_name=None,
 	#pprint.pprint(search_result)
 	return search_result
 
-# main function that triggers other helper functions to 
+# main function that triggers other helper functions to
 def updateRelease(product_name=None, release_number=None, cluster_name=None):
 	update_release = Update_Release()
 	product_release_id = update_release.populateProductRelease(product_name,release_number)
