@@ -11,7 +11,7 @@ import boto3
 import pprint
 
 
-@app.route('/search', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
 def search():
 	clients = Client.query.all()
@@ -36,12 +36,25 @@ def search():
 	productsQ=products, releasesQ=releases, clustersQ=clusters,
 	componentsQ=components, environmentsQ=environments, regionsQ=regions, productsTag=productsQ, clustersTag=clustersQ)
 
-
 @app.route('/update', methods=['GET', 'POST'])
 def update():
 	print(request.form.keys())
 	if request.method == 'POST':
 		return redirect(url_for('search'))
+
+
+#This route is to have a POST request in order to create a new release tag or update.
+@app.route('/newTag', methods=['GET', 'POST'])
+def createTag():
+	print(request.form.keys())
+	data = request.form.keys()
+	for values in data:
+		stringified = values
+		objectified = json.loads(values)
+		print(objectified['tagQuery'])
+
+	return 'YIPPEE'
+
 
 
 #This function communicates with the HTML and gathers the responses in order to load the table data.

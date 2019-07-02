@@ -256,6 +256,13 @@ let selectedCluster = []
     addReleaseTag['clusters'] = selectedCluster
     let releaseNum = document.getElementById('releaseNum').value
     addReleaseTag['releaseNum'] = releaseNum
+    $.ajax({
+      url:'/newTag',
+      type:'POST',
+      data: JSON.stringify({
+        tagQuery: addReleaseTag
+      })
+    })
   }
 
   </script>
