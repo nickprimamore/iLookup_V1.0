@@ -98,7 +98,7 @@ class AWSData:
 				if (lastStatus == "RUNNING"):
 					date =  tasks_description["startedAt"]
 				else:
-					date = None
+					date = "None"
 
 				##check if the task_definition entry exists in the database
 				exists_task_definition = db.session.query(Task_Definition.task_definition_name).filter(Task_Definition.image_tag==image).filter(Task_Definition.release_number==release_number).scalar() is not None

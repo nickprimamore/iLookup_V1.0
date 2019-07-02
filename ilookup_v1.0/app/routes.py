@@ -12,12 +12,11 @@ import json
 import boto3
 import pprint
 
+client = boto3.client('ecs')
 
-@app.route('/search', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
 def search():
-	# print(test)
-
 	clients = Client.query.all()
 	products = Product.query.all()
 	releases = Product_Release.query.all()
@@ -55,7 +54,6 @@ def search():
 	return render_template('search.html', clientsQ=clients,
 	productsQ=products, releasesQ=releases, clustersQ=clusters,
 	componentsQ=components, environmentsQ=environments, regionsQ=regions, productsTag=productsQ, clustersTag=clustersQ)
-
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
@@ -120,6 +118,30 @@ def update():
 		productsUpdate=products, releasesUpdate=releases, clustersUpdate=clusters,
 		componentsUpdate=components, environmentsUpdate=environments, regionsUpdate=regions))
 
+		return redirect(url_for('search'))
+
+
+#This route is to have a POST request in order to create a new release tag or update.
+@app.route('/newTag', methods=['GET', 'POST'])
+def createTag():
+	data = request.form.keys()
+	clusters = client.list_clusters()
+	clusterArns = clusters["clusterArns"]
+	for values in data:
+		objectified = json.loads(values)
+	for cluster in objectified['tagQuery']['clusters']:
+		for awsCluster in clusterArns:
+			cluster_split = awsCluster.split("/")
+			if (cluster == cluster_split[1]):
+				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+				tags = currentTags["tags"]
+				for tag in tags:
+					if tag['key'] == 'Release':
+						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
+				client.tag_resource(resourceArn=awsCluster, tags=[{'key':'Release', 'value': objectified['tagQuery']['releaseNum']}])
+	return 'Succeeded in updating the cluster(s)'
+
+
 
 #This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])
@@ -127,7 +149,6 @@ def result():
 	results = []
 	data = request.form.keys()
 	for values in data:
-		stringified = values
 		objectified = json.loads(values)
 		clients = objectified['Clients']
 		products = objectified['Products']

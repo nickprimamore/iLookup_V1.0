@@ -16,6 +16,7 @@
       if (i+1 != tasks.length) {
         strObject = strObject.substring(0, strObject.length-1)
       }
+      console.log(strObject)
       strObject = JSON.parse(strObject)
       compTasks.push(strObject)
     }
@@ -41,7 +42,7 @@
         '</div>'+
         '<div id="' + image + '" class="collapse deleteOnClose" aria-labelledby="headingOne" data-parent="#accordion">' +
           '<div class="card-body deleteOnClose">' +
-            'Image: ' + image + '<br class="deleteOnClose" />' +
+            'Image Tag: ' + image + '<br class="deleteOnClose" />' +
             'Revision: ' + revision + '<br class="deleteOnClose"/>' +
             'Memory: ' + memory + '<br class="deleteOnClose"/>' +
             'Date Started: ' + date + '<br class="deleteOnClose"/>' +
