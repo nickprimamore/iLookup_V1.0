@@ -1,6 +1,8 @@
 {% extends "layout.html"%}
 
 {% block content %}
+<html>
+<body style="background-color:#F8F8F8">
 <script>
 
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
@@ -8,6 +10,7 @@
     $('.dropdowns').select2({
       theme: "classic"
     });
+
     //Listening event to get the information
     let changed = false
     let selectedQueries = []
@@ -101,10 +104,16 @@
 </script>
 
 <style>
+  h1 {
+    font-family:"Trebuchet MS";
+  }
+
   div.searchContainer {
     display:flex;
     flex-wrap:wrap;
-    margin: 0% 20%
+    margin: 0% 20%;
+    z-index:5;
+    overflow:auto;
   }
   div.searchBar {
     text-align:left;
@@ -112,6 +121,7 @@
   p.searchLabel {
     color:#2867b1;
     margin-bottom:5px;
+    font-family: "Trebuchet MS";
   }
   select.dropdowns {
     width: 100%
@@ -119,14 +129,15 @@
   label.modalLabel {
     color:#2867b1;
     font-weight:bold;
+    font-family: "Trebuchet MS"
   }
 </style>
 
-<h1 style="padding-top:14px; padding-bottom:11px; text-align: center"> Search <span style="color:#FF9900">aws</span> Resources:</h1>
+<h1 style="padding-top:70px; padding-bottom:11px; text-align: center"> Search <span style="color:#FF9900">aws</span> Resources</h1>
 
 <div class="searchContainer">
   <div class="searchBar col-md-6">
-    <p class="searchLabel" > <b> Clients </b> </p>
+    <p class="searchLabel" > <b> Clients: </b> </p>
     <select class="dropdowns clients"  name="clients[]" multiple="multiple">
       {% for client in clientsQ %}
         <option value="{{ client.client_name }}">{{ client.client_name }}</option>
@@ -134,7 +145,7 @@
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Products </b> </p>
+    <p class="searchLabel"> <b> Products: </b> </p>
     <select class="dropdowns products"  name="products[]" multiple="multiple">
       {% for product in productsQ %}
         <option value="{{ product.product_name }}">{{ product.product_name }}</option>
@@ -142,7 +153,7 @@
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Releases </b> </p>
+    <p class="searchLabel"> <b> Releases: </b> </p>
     <select class="dropdowns releases"  name="releases[]" multiple="multiple">
       {% for release in releasesQ %}
         <option value="{{ release.release_number }}">{{ release.release_number }}</option>
@@ -150,7 +161,7 @@
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Regions </b> </p>
+    <p class="searchLabel"> <b> Regions: </b> </p>
     <select class="dropdowns regions"  name="regions[]" multiple="multiple">
       {% for region in regionsQ %}
         <option value="{{ region }}">{{ region }}</option>
@@ -158,7 +169,7 @@
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Clusters </b> </p>
+    <p class="searchLabel"> <b> Clusters: </b> </p>
     <select class="dropdowns clusters"  name="clusters[]" multiple="multiple">
       {% for cluster in clustersQ %}
         <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
@@ -166,7 +177,7 @@
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Environments </b> </p>
+    <p class="searchLabel"> <b> Environments: </b> </p>
     <select class="dropdowns environments"  name="environments[]" multiple="multiple">
       {% for environment in environmentsQ %}
         <option value="{{ environment }}">{{ environment }}</option>
@@ -174,7 +185,7 @@
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Components </b> </p>
+    <p class="searchLabel"> <b> Components: </b> </p>
     <select class="dropdowns components"  name="components[]" multiple="multiple">
       {% for component in componentsQ %}
         <option value="{{ component.component_name }}">{{ component.component_name }}</option>
@@ -183,16 +194,16 @@
   </div>
   <div class="form-group col-md-3" style = padding-right:1%>
       <!--<label for="date (from)">Date (From)</label>!-->
-      <p class="searchLabel"> <b> Date (From) </b> </p>
+      <p class="searchLabel"> <b> Date (From): </b> </p>
       <input type="date" class="form-control" id="dateFrom"name="Date (From)">
   </div>
   <div class="form-group col-md-3">
       <!--<label for="date (until)">Date (Until)</label>-->
-      <p class="searchLabel"> <b> Date (Until) </b> </p>
+      <p class="searchLabel"> <b> Date (Until): </b> </p>
       <input type="date" class="form-control" id="dateUntil" name="Date (Until)">
   </div>
   <div class="searchBar col-md-12">
-    <button type="button" class="btn btn-outline-warning" style="width:100%; font-weight:bold" onClick="sendData()">Search</button>
+    <button type="button" class="btn btn-outline-primary" style="width:100%; font-weight:bold" onClick="sendData()">Search</button>
   </div>
 
   <br>
@@ -238,10 +249,8 @@ let selectedCluster = []
     addReleaseTag['clusters'] = selectedCluster
     let releaseNum = document.getElementById('releaseNum').value
     addReleaseTag['releaseNum'] = releaseNum
-
-
-  })
   }
+
 
 
   </script>
@@ -259,7 +268,8 @@ let selectedCluster = []
           <form>
               <div class="form-group">
                 <label class="modalLabel" for="selectProduct">Product:</label>
-                <select class="productsTag" id="selectProduct" placeholder="Select product">
+                <br>
+                <select class="productsTag" id="selectProduct" placeholder="Select product" style="width:100%">
                   <option value="" disabled selected>Select product</option>
                   {% for product in productsTag %}
                     <option value="{{ product.product_name }}">{{ product.product_name }}</option>
@@ -366,6 +376,8 @@ let selectedCluster = []
 <!-- This is where the table is being rendered in! -->
 </div>
 <div id="result-tag"></div>
+</body>
+</html>
 
 {% block resultContent%}
 {% endblock %}
