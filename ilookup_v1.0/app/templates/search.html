@@ -4,7 +4,6 @@
 <html>
 <body style="background-color:#F8F8F8">
 <script>
-
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
   $(document).ready(function() {
     $('.dropdowns').select2({
@@ -12,30 +11,32 @@
     });
 
     //Listening event to get the information
-    let changed = false
     let selectedQueries = []
-    $('.dropdowns').on('select2:select', function(e) {
-      let data = e.params.data
-      selectedQueries.push(data.text)
-      changed = true
-    })
 
-    $('.dropdowns').on('select2:unselect', function(e) {
-      let data = e.params.data
-      let unselected = data.text
-      for (let i = 0; i < selectedQueries.length; i++) {
-        if (selectedQueries[i] == unselected) {
-          selectedQueries.splice(i, 1)
-          changed = true
+
+    $('.dropdowns').on('change.select2', function(e) {
+      let values = getValues()
+      $.ajax({
+        url: '/update',
+        type: 'POST',
+        data: JSON.stringify({
+          Clients: values[0],
+          Products: values[1],
+          Releases: values[2],
+          Regions: values[3],
+          Clusters: values[4],
+          Environments: values[5],
+          Components: values[6],
+          Dates: values[7]
+        }),
+        success: function (response) {
+          console.log('YIPPEE KAI YAY')
         }
-      }
+      })
     })
-
   });
 
-
-  // Sends the selected search tags to the backend
-  function sendData() {
+  function getValues() {
     //The format of $('._____').val() gives the results from the select2 Tables
     var clientVal = $('.clients').val()
     var productVal = $('.products').val()
@@ -81,19 +82,25 @@
       componentList.push(componentVal[com])
     }
 
+    return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList]
+  }
+  // Sends the selected search tags to the backend
+  function sendData() {
+    let values = getValues()
+
     //send back and Ajax Request with the following information.
       $.ajax({
       url: '/result',
       type: 'POST',
       data: JSON.stringify({
-        Clients: clientList,
-        Products: productList,
-        Releases: releaseList,
-        Regions: regionList,
-        Clusters: clusterList,
-        Environments: environmentList,
-        Components: componentList,
-        Dates: dateList
+        Clients: values[0],
+        Products: values[1],
+        Releases: values[2],
+        Regions: values[3],
+        Clusters: values[4],
+        Environments: values[5],
+        Components: values[6],
+        Dates: values[7]
       }),
       success: function (response) {
         $('#result-tag').html(response)
