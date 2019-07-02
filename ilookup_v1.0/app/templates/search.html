@@ -3,6 +3,34 @@
 {% block content %}
 <html>
 <body style="background-color:#F8F8F8">
+<style>
+  h1 {
+    font-family:"Trebuchet MS";
+  }
+  div.searchContainer {
+    display:flex;
+    flex-wrap:wrap;
+    margin: 0% 20%;
+    z-index:5;
+    overflow:auto;
+  }
+  div.searchBar {
+    text-align:left;
+  }
+  p.searchLabel {
+    color:#2867b1;
+    margin-bottom:5px;
+    font-family: "Trebuchet MS";
+  }
+  select.dropdowns {
+    width: 100%
+  }
+  label.modalLabel {
+    color:#2867b1;
+    font-weight:bold;
+    font-family: "Trebuchet MS"
+  }
+</style>
 <script>
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
   $(document).ready(function() {
@@ -110,41 +138,11 @@
 
 </script>
 
-<style>
-  h1 {
-    font-family:"Trebuchet MS";
-  }
-
-  div.searchContainer {
-    display:flex;
-    flex-wrap:wrap;
-    margin: 0% 20%;
-    z-index:5;
-    overflow:auto;
-  }
-  div.searchBar {
-    text-align:left;
-  }
-  p.searchLabel {
-    color:#2867b1;
-    margin-bottom:5px;
-    font-family: "Trebuchet MS";
-  }
-  select.dropdowns {
-    width: 100%
-  }
-  label.modalLabel {
-    color:#2867b1;
-    font-weight:bold;
-    font-family: "Trebuchet MS"
-  }
-</style>
-
 <h1 style="padding-top:70px; padding-bottom:11px; text-align: center"> Search <span style="color:#FF9900">aws</span> Resources</h1>
 
 <div class="searchContainer">
   <div class="searchBar col-md-6">
-    <p class="searchLabel" > <b> Clients: </b> </p>
+    <p class="searchLabel clients" > <b> Clients: </b> </p>
     <select class="dropdowns clients"  name="clients[]" multiple="multiple">
       {% for client in clientsQ %}
         <option value="{{ client.client_name }}">{{ client.client_name }}</option>
@@ -257,6 +255,15 @@ let selectedCluster = []
     let releaseNum = document.getElementById('releaseNum').value
     addReleaseTag['releaseNum'] = releaseNum
     $.ajax({
+
+      url: '/values',
+      type: 'POST',
+      data: JSON.stringify({
+        tag: addReleaseTag
+      }),
+      success: function (response) {
+        console.log("Success")
+
       url:'/newTag',
       type:'POST',
       data: JSON.stringify({
@@ -264,6 +271,7 @@ let selectedCluster = []
       }),
       success: function(response) {
         alert(response)
+
       }
     })
   }
@@ -327,66 +335,6 @@ let selectedCluster = []
           $('#addClustersSelect2').val(null).trigger('change');
     });
   </script>
-
-
-  <!-- Modal for updating a release tag -->
-  <!--<div class="modal fade" id="updateTagModal" tabindex="-1" role="dialog" aria-labelledby="updateTagLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="updateTagLabel">Update a Release Tag:</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form>
-              <div class="form-group">
-                <label class="modalLabel" for="selectProduct">Product:</label>
-                <select class="form-control" id="selectProduct">
-                  <option value="" disabled selected>Select product</option>
-                  {% for product in productsQ %}
-                    <option value="{{ product.product_name }}">{{ product.product_name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-          </form>
-          <form>
-            <div class="form-group">
-              <label class="modalLabel" for="releaseNum">New Release Number:</label>
-              <input type="email" class="form-control" id="releaseNumUpdated" aria-describedby="releaseUpdatedFormat" placeholder="Enter new release">
-              <small id="releaseUpdatedFormat" class="form-text text-muted">Example format: 1.1.1.1</small>
-            </div>
-          </form>
-          <form>
-            <div class="searchBar col-md-6">
-              <p class="searchLabel"> <b> Cluster(s):</b> </p>
-                <select class="dropdowns clusters" id="updateClustersSelect2" style="width:214%" name="clusters[]" multiple="multiple">
-                  {% for cluster in clustersQ %}
-                  <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
-                  {% endfor %}
-                </select>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">Update tag</button>
-        </div>
-      </div>
-    </div>
-  </div> -->
-
-
-  <!-- This script clears out the update tag modal after submission/closing -->
-  <!-- <script>
-    $('#updateTagModal').on('hidden.bs.modal', function (e) {
-        $(this)
-          .find("input, select")
-          .val('')
-          .end()
-          $('#updateClustersSelect2').val(null).trigger('change');
-    });
-  </script> -->
 
 <!-- This is where the table is being rendered in! -->
 </div>
