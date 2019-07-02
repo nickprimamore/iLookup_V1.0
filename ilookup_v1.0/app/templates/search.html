@@ -261,7 +261,10 @@ let selectedCluster = []
       type:'POST',
       data: JSON.stringify({
         tagQuery: addReleaseTag
-      })
+      }),
+      success: function(response) {
+        alert(response)
+      }
     })
   }
 
