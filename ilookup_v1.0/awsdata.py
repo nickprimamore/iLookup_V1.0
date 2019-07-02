@@ -92,7 +92,7 @@ class AWSData:
 				revision = str(task_definition["taskDefinition"]["revision"])
 				
 				#if task_definition['taskDefinition'][release_number] is None:
-				release_number = "9.9.9.9" # To be updated in later version
+				release_number = "9.9.9.8" # To be updated in later version
 				
 
 				if (lastStatus == "RUNNING"):

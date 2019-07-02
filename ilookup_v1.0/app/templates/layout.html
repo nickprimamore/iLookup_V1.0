@@ -11,32 +11,53 @@
 	<title>Layout</title>
 </head>
 	<body>
-
-		<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #2867b1; color:#2867b1">
-		  <a class="navbar-brand mb-0 h1" style="color:white" href="/">iLookup</a>
+		<style>
+			.navbar-brand{
+				position: fixed;
+				width: 50%;
+	 			left: 25%;
+				right: 25%;
+	 			top: 0;
+	 			text-align: center;
+				font-size: 30px;
+	 			margin: auto;
+			}
+		</style>
+		<nav class="navbar navbar-expand-lg navbar-light" id="topNav" role="navigation" style="background-color: #2867b1; color:#2867b1">
+			<div class="navbar-header" >
+		  	<div class="navbar-brand mb-0 h1" align="center" style="color:white">iLookup</div>
+			</div>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 		    <span class="navbar-toggler-icon"></span>
 		  </button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			 	<ul class="navbar-nav mr-auto">
+			 	<ul class="navbar-nav navbar-left mr-auto">
 				 	<li class="nav-item active">
-					 	<a class="nav-link" style="color:white" href="/">Search<span class="sr-only">(current)</span></a>
+						<button type="button"class="btn btn-warning" style="margin-right: 25px; font-weight:bold" onclick="location.href='/'">
+							Search
+						</button>
 					</li>
 				 	<li class="nav-item">
-					 	<a class="nav-link" style="color:white" href="#">Add New Release</a>
+						<button type="button" class="btn btn-primary" style="margin-right: 925px; background-color: #ffffff; font-weight:bold; color:#2867b1; width:18%" data-toggle="modal" data-target="#addTagModal">
+					    Add New Release Tag
+					  </button>
 				 	</li>
+				</ul>
+				<ul class="navbar-nav navbar-right mr-auto">
 				 	<li class="nav-item">
-					 	<a class="nav-link" style="color:white" href="#">Add New Tags</a>
+						<button type="button" class="btn btn-primary" style="background-color: #ffffff; color:#2867b1; font-weight:bold; width:90%; margin-right:50px" data-toggle="modal" data-target="#updateTagModal">
+					    Update a Release Tag
+					  </button>
 				 	</li>
+					<li class="nav-item">
+						<a href="/load"><button type="submit" class="btn btn-warning" style="width:100%; font-weight:bold">Refresh</button></a>
+					</li>
 			 	</ul>
-			 	<a href="/load"><button type="submit" class="btn btn-warning" style="width:100%">Refresh</button></a>
+
 		 	</div>
-
-
 		</nav>
 	{% block content%}
 	{% endblock %}
-
 
 	</body>
 

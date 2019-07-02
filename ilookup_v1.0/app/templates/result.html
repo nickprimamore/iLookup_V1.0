@@ -3,22 +3,58 @@
 <script>
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
+    let tasks = trigger.data('tasks')
     let clusterName = trigger.data('clustername')
-    let taskdef = trigger.data('taskdef')
-    let imagetag = trigger.data('imagetag')
-    let revision = trigger.data('revision')
-    let date = trigger.data('date')
-    let cpu = trigger.data('cpu')
-    let memory = trigger.data('memory')
+    tasks = tasks.split('{')
+    tasks.shift()
+    let compTasks = []
+    for (let i = 0; i < tasks.length; i++) {
+      strObject = tasks[i]
+      strObject = "{" + strObject
+      strObject = strObject.substring(0, strObject.length-1)
+      strObject = strObject.replace(/'/g, '"').replace(/u/g, '')
+      if (i+1 != tasks.length) {
+        strObject = strObject.substring(0, strObject.length-1)
+      }
+      strObject = JSON.parse(strObject)
+      compTasks.push(strObject)
+    }
     let modal = $(this)
-    modal.find('.cluster-title').text(clusterName)
-    modal.find('.taskdef').text(taskdef)
-    modal.find('.imagetag').text(imagetag)
-    modal.find('.revision').text(revision)
-    modal.find('.date').text(date)
-    modal.find('.cpu').text(cpu)
-    modal.find('.memory').text(memory)
+    modal.find('.cluster-title').text('Cluster: ' + clusterName)
+
+    for (task of compTasks) {
+      console.log(task)
+      let image = task.image_tag.substring(task.image_tag.length-7, task.image_tag.length)
+      let memory = task.memory
+      let date = task.date
+      let cpu = task.cp
+      let revision = task.revision
+      let task_name = task.task_definition_name
+
+      $( "#accordion" ).append('<div class="card deleteOnClose">' +
+        '<div class="card-header deleteOnClose" id="headingOne">' +
+          '<h5 class="mb-0 deleteOnClose">' +
+            '<button class="btn btn-link deleteOnClose" data-toggle="collapse" data-target="#' + image + '" aria-expanded="true" aria-controls="' + image + '">' +
+            task_name + '<br class="deleteOnClose"/>' +
+            '</button>' +
+          '</h5>' +
+        '</div>'+
+        '<div id="' + image + '" class="collapse deleteOnClose" aria-labelledby="headingOne" data-parent="#accordion">' +
+          '<div class="card-body deleteOnClose">' +
+            'Image: ' + image + '<br class="deleteOnClose" />' +
+            'Revision: ' + revision + '<br class="deleteOnClose"/>' +
+            'Memory: ' + memory + '<br class="deleteOnClose"/>' +
+            'Date Started: ' + date + '<br class="deleteOnClose"/>' +
+            'CPU: ' + cpu + '<br class="deleteOnClose" />' +
+          '</div>' +
+        '</div>' +
+      '</div>')
+    }
   })
+  $('#clusterDetail').on('hide.bs.modal', function (event) {
+    $('.deleteOnClose').remove();
+  })
+
 </script>
 
 <style>
@@ -27,17 +63,22 @@
     padding-bottom: 3px
   }
 </style>
+
 <!-- This is the modal and it is working with the function above to create multiple unique modal's based on which entry was pressed. -->
 <div class="modal fade bd-example-modal-lg" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="cluster-title" id="clusterLabel"></h3>
+        <h4 class="cluster-title" id="clusterLabel"></h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="cluster-info">
+      <div id="accordion">
+
+
+      </div>
+      <!-- <div class="cluster-info">
         <table class="table table-striped">
           <thead>
             <tr>
@@ -70,7 +111,7 @@
             </tr>
           </tbody>
         </table>
-      </div>
+      </div> -->
     </div>
   </div>
 </div>
@@ -89,19 +130,14 @@
   <tbody>
 
 <!-- This is a for loop to render the search results  -->
-    {% for query in results %}
-    {% for result in query %}
+
+    {% for result in results %}
 
     <tr
       data-toggle="modal"
       data-target="#clusterDetail"
       data-clustername="{{result.cluster_name}}"
-      data-taskdef="{{result.task_definition_name}}"
-      data-imagetag="{{result.image_tag}}"
-      data-revision="{{result.revision}}"
-      data-date="{{result.date}}"
-      data-cpu="{{result.cpu}}"
-      data-memory="{{result.memory}}"
+      data-tasks='{{result.task_definitions}}'
       >
       <th scope="row">{{result.client_name}}</th>
       <td> {{result.product_name}} </td>
@@ -112,6 +148,27 @@
     </tr>
 
     {% endfor %}
-    {% endfor %}
+
   </tbody>
 </table>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>

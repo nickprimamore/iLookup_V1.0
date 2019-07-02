@@ -4,11 +4,12 @@ import pprint, json
 class Search:
 
 	def getSearchResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
-		
-		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id, 
+
+		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
-		   
-		
+
+		results = []
+
 		if client_name:
 			search_result = search_result.filter(Client.client_name== client_name)
 
@@ -37,11 +38,10 @@ class Search:
 			result['cluster_name'] = res.Cluster.cluster_name
 			result['region'] = res.Cluster.region
 			result['environment'] = res.Cluster.environment
-			#print(result)
+
 
 			if (toDate and fromDate) is None:
-				#print("toDate and fromDate is None")
-				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 				task_definition_list = []
 				for task_definition in task_definition_result:
 					task = {}
@@ -52,13 +52,14 @@ class Search:
 					task["date"] = task_definition.Task_Definition.date
 					task["cpu"] = task_definition.Task_Definition.cpu
 					task["memory"] = task_definition.Task_Definition.memory
+					task["release"] = task_definition.Task_Definition.release_number
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
-				results.append(result)
+				#results.append(result)
 
 			if (toDate and fromDate) is not None:
 				print("toDate and fromDate")
-				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.date <= toDate).all()
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.date <= toDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 				task_definition_list = []
 				for task_definition in task_definition_result:
 					task = {}
@@ -68,13 +69,14 @@ class Search:
 					task["date"] = task_definition.Task_Definition.date
 					task["cpu"] = task_definition.Task_Definition.cpu
 					task["memory"] = task_definition.Task_Definition.memory
+					task["release"] = task_definition.Task_Definition.release_number
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
-				results.append(result)
+				#results.append(result)
 
 			if (toDate) is not None:
 				print("toDate")
-				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date <= toDate).all()
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date <= toDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 				task_definition_list = []
 				for task_definition in task_definition_result:
 					task = {}
@@ -84,13 +86,15 @@ class Search:
 					task["date"] = task_definition.Task_Definition.date
 					task["cpu"] = task_definition.Task_Definition.cpu
 					task["memory"] = task_definition.Task_Definition.memory
+					task["release"] = task_definition.Task_Definition.release_number
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
-				results.append(result)
+				#results.append(result)
 
 			if (fromDate) is not None:
 				print("fromDate")
-				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).all()
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
+				#task_definition_result = task_definition_result.filter(Task_Definition.release_number==res.Product_Release.release_number)
 				task_definition_list = []
 				for task_definition in task_definition_result:
 					task = {}
@@ -100,14 +104,19 @@ class Search:
 					task["date"] = task_definition.Task_Definition.date
 					task["cpu"] = task_definition.Task_Definition.cpu
 					task["memory"] = task_definition.Task_Definition.memory
+					task["release"] = task_definition.Task_Definition.release_number
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
-				results.append(result)
-			#results.append(result)
-		print(results)
+				#results.append(result)
+			results.append(result)
+		#pprint.pprint(results)
 		return 	results
 
 search_result = Search()
-print("Searching for client_name")
-search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
-print("done!")
+
+# print("Searching for client_name")
+# search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
+# print("done!")
+
+#search_result.getSearchResult(product_name="iForms", client_name="Aon")
+#print("done!")
