@@ -31,25 +31,7 @@ def search():
 	 		environments.append(cluster.environment)
 		if cluster.region not in regions:
 			regions.append(cluster.region)
-	if (request.args.get("updated")):
-		clients = request.args.getlist('clientsUpdate')
-		products = request.args.getlist('productsUpdate')
-		clusters = request.args.getlist('clustersUpdate')
-		releases = request.args.getlist('releasesUpdate')
-		environments = request.args.getlist('environmentsUpdate')
-		regions = request.args.getlist('regionsUpdate')
 
-	#These two Arrays are for the update Release Tag
-
-	#search(product_name="iForms")
-	#updateRelease(product_name="iForms", release_number="3.3.3.3", cluster_name='asg-ecs-qa2-cluster')
-	#Remove duplicate values such as "dev" and "qa"
-	print(clients)
-	print(products)
-	print(clusters)
-	print(releases)
-	print(environments)
-	print(regions)
 	#Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,
 	productsQ=products, releasesQ=releases, clustersQ=clusters,
@@ -57,8 +39,6 @@ def search():
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
-	print(request.form.keys())
-	if request.method == 'POST':
 		data = request.form.keys()
 		for values in data:
 			stringified = values
@@ -94,7 +74,6 @@ def update():
 		clusters = []
 		components = []
 		for res in result:
-			print(res.Client)
 			clients.append(res.Client)
 			products.append(res.Product)
 			clusters.append(res.Cluster)
@@ -112,13 +91,7 @@ def update():
 			if cluster.region not in regions:
 				regions.append(cluster.region)
 
-
-		print(clients,products,clusters,environments,regions,releases)
-		return redirect(url_for('search',updated=True,clientsUpdate=clients,
-		productsUpdate=products, releasesUpdate=releases, clustersUpdate=clusters,
-		componentsUpdate=components, environmentsUpdate=environments, regionsUpdate=regions))
-
-	return redirect(url_for('search'))
+		return str(clients + products + clusters + environments + regions + releases)
 
 
 #This route is to have a POST request in order to create a new release tag or update.

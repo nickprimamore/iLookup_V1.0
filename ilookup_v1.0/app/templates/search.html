@@ -56,7 +56,11 @@
           Dates: values[7]
         }),
         success: function (response) {
-
+          console.log(response)
+          console.log(typeof(response))
+          response = response.slice(1, response.length-1)
+          parsingUpdate = response.split(',')
+          console.log(parsingUpdate)
         }
       })
     })
