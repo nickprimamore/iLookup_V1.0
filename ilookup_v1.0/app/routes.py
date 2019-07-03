@@ -31,25 +31,7 @@ def search():
 	 		environments.append(cluster.environment)
 		if cluster.region not in regions:
 			regions.append(cluster.region)
-	if (request.args.get("updated")):
-		clients = request.args.getlist('clientsUpdate')
-		products = request.args.getlist('productsUpdate')
-		clusters = request.args.getlist('clustersUpdate')
-		releases = request.args.getlist('releasesUpdate')
-		environments = request.args.getlist('environmentsUpdate')
-		regions = request.args.getlist('regionsUpdate')
 
-	#These two Arrays are for the update Release Tag
-
-	#search(product_name="iForms")
-	#updateRelease(product_name="iForms", release_number="3.3.3.3", cluster_name='asg-ecs-qa2-cluster')
-	#Remove duplicate values such as "dev" and "qa"
-	print(clients)
-	print(products)
-	print(clusters)
-	print(releases)
-	print(environments)
-	print(regions)
 	#Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,
 	productsQ=products, releasesQ=releases, clustersQ=clusters,
@@ -57,68 +39,59 @@ def search():
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
-	print(request.form.keys())
-	if request.method == 'POST':
-		data = request.form.keys()
-		for values in data:
-			stringified = values
-			objectified = json.loads(values)
+	data = request.form.keys()
+	for values in data:
+		stringified = values
+		objectified = json.loads(values)
 
-			client=""
-			product=""
-			release=""
-			region=""
-			cluster=""
-			environment=""
+		client=""
+		product=""
+		release=""
+		region=""
+		cluster=""
+		environment=""
 
-			if len(objectified["Clients"]) > 0:
-				client = objectified["Clients"][0]
-			if len(objectified["Products"]) > 0:
-				product = objectified["Products"][0]
-			if len(objectified["Releases"]) > 0:
-				release = objectified["Releases"][0]
-			if len(objectified["Regions"]) >  0:
-				region = objectified["Regions"][0]
-			if len(objectified["Clusters"]) > 0:
-				cluster = objectified["Clusters"][0]
-			if len(objectified["Environments"]) > 0:
-				environment = objectified["Environments"][0]
+		if len(objectified["Clients"]) > 0:
+			client = objectified["Clients"][0]
+		if len(objectified["Products"]) > 0:
+			product = objectified["Products"][0]
+		if len(objectified["Releases"]) > 0:
+			release = objectified["Releases"][0]
+		if len(objectified["Regions"]) >  0:
+			region = objectified["Regions"][0]
+		if len(objectified["Clusters"]) > 0:
+			cluster = objectified["Clusters"][0]
+		if len(objectified["Environments"]) > 0:
+			environment = objectified["Environments"][0]
 
-		dynamicFilter = DynamicFilter()
-		result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment)
-		clients = []
-		products = []
-		releases = []
-		environment = []
-		regions = []
-		clusters = []
-		components = []
-		for res in result:
-			print(res.Client)
-			clients.append(res.Client)
-			products.append(res.Product)
-			clusters.append(res.Cluster)
-			releases.append(res.Product_Release)
+	dynamicFilter = DynamicFilter()
+	result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment)
+	clients = []
+	products = []
+	releases = []
+	environment = []
+	regions = []
+	clusters = []
+	components = []
+	for res in result:
+		clients.append(res.Client)
+		products.append(res.Product)
+		clusters.append(res.Cluster)
+		releases.append(res.Product_Release)
 
-		clients = list(set(clients))
-		products = list(set(products))
-		clusters = list(set(clusters))
-		releases = list(set(releases))
-		environments = []
-		regions = []
-		for cluster in clusters:
-		 	if cluster.environment not in environments:
-		 		environments.append(cluster.environment)
-			if cluster.region not in regions:
-				regions.append(cluster.region)
+	clients = list(set(clients))
+	products = list(set(products))
+	clusters = list(set(clusters))
+	releases = list(set(releases))
+	environments = []
+	regions = []
+	for cluster in clusters:
+	 	if cluster.environment not in environments:
+	 		environments.append(cluster.environment)
+		if cluster.region not in regions:
+			regions.append(cluster.region)
 
-
-		print(clients,products,clusters,environments,regions,releases)
-		return redirect(url_for('search',updated=True,clientsUpdate=clients,
-		productsUpdate=products, releasesUpdate=releases, clustersUpdate=clusters,
-		componentsUpdate=components, environmentsUpdate=environments, regionsUpdate=regions))
-
-	return redirect(url_for('search'))
+	return str(clients + products + clusters + environments + regions + releases)
 
 
 #This route is to have a POST request in order to create a new release tag or update.
