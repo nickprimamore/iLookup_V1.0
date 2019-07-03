@@ -39,59 +39,59 @@ def search():
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
-		data = request.form.keys()
-		for values in data:
-			stringified = values
-			objectified = json.loads(values)
+	data = request.form.keys()
+	for values in data:
+		stringified = values
+		objectified = json.loads(values)
 
-			client=""
-			product=""
-			release=""
-			region=""
-			cluster=""
-			environment=""
+		client=""
+		product=""
+		release=""
+		region=""
+		cluster=""
+		environment=""
 
-			if len(objectified["Clients"]) > 0:
-				client = objectified["Clients"][0]
-			if len(objectified["Products"]) > 0:
-				product = objectified["Products"][0]
-			if len(objectified["Releases"]) > 0:
-				release = objectified["Releases"][0]
-			if len(objectified["Regions"]) >  0:
-				region = objectified["Regions"][0]
-			if len(objectified["Clusters"]) > 0:
-				cluster = objectified["Clusters"][0]
-			if len(objectified["Environments"]) > 0:
-				environment = objectified["Environments"][0]
+		if len(objectified["Clients"]) > 0:
+			client = objectified["Clients"][0]
+		if len(objectified["Products"]) > 0:
+			product = objectified["Products"][0]
+		if len(objectified["Releases"]) > 0:
+			release = objectified["Releases"][0]
+		if len(objectified["Regions"]) >  0:
+			region = objectified["Regions"][0]
+		if len(objectified["Clusters"]) > 0:
+			cluster = objectified["Clusters"][0]
+		if len(objectified["Environments"]) > 0:
+			environment = objectified["Environments"][0]
 
-		dynamicFilter = DynamicFilter()
-		result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment)
-		clients = []
-		products = []
-		releases = []
-		environment = []
-		regions = []
-		clusters = []
-		components = []
-		for res in result:
-			clients.append(res.Client)
-			products.append(res.Product)
-			clusters.append(res.Cluster)
-			releases.append(res.Product_Release)
+	dynamicFilter = DynamicFilter()
+	result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment)
+	clients = []
+	products = []
+	releases = []
+	environment = []
+	regions = []
+	clusters = []
+	components = []
+	for res in result:
+		clients.append(res.Client)
+		products.append(res.Product)
+		clusters.append(res.Cluster)
+		releases.append(res.Product_Release)
 
-		clients = list(set(clients))
-		products = list(set(products))
-		clusters = list(set(clusters))
-		releases = list(set(releases))
-		environments = []
-		regions = []
-		for cluster in clusters:
-		 	if cluster.environment not in environments:
-		 		environments.append(cluster.environment)
-			if cluster.region not in regions:
-				regions.append(cluster.region)
+	clients = list(set(clients))
+	products = list(set(products))
+	clusters = list(set(clusters))
+	releases = list(set(releases))
+	environments = []
+	regions = []
+	for cluster in clusters:
+	 	if cluster.environment not in environments:
+	 		environments.append(cluster.environment)
+		if cluster.region not in regions:
+			regions.append(cluster.region)
 
-		return str(clients + products + clusters + environments + regions + releases)
+	return str(clients + products + clusters + environments + regions + releases)
 
 
 #This route is to have a POST request in order to create a new release tag or update.
