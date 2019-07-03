@@ -39,8 +39,6 @@
     });
 
     //Listening event to get the information
-    let selectedQueries = []
-
 
     $('.dropdowns').on('change.select2', function(e) {
       let values = getValues()
@@ -58,7 +56,7 @@
           Dates: values[7]
         }),
         success: function (response) {
-          console.log('YIPPEE KAI YAY')
+
         }
       })
     })
@@ -67,6 +65,7 @@
   function getValues() {
     //The format of $('._____').val() gives the results from the select2 Tables
     var clientVal = $('.clients').val()
+    console.log($('.clients').val())
     var productVal = $('.products').val()
     var releaseVal = $('.releases').val()
     var regionVal = $('.regions').val()
@@ -110,6 +109,15 @@
       componentList.push(componentVal[com])
     }
 
+    console.log(clientList)
+    console.log(productList)
+    console.log(releaseList)
+    console.log(regionList)
+    console.log(clusterList)
+    console.log(environmentList)
+    console.log(componentList)
+    console.log(dateList)
+
     return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList]
   }
   // Sends the selected search tags to the backend
@@ -142,7 +150,7 @@
 
 <div class="searchContainer">
   <div class="searchBar col-md-6">
-    <p class="searchLabel clients" > <b> Clients: </b> </p>
+    <p class="searchLabel"> <b> Clients: </b> </p>
     <select class="dropdowns clients"  name="clients[]" multiple="multiple">
       {% for client in clientsQ %}
         <option value="{{ client.client_name }}">{{ client.client_name }}</option>
@@ -255,15 +263,6 @@ let selectedCluster = []
     let releaseNum = document.getElementById('releaseNum').value
     addReleaseTag['releaseNum'] = releaseNum
     $.ajax({
-
-      url: '/values',
-      type: 'POST',
-      data: JSON.stringify({
-        tag: addReleaseTag
-      }),
-      success: function (response) {
-        console.log("Success")
-
       url:'/newTag',
       type:'POST',
       data: JSON.stringify({
@@ -271,7 +270,6 @@ let selectedCluster = []
       }),
       success: function(response) {
         alert(response)
-
       }
     })
   }
