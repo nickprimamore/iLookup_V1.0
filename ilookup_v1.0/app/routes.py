@@ -14,7 +14,7 @@ import pprint
 
 client = boto3.client('ecs')
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/search', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
 def search():
 	clients = Client.query.all()
@@ -32,6 +32,7 @@ def search():
 		if cluster.region not in regions:
 			regions.append(cluster.region)
 	if (request.args.get("updated")):
+		print("Updated")
 		clients = request.args.getlist('clientsUpdate')
 		products = request.args.getlist('productsUpdate')
 		clusters = request.args.getlist('clustersUpdate')
@@ -44,16 +45,16 @@ def search():
 	#search(product_name="iForms")
 	#updateRelease(product_name="iForms", release_number="3.3.3.3", cluster_name='asg-ecs-qa2-cluster')
 	#Remove duplicate values such as "dev" and "qa"
-	print(clients)
-	print(products)
-	print(clusters)
-	print(releases)
-	print(environments)
-	print(regions)
+		print(clients)
+		print(products)
+		print(clusters)
+		print(releases)
+		print(environments)
+		print(regions)
 	#Renders the Result.html file which extends Search.html which extends Layout.html
 	return render_template('search.html', clientsQ=clients,
 	productsQ=products, releasesQ=releases, clustersQ=clusters,
-	componentsQ=components, environmentsQ=environments, regionsQ=regions, productsTag=productsQ, clustersTag=clustersQ)
+	componentsQ=components, environmentsQ=environments, regionsQ=regions)
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
@@ -111,8 +112,6 @@ def update():
 		 		environments.append(cluster.environment)
 			if cluster.region not in regions:
 				regions.append(cluster.region)
-
-
 		print(clients,products,clusters,environments,regions,releases)
 		return redirect(url_for('search',updated=True,clientsUpdate=clients,
 		productsUpdate=products, releasesUpdate=releases, clustersUpdate=clusters,
