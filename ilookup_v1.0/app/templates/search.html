@@ -104,7 +104,7 @@
           let clientOptionsHTML = ''
           for (let i = 0; i < newClients.length; i++) {
             if (values[0].includes(newClients[i])) {
-              clientOptionsHTML += '<option class="clientValues" id="' + newClients[i] + '" value="' + newClients[i] + '">' + newClients[i] + '</option>'
+              clientOptionsHTML += '<option selected="selected" class="clientValues" id="' + newClients[i] + '" value="' + newClients[i] + '">' + newClients[i] + '</option>'
             }
             else {
               clientOptionsHTML += '<option class="clientValues" id="' + newClients[i] + '" value="' + newClients[i] + '">' + newClients[i] + '</option>'

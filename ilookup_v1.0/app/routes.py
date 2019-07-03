@@ -112,7 +112,7 @@ def createTag():
 					if tag['key'] == 'Release':
 						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':'Release', 'value': objectified['tagQuery']['releaseNum']}])
-				updateRelease(objectifed['tagQuery']["product"], objectified['tagQuery']['releaseNum'], objectified['tag']['clusters'])
+				updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['releaseNum'], cluster)
 	return 'Succeeded in updating the cluster(s)'
 
 
