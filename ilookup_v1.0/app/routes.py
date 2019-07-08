@@ -14,28 +14,66 @@ import pprint
 
 client = boto3.client('ecs')
 
+def convertUnicodeToArray(unicodeArray):
+	newArray = []
+	counter = 0
+	for x in range(len(unicodeArray)):
+		utf8string = unicodeArray[x].encode("utf-8")
+		newArray.append(utf8string)
+
+	return newArray
+
+
 @app.route('/', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
+def load():
+	return render_template('search.html')
+
+@app.route('/search', methods=['GET'])
 def search():
 	clients = Client.query.all()
 	products = Product.query.all()
 	releases = Product_Release.query.all()
 	clusters = Cluster.query.all()
 	components = Component.query.all()
-	productsQ = Product.query.all()
-	clustersQ = Cluster.query.all()
-	environments = []
-	regions = []
-	for cluster in clusters:
-	 	if cluster.environment not in environments:
-	 		environments.append(cluster.environment)
-		if cluster.region not in regions:
-			regions.append(cluster.region)
 
-	#Renders the Result.html file which extends Search.html which extends Layout.html
-	return render_template('search.html', clientsQ=clients,
-	productsQ=products, releasesQ=releases, clustersQ=clusters,
-	componentsQ=components, environmentsQ=environments, regionsQ=regions, productsTag=productsQ, clustersTag=clustersQ)
+	clientsQ = []
+	productsQ = []
+	releasesQ = []
+	clustersQ = []
+	componentsQ = []
+	environmentsQ = []
+	regionsQ = []
+	productsTagQ = []
+	clustersTagQ = []
+
+	for client in clients:
+		clientsQ.append(client.client_name)
+	for product in products:
+		productsQ.append(product.product_name)
+		productsTagQ.append(product.product_name)
+	for release in releases:
+		releasesQ.append(release.release_number)
+	for cluster in clusters:
+		clustersQ.append(cluster.cluster_name)
+		clustersTagQ.append(cluster.cluster_name)
+		if cluster.environment not in environmentsQ:
+	 		environmentsQ.append(cluster.environment)
+		if cluster.region not in regionsQ:
+			regionsQ.append(cluster.region)
+	for component in components:
+		componentsQ.append(component.component_name)
+
+	clientsQ = convertUnicodeToArray(clientsQ)
+	productsQ = convertUnicodeToArray(productsQ)
+	releasesQ = convertUnicodeToArray(releasesQ)
+	clustersQ = convertUnicodeToArray(clustersQ)
+	clustersTagQ = convertUnicodeToArray(clustersTagQ)
+	environmentsQ = convertUnicodeToArray(environmentsQ)
+	regionsQ = convertUnicodeToArray(regionsQ)
+	componentsQ = convertUnicodeToArray(componentsQ)
+	productsTagQ = convertUnicodeToArray(productsTagQ)
+	return jsonify(clientsQ=clientsQ, productsQ=productsQ, releasesQ=releasesQ, clustersQ=clustersQ, environmentsQ=environmentsQ, regionsQ=regionsQ, componentsQ=componentsQ, productsTagQ=productsTagQ, clustersTagQ=clustersTagQ)
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
@@ -69,29 +107,27 @@ def update():
 	clients = []
 	products = []
 	releases = []
-	environment = []
+	environments = []
 	regions = []
 	clusters = []
 	components = []
+
 	for res in result:
-		clients.append(res.Client)
-		products.append(res.Product)
-		clusters.append(res.Cluster)
-		releases.append(res.Product_Release)
+		clients.append(res.Client.client_name)
+		products.append(res.Product.product_name)
+		clusters.append(res.Cluster.cluster_name)
+		releases.append(res.Product_Release.release_number)
+		environments.append(res.Cluster.environment)
+		regions.append(res.Cluster.region)
 
-	clients = list(set(clients))
-	products = list(set(products))
-	clusters = list(set(clusters))
-	releases = list(set(releases))
-	environments = []
-	regions = []
-	for cluster in clusters:
-	 	if cluster.environment not in environments:
-	 		environments.append(cluster.environment)
-		if cluster.region not in regions:
-			regions.append(cluster.region)
+	clients = convertUnicodeToArray(list(set(clients)))
+	products = convertUnicodeToArray(list(set(products)))
+	clusters = convertUnicodeToArray(list(set(clusters)))
+	releases = convertUnicodeToArray(list(set(releases)))
+	environments = convertUnicodeToArray(list(set(environments)))
+	regions = convertUnicodeToArray(list(set(regions)))
 
-	return str(clients + products + clusters + environments + regions + releases)
+	return jsonify(clientsUp=clients, productsUp=products, clustersUp=clusters, environmentsUp=environments, regionsUp=regions, releasesUp=releases)
 
 
 #This route is to have a POST request in order to create a new release tag or update.
