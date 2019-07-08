@@ -5,11 +5,22 @@ import json
 import pprint
 import re
 
-client = boto3.client("ecs")
+
+# client = boto3.client("ecs")
 
 class AWSData:
-	def mainFunction(self):
-		client = boto3.client("ecs")
+	def newMainFunction(self):
+		nvirginia = "us-east-1"  
+		london = "eu-west-2"
+		print("Running London Region")
+		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		self.mainFunction(london)
+		print("Running N. Virginia Region")
+		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		self.mainFunction(nvirginia)
+
+	def mainFunction(self,region_name):
+		client = boto3.client("ecs", region_name=region_name)
 		clusters = client.list_clusters()
 		clusters = clusters["clusterArns"]
 
@@ -18,14 +29,19 @@ class AWSData:
 			region = cluster_split[3]
 			if region=="us-east-1":
 				region = "N. Virginia"
+			else:
+				region = "London"
 
 			mysplit= cluster.split("/")
 
 			cluster_name=mysplit[1]
-			tags = self.fetchClusterTags(cluster,cluster_name)
+			tags = self.fetchClusterTags(cluster,cluster_name,region_name)
 			print(cluster_name)
 			pprint.pprint(tags)
 			client_names = []
+			client_name = "unknown"
+			product_name = "unknown"
+			product_release_number = "unknown"
 			for key in tags:
 				if ("Client") in key:
 					client_name = tags[key]
@@ -40,15 +56,31 @@ class AWSData:
 					product_release_number = tags[key]
 				if ("Environment") in key:
 					environment = tags[key]
-			product_release_id = self.populateProductRelease(product_name,product_release_number)
-			self.populateClusters(cluster, cluster_name,environment,region,product_release_number)
-			#clients = Client.query.all()
-			for client in client_names:
-				client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
-				#print(client_id)
-				self.populateCPRC(cluster_name,product_release_id, client_id[0])
+			
+			if (product_name!="" and product_release_number!="" ):
+				product_release_id = self.populateProductRelease(product_name,product_release_number)
+			else:
+				product_release_id = self.populateProductRelease("unknown","unknown")
+			
+			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name)
+				#clients = Client.query.all()
+			
+			if (product_name!="" and product_release_number!="" ):
+				for client in client_names:
+					client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
+							#print(client_id)
+					self.populateCPRC(cluster_name,product_release_id, client_id[0])
+			else:
+				if len(client_names) > 0:
+					for client in client_names:
+						client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
+								#print(client_id)
+						self.populateCPRC(cluster_name,product_release_id, client_id[0])
+				else:
+					client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
+					self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
-	def populateClusters(self, cluster,cluster_name,environment,region,product_release_number):
+	def populateClusters(self, cluster,cluster_name,environment,region,product_release_number,region_name):
 		
 		exists_cluster = db.session.query(Cluster.cluster_name).filter_by(cluster_name=cluster_name).scalar() is not None
 		if exists_cluster:
@@ -62,11 +94,11 @@ class AWSData:
 
 				##get the cluster id by querying database
 		cluster_id = db.session.query(Cluster.cluster_id).filter_by(cluster_name=cluster_name).first()
-		self.populateComponent(cluster_id, cluster,product_release_number)
+		self.populateComponent(cluster_id, cluster,product_release_number, region_name)
 
 
-	def populateComponent(self, cluster_id, cluster, release_number):
-
+	def populateComponent(self, cluster_id, cluster, release_number, region_name):
+		client = boto3.client("ecs", region_name=region_name)
 		##fetch the services from AWS
 		services = client.list_services(cluster = cluster)
 		services = services["serviceArns"]
@@ -87,10 +119,11 @@ class AWSData:
 
 			##get the component_id of the corresponding component
 			component_id = db.session.query(Component.component_id).filter_by(component_name=service_name).first()
-			self.populateTaskDefinition(component_id, cluster, service, release_number)
+			self.populateTaskDefinition(component_id, cluster, service, release_number, region_name)
 
 
-	def populateTaskDefinition(self, component_id,cluster, service, release_number):
+	def populateTaskDefinition(self, component_id,cluster, service, release_number, region_name):
+		client = boto3.client("ecs", region_name=region_name)
 		tasks = client.list_tasks(cluster = cluster, serviceName = service)
 		tasks = tasks["taskArns"]
 		size = len(tasks)
@@ -133,7 +166,8 @@ class AWSData:
 
 				#print("================================")
 
-	def fetchClusterTags(self,clusterArn, cluster_name):
+	def fetchClusterTags(self,clusterArn, cluster_name,region_name):
+		client = boto3.client("ecs", region_name=region_name)
 		res = client.list_tags_for_resource(resourceArn = clusterArn)
 		tagsDict =  {}
 		tagsDict["cluster_name"] = cluster_name
@@ -216,7 +250,7 @@ class AWSData:
 
 data = AWSData()
 
-data.mainFunction()
+data.newMainFunction()
 
 db.session.commit()
 

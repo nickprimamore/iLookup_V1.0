@@ -3,7 +3,7 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component_Type, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-from awsdata import AWSData
+# from awsdata import AWSData
 from db_search import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
@@ -85,6 +85,7 @@ def update():
 			if len(objectified["Environments"]) > 0:
 				environment = objectified["Environments"][0]
 
+
 		dynamicFilter = DynamicFilter()
 		result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment)
 		clients = []
@@ -148,16 +149,64 @@ def createTag():
 def result():
 	results = []
 	data = request.form.keys()
+	product = None
+	client= None
+	region = None
+	release =None
+	environment = None
+	cluster = None
+	toDate = None
+	fromDate = None
 	for values in data:
 		objectified = json.loads(values)
 		clients = objectified['Clients']
 		products = objectified['Products']
-		for client in clients:
-			client_result = search(client_name=client)
-			results = results + (client_result)
-		for product in products:
-			product_result = search(product_name=product)
-			results = results + (product_result)
+		pprint.pprint(products)
+		releases = objectified['Releases']
+		pprint.pprint(releases)
+		regions = objectified['Regions']
+		pprint.pprint(regions)
+		clusters = objectified['Clusters']
+		pprint.pprint(clusters)
+		environments = objectified['Environments']
+		pprint.pprint(environments)
+		components = objectified['Components']
+		pprint.pprint(components)
+		dates = objectified['Dates']
+		pprint.pprint(dates)
+		toDate = None
+		if len(clients) > 0:
+			client = clients[0]
+		if len(products) > 0:
+			product = products[0]
+		if len(releases) > 0:
+			release = releases[0]
+		if len(regions) > 0:
+			region = regions[0]
+		if len(clusters) > 0:
+			cluster = clusters[0]
+		if len(environments) > 0:
+			environment = environments[0]
+		if len(components) > 0:
+			component = components[0]
+		if len(dates) > 0:
+			toDate = dates[1]
+			fromDate = dates[0]
+			if toDate == "":
+				toDate = None
+			if fromDate == "":
+				fromDate = None
+		result  = search(product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
+		results = results + (result)
+		pprint.pprint(results)
+		# for client in clients:
+		# 	client_result = search(client_name=client)
+		# 	pprint.pprint(client_result)
+		# 	results = results + (client_result)
+		# for product in products:
+		# 	product_result = search(product_name=product)
+		# 	pprint.pprint(product_result)
+		# 	results = results + (product_result)
 	return render_template('result.html', results=results)
 
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
