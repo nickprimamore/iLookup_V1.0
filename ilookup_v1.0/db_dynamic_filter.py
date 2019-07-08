@@ -33,23 +33,5 @@ class DynamicFilter:
 			if environment:
 				search_result = search_result.filter(Cluster.environment==environment)
 
-			# for res in search_result:
-			# 		clients.append(res.Client.client_name)
-			# 		products.append(res.Product.product_name)
-			# 		environments.append(res.Cluster.environment)
-			# 		clients.append(res.Client.client_name)
-			# 		releases.append(res.Product_Release.release_number)
-			# 		clusters.append(res.Cluster.cluster_name)
-
-			# result = {}
-			# result["search_result"] = search_result
-			# result["products"] = products
-			# result["clients"] = clients
-			# result["regions"] = regions
-			# result["environments"] = environments
-			# result["clusters"] = clusters
-			# result["releases"] = releases
-
-			# pprint.pprint(result)
 			return search_result
 

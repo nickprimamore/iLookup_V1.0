@@ -148,7 +148,7 @@ def createTag():
 					if tag['key'] == 'Release':
 						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':'Release', 'value': objectified['tagQuery']['releaseNum']}])
-				updateRelease(objectifed['tagQuery']["product"], objectified['tagQuery']['releaseNum'], objectified['tag']['clusters'])
+				updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['releaseNum'], cluster)
 	return 'Succeeded in updating the cluster(s)'
 
 
@@ -158,16 +158,64 @@ def createTag():
 def result():
 	results = []
 	data = request.form.keys()
+	product = None
+	client= None
+	region = None
+	release = None
+	environment = None
+	cluster = None
+	toDate = None
+	fromDate = None
 	for values in data:
 		objectified = json.loads(values)
 		clients = objectified['Clients']
 		products = objectified['Products']
-		for client in clients:
-			client_result = search(client_name=client)
-			results = results + (client_result)
-		for product in products:
-			product_result = search(product_name=product)
-			results = results + (product_result)
+		pprint.pprint(products)
+		releases = objectified['Releases']
+		pprint.pprint(releases)
+		regions = objectified['Regions']
+		pprint.pprint(regions)
+		clusters = objectified['Clusters']
+		pprint.pprint(clusters)
+		environments = objectified['Environments']
+		pprint.pprint(environments)
+		components = objectified['Components']
+		pprint.pprint(components)
+		dates = objectified['Dates']
+		pprint.pprint(dates)
+		toDate = None
+		if len(clients) > 0:
+			client = clients[0]
+		if len(products) > 0:
+			product = products[0]
+		if len(releases) > 0:
+			release = releases[0]
+		if len(regions) > 0:
+			region = regions[0]
+		if len(clusters) > 0:
+			cluster = clusters[0]
+		if len(environments) > 0:
+			environment = environments[0]
+		if len(components) > 0:
+			component = components[0]
+		if len(dates) > 0:
+			toDate = dates[1]
+			fromDate = dates[0]
+			if toDate == "":
+				toDate = None
+			if fromDate == "":
+				fromDate = None
+		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
+		results = results + (result)
+		pprint.pprint(results)
+		# for client in clients:
+		# 	client_result = search(client_name=client)
+		# 	pprint.pprint(client_result)
+		# 	results = results + (client_result)
+		# for product in products:
+		# 	product_result = search(product_name=product)
+		# 	pprint.pprint(product_result)
+		# 	results = results + (product_result)
 	return render_template('result.html', results=results)
 
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
