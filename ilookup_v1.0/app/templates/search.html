@@ -39,8 +39,6 @@
     });
 
     //Listening event to get the information
-    let selectedQueries = []
-
 
     $('.dropdowns').on('change.select2', function(e) {
       let values = getValues()
@@ -58,7 +56,135 @@
           Dates: values[7]
         }),
         success: function (response) {
-          console.log('YIPPEE KAI YAY')
+          response = response.slice(1, response.length-1)
+          parsingUpdate = response.split(',')
+          let newClients = []
+          let newProducts = []
+          let newReleases = []
+          let newRegions = []
+          let newClusters = []
+          let newEnvironments = []
+
+          for (let i = 0; i < parsingUpdate.length; i++) {
+            let info = parsingUpdate[i]
+            if(info[0] == ' '){
+                if (info[1] == 'u') {
+                  let envOrReg = info.slice(3, info.length-1)
+                  if (envOrReg == 'N. Virginia') {
+                    newRegions.push(envOrReg)
+                  }
+                  else {
+                    newEnvironments.push(envOrReg)
+                  }
+                }
+                else {
+                  let others = info.slice(2, info.length-1)
+                  let detailedInfo = others.split(' ')
+                  if (detailedInfo[0] == 'Client') {
+                    newClients.push(detailedInfo[1])
+                  }
+                  else if (detailedInfo[0] == 'Product'){
+                    newProducts.push(detailedInfo[1])
+                  }
+                  else if (detailedInfo[0] == 'Product_Release') {
+                    newReleases.push(detailedInfo[1])
+                  }
+                  else if (detailedInfo[0] == 'Cluster') {
+                    newClusters.push(detailedInfo[1])
+                  }
+                }
+            }
+            else {
+                  let client = info.slice(8, info.length-1)
+                  newClients.push(client)
+            }
+          }
+
+          $('.clientValues').remove()
+          let clientOptionsHTML = ''
+          for (let i = 0; i < newClients.length; i++) {
+            if (values[0].includes(newClients[i])) {
+              clientOptionsHTML += '<option selected="selected" class="clientValues" id="' + newClients[i] + '" value="' + newClients[i] + '">' + newClients[i] + '</option>'
+            }
+            else {
+              clientOptionsHTML += '<option class="clientValues" id="' + newClients[i] + '" value="' + newClients[i] + '">' + newClients[i] + '</option>'
+            }
+          }
+          $('.clients').append(clientOptionsHTML)
+
+          // for (let i = 0; i < values[0].length; i++) {
+          //     $('.clients').val(values[0][i])
+          // }
+
+          $('.productValues').remove()
+          let productOptionsHTML = ''
+          for (let i = 0; i < newProducts.length; i++) {
+            if (values[1].includes(newProducts[i])) {
+              productOptionsHTML += '<option selected="selected" class="productValues" id="' + newProducts[i] + '" value="' + newProducts[i] + '">' + newProducts[i] + '</option>'
+            }
+            else {
+              productOptionsHTML += '<option class="productValues" id="' + newProducts[i] + '" value="' + newProducts[i] + '">' + newProducts[i] + '</option>'
+            }
+          }
+          $('.products').append(productOptionsHTML)
+
+          $('.releaseValues').remove()
+          let releaseOptionsHTML = ''
+          for (let i = 0; i < newReleases.length; i++) {
+            if (values[2].includes(newReleases[i])) {
+              releaseOptionsHTML += '<option selected="selected" class="releaseValues" id="' + newReleases[i] + '" value="' + newReleases[i] + '">' + newReleases[i] + '</option>'
+            }
+            else {
+              releaseOptionsHTML += '<option class="releaseValues" id="' + newReleases[i] + '" value="' + newReleases[i] + '">' + newReleases[i] + '</option>'
+            }
+          }
+          $('.releases').append(releaseOptionsHTML)
+
+          $('.regionValues').remove()
+          let regionOptionsHTML = ''
+          for (let i = 0; i < newRegions.length; i++) {
+            if (values[3].includes(newRegions[i])) {
+              regionOptionsHTML += '<option selected="selected" class="regionValues" id="' + newRegions[i] + '" value="' + newRegions[i] + '">' + newRegions[i] + '</option>'
+            }
+            else {
+              regionOptionsHTML += '<option class="regionValues" id="' + newRegions[i] + '" value="' + newRegions[i] + '">' + newRegions[i] + '</option>'
+            }
+
+          }
+          $('.regions').append(regionOptionsHTML)
+
+          $('.clusterValues').remove()
+          let clusterOptionsHTML = ''
+          for (let i = 0; i < newClusters.length; i++) {
+            if (values[4].includes(newClusters[i])) {
+              clusterOptionsHTML += '<option selected="selected" class="clusterValues" id="' + newClusters[i] + '" value="' + newClusters[i] + '">' + newClusters[i] + '</option>'
+            }
+            else {
+              clusterOptionsHTML += '<option class="clusterValues" id="' + newClusters[i] + '" value="' + newClusters[i] + '">' + newClusters[i] + '</option>'
+            }
+
+          }
+          $('.clusters').append(clusterOptionsHTML)
+
+          $('.environmentValues').remove()
+          let environmentOptionsHTML = ''
+          for (let i = 0; i < newEnvironments.length; i++) {
+            if (values[5].includes(newEnvironments[i])) {
+              environmentOptionsHTML += '<option selected="selected" class="environmentValues" id="' + newEnvironments[i] + '" value="' + newEnvironments[i] + '">' + newEnvironments[i] + '</option>'
+            }
+            else {
+              environmentOptionsHTML += '<option class="environmentValues" id="' + newEnvironments[i] + '" value="' + newEnvironments[i] + '">' + newEnvironments[i] + '</option>'
+            }
+          }
+          $('.environments').append(environmentOptionsHTML)
+
+
+          console.log(newClients)
+          console.log(newProducts)
+          console.log(newReleases)
+          console.log(newRegions)
+          console.log(newClusters)
+          console.log(newEnvironments)
         }
       })
     })
@@ -67,6 +193,7 @@
   function getValues() {
     //The format of $('._____').val() gives the results from the select2 Tables
     var clientVal = $('.clients').val()
+    console.log($('.clients').val())
     var productVal = $('.products').val()
     var releaseVal = $('.releases').val()
     var regionVal = $('.regions').val()
@@ -110,6 +237,15 @@
       componentList.push(componentVal[com])
     }
 
+    console.log(clientList)
+    console.log(productList)
+    console.log(releaseList)
+    console.log(regionList)
+    console.log(clusterList)
+    console.log(environmentList)
+    console.log(componentList)
+    console.log(dateList)
+
     return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList]
   }
   // Sends the selected search tags to the backend
@@ -142,55 +278,55 @@
 
 <div class="searchContainer">
   <div class="searchBar col-md-6">
-    <p class="searchLabel clients" > <b> Clients: </b> </p>
+    <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
     <select class="dropdowns clients"  name="clients[]" multiple="multiple">
       {% for client in clientsQ %}
-        <option value="{{ client.client_name }}">{{ client.client_name }}</option>
+        <option class="clientValues" id="{{ client.client_name }} value="{{ client.client_name }}">{{ client.client_name }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Products: </b> </p>
+    <p class="searchLabel productSelect"> <b> Products: </b> </p>
     <select class="dropdowns products"  name="products[]" multiple="multiple">
       {% for product in productsQ %}
-        <option value="{{ product.product_name }}">{{ product.product_name }}</option>
+        <option class="productValues" id="{{ product.product_name }}" value="{{ product.product_name }}">{{ product.product_name }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Releases: </b> </p>
+    <p class="searchLabel releaseSelect"> <b> Releases: </b> </p>
     <select class="dropdowns releases"  name="releases[]" multiple="multiple">
       {% for release in releasesQ %}
-        <option value="{{ release.release_number }}">{{ release.release_number }}</option>
+        <option class="releaseValues" id="{{ release.release_number }} value="{{ release.release_number }}">{{ release.release_number }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Regions: </b> </p>
+    <p class="searchLabel regionSelect"> <b> Regions: </b> </p>
     <select class="dropdowns regions"  name="regions[]" multiple="multiple">
       {% for region in regionsQ %}
-        <option value="{{ region }}">{{ region }}</option>
+        <option class="regionValues" id="{{ region }}" value="{{ region }}">{{ region }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Clusters: </b> </p>
+    <p class="searchLabel clusterSelect"> <b> Clusters: </b> </p>
     <select class="dropdowns clusters"  name="clusters[]" multiple="multiple">
       {% for cluster in clustersQ %}
-        <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
+        <option class="clusterValues" id="{{ cluster.cluster_name }} value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Environments: </b> </p>
+    <p class="searchLabel environmentSelect"> <b> Environments: </b> </p>
     <select class="dropdowns environments"  name="environments[]" multiple="multiple">
       {% for environment in environmentsQ %}
-        <option value="{{ environment }}">{{ environment }}</option>
+        <option class="environmentValues" id="{{ environment }}" value="{{ environment }}">{{ environment }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="searchBar col-md-6">
-    <p class="searchLabel"> <b> Components: </b> </p>
+    <p class="searchLabel componentSelect"> <b> Components: </b> </p>
     <select class="dropdowns components"  name="components[]" multiple="multiple">
       {% for component in componentsQ %}
         <option value="{{ component.component_name }}">{{ component.component_name }}</option>
@@ -255,15 +391,6 @@ let selectedCluster = []
     let releaseNum = document.getElementById('releaseNum').value
     addReleaseTag['releaseNum'] = releaseNum
     $.ajax({
-
-      url: '/values',
-      type: 'POST',
-      data: JSON.stringify({
-        tag: addReleaseTag
-      }),
-      success: function (response) {
-        console.log("Success")
-
       url:'/newTag',
       type:'POST',
       data: JSON.stringify({
@@ -271,12 +398,9 @@ let selectedCluster = []
       }),
       success: function(response) {
         alert(response)
-
       }
     })
   }
-
-
 
   </script>
   <!-- Modal for adding a release tag -->

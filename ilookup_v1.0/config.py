@@ -8,4 +8,6 @@ class Config(object):
 
 	SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Sj93299347!@127.0.0.1:3306/awsdata"
 
+
+
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
