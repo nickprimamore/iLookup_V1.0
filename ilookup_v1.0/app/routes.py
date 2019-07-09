@@ -113,9 +113,27 @@ def createTag():
 						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':'Release', 'value': objectified['tagQuery']['releaseNum']}])
 				updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['releaseNum'], cluster)
-	return 'Succeeded in updating the cluster(s)'
+	return 'Successfully updated the cluster(s)'
 
-
+#Retrieves the tags for a given AWS cluster
+@app.route('/getTags', methods=['GET', 'POST'])
+def getTags():
+	data = request.form.keys()
+	clusterName = ''
+	for values in data:
+		objectified = json.loads(values)
+		clusterName = objectified['clusterName']
+	clusters = client.list_clusters()
+	clusterArns = clusters["clusterArns"]
+	for cluster in clusterArns:
+		cluster_split = cluster.split("/")
+		if(clusterName == cluster_split[1]):
+			currentTags = client.list_tags_for_resource(resourceArn=cluster)
+			tags = currentTags["tags"]
+			if(tags == []):
+				return 'No tags for the selected cluster'
+			return jsonify(tags)
+	return 'tags'
 
 #This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])

@@ -361,6 +361,10 @@ let selectedCluster = []
       theme: "classic"
     });
 
+    $('.regionsTag').select2({
+      theme: "classic"
+    });
+
     $('.clustersTag').select2({
       theme: "classic"
     });
@@ -369,9 +373,41 @@ let selectedCluster = []
       let data = e.params.data
       addReleaseTag['product'] = data.text
     })
+    $('.regionsTag').on('select2:select', function(e) {
+      let data = e.params.data
+      addReleaseTag['region'] = data.text
+    })
     $('.clustersTag').on('select2:select', function(e) {
       let data = e.params.data
       selectedCluster.push(data.text)
+      $.ajax({
+        url:'/getTags',
+        type:'POST',
+        data: JSON.stringify({
+          clusterName: data.text
+        }),
+        success: function(response) {
+          //alert((JSON.stringify(response)))
+          let tags = JSON.stringify(response)
+          // let parsedTags = ''
+          // for(var index = 0; index < tags.length; index++){
+          //   if(tags[index] == ':'){
+          //     for(var temp = index+2; temp < 99999; temp++){
+          //       if(tags[temp] == '"'){
+          //         parsedTags.concat(':')
+          //         break
+          //       }
+          //       else{
+          //         parsedTags.concat(tags[temp])
+          //       }
+          //     }
+          //   }
+          // }
+          // console.log(parsedTags)
+          let tagsHTML = '<h6 class=' + data.text +'>' + tags + '</h6>'
+          $('.tags').append(tagsHTML)
+        }
+      })
     })
 
     $('.clustersTag').on('select2:unselect', function(e) {
@@ -382,6 +418,7 @@ let selectedCluster = []
           selectedCluster.splice(i, 1)
         }
       }
+      $('.' + data.text).remove()
     })
   });
 
@@ -397,18 +434,19 @@ let selectedCluster = []
         tagQuery: addReleaseTag
       }),
       success: function(response) {
-        alert(response)
+        //alert(response)
       }
     })
   }
 
+
   </script>
-  <!-- Modal for adding a release tag -->
+  <!-- modal for adding/updating an AWS cluster tag -->
   <div class="modal fade no-reload" id="addTagModal" tabindex="-1" role="dialog" aria-labelledby="addTagLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addTagLabel">Add/Update a Release Tag:</h5>
+          <h5 class="modal-title" id="addTagLabel">Add/Update an AWS Cluster Tag:</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -419,7 +457,7 @@ let selectedCluster = []
                 <label class="modalLabel" for="selectProduct">Product:</label>
                 <br>
                 <select class="productsTag" id="selectProduct" placeholder="Select product" style="width:100%">
-                  <option value="" disabled selected>Select product</option>
+                  <option value="" disabled selected>Select a product</option>
                   {% for product in productsTag %}
                     <option value="{{ product.product_name }}">{{ product.product_name }}</option>
                   {% endfor %}
@@ -427,11 +465,16 @@ let selectedCluster = []
               </div>
           </form>
           <form>
-            <div class="form-group">
-              <label class="modalLabel" for="releaseNum">Release Number:</label>
-              <input type="email" class="form-control" id="releaseNum" aria-describedby="releaseFormat" placeholder="Enter release">
-              <small id="releaseFormat" class="form-text text-muted">Example format: 1.1.1.1</small>
-            </div>
+              <div class="form-group">
+                <label class="modalLabel" for="selectRegion">Region:</label>
+                <br>
+                <select class="regionsTag" id="selectRegion" placeholder="Select region" style="width:100%">
+                  <option value="" disabled selected>Select a region</option>
+                  {% for region in regionsQ %}
+                    <option value="{{ region }}">{{ region }}</option>
+                  {% endfor %}
+                </select>
+              </div>
           </form>
           <form>
             <div class="searchBar col-md-6">
@@ -441,6 +484,16 @@ let selectedCluster = []
                   <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
                   {% endfor %}
                 </select>
+            </div>
+          </form>
+          <div class="tags">
+
+          </div>
+          <form>
+            <div class="form-group">
+              <label class="modalLabel" for="releaseNum">Release Number:</label>
+              <input type="email" class="form-control" id="releaseNum" aria-describedby="releaseFormat" placeholder="Enter release">
+              <small id="releaseFormat" class="form-text text-muted">Example format: 1.1.1.1</small>
             </div>
           </form>
         </div>
@@ -455,7 +508,7 @@ let selectedCluster = []
   <script>
     $('#addTagModal').on('hidden.bs.modal', function (e) {
         $(this)
-          .find("input, select")
+          .find("input, select2")
           .val('')
           .end()
           $('#addClustersSelect2').val(null).trigger('change');
