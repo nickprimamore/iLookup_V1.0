@@ -41,18 +41,6 @@
       url: '/search',
       type: 'GET',
       success: function (response) {
-        clientStr = ""
-        productStr = ""
-        releasesStr = ""
-        clustersStr = ""
-        clustersTagStr = ""
-        environmentsStr = ""
-        regionsStr = ""
-        componentsStr = ""
-        productsTagStr = ""
-        clientObj = {
-          "results": []
-        }
         //These following forloops go through the passed in arrays of each possible search query, and creates an Option tag to add to the individual select2s
         for (let client in response.clientsQ) {
           let newOption = new Option(response.clientsQ[client], response.clientsQ[client], false, false);
@@ -61,7 +49,10 @@
         for (let product in response.productsQ) {
           let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
           $('#products').append(newOption);
-          $('#selectProduct').append(newOption)
+        }
+        for (let product in response.productsQ) {
+          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
+          $('#selectProduct').append(newOption);
         }
         for (let release in response.releasesQ) {
           let newOption = new Option(response.releasesQ[release], response.releasesQ[release], false, false);
@@ -70,11 +61,17 @@
         for (let cluster in response.clustersQ) {
           let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
           $('#clusters').append(newOption);
+        }
+        for (let cluster in response.clustersQ) {
+          let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
           $('#addClustersSelect2').append(newOption);
         }
         for (let region in response.regionsQ) {
           let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
           $('#regions').append(newOption);
+        }
+        for (let region in response.regionsQ) {
+          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
           $('#selectRegion').append(newOption);
         }
         for (let environment in response.environmentsQ) {
@@ -116,12 +113,6 @@
           Dates: values[7]
         }),
         success: function (response) {
-          clientStr = ""
-          productStr = ""
-          releasesStr = ""
-          clustersStr = ""
-          environmentsStr = ""
-          regionsStr = ""
           //These forloops delete all the options for each dropdown
           $('#clients option').each(function() {
             $("#clients option[value=" + $(this).val() +"]").remove()
@@ -473,6 +464,7 @@ let selectedCluster = []
     $('.regionsTag').on('select2:select', function(e) {
       let data = e.params.data
       addReleaseTag['region'] = data.text
+
     })
 
 
@@ -520,6 +512,93 @@ let selectedCluster = []
       }
       $('.' + data.text).remove()
     })
+
+    function getTagValues() {
+      var productTag = $('.productsTag').val()
+      var regionTag = $('.regionsTag').val()
+      var clusterTag = $('.clustersTag').val()
+
+      var productList = []
+      var regionList = []
+      var clusterList = []
+
+      for (var pro in productTag) {
+        productList.push(productTag[pro])
+      }
+      for (var reg in regionTag) {
+        regionList.push(regionTag[reg])
+      }
+      for (var cli in clusterTag) {
+        clusterList.push(clusterTag[cli])
+      }
+
+      return [productList, regionList, clusterList]
+    }
+
+    $('.updateTags').on('change.select2', function(e) {
+      values = getTagValues()
+      $.ajax({
+        url:'/update',
+        type: 'POST',
+        data: JSON.stringify({
+          Clients: [],
+          Products: values[0],
+          Releases: [],
+          Regions: values[1],
+          Clusters: [],
+          Environments: [],
+          Dates: []
+        }),
+        success: function (response) {
+          $('#selectProduct option').each(function() {
+            $("#selectProduct option[value=" + $(this).val() + "]").remove()
+            $("#selectProduct").select2('close')
+          })
+
+          $('#selectRegion option').each(function() {
+            $("#selectRegion option[value=" + "'" + $(this).val() + "'" + "]").remove()
+            $("#selectRegion").select2('close')
+          })
+
+          $('#addClustersSelect2 option').each(function() {
+            $("#addClustersSelect2 option[value=" + $(this).val() + "]").remove()
+            $("#addClustersSelect2").select2('close')
+          })
+
+          for (let product in response.productsUp) {
+            let newOption
+            if (values[0].includes(response.productsUp[product])) {
+              newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
+            } else {
+              newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
+            }
+            $('#selectProduct').append(newOption);
+          }
+
+          for (let region in response.regionsUp) {
+            let newOption
+            if (values[1].includes(response.regionsUp[region])) {
+              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
+            } else {
+              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
+            }
+            $('#selectRegion').append(newOption);
+          }
+
+          for (let cluster in response.clustersUp) {
+            let newOption
+            if (values[2].includes(response.clustersUp[cluster])) {
+              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
+            } else {
+              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, false);
+            }
+            $('#addClustersSelect2').append(newOption);
+          }
+
+
+        }
+      })
+    })
   });
 
   //This function creates an object for the newTag and sends it to the backend for it to be created on AWS servers
@@ -564,8 +643,8 @@ let selectedCluster = []
               <div class="form-group">
                 <label class="modalLabel" for="selectProduct">Product:</label>
                 <br>
-                <select class="productsTag" id="selectProduct" placeholder="Select product" style="width:100%" name="selectProduct">
-                  <option value="" disabled selected>Select a product</option>
+                <select class="productsTag updateTags" id="selectProduct" placeholder="Select product" style="width:100%" name="selectProduct" multiple="multiple">
+
                 </select>
               </div>
           </form>
@@ -573,8 +652,8 @@ let selectedCluster = []
               <div class="form-group">
                 <label class="modalLabel" for="selectRegion">Region:</label>
                 <br>
-                <select class="regionsTag" id="selectRegion" placeholder="Select region" style="width:100%" name="selectRegion">
-                  <option value="" disabled selected>Select a region</option>
+                <select class="regionsTag updateTags" id="selectRegion" placeholder="Select region" style="width:100%" name="selectRegion" multiple="multiple">
+
                 </select>
               </div>
           </form>
