@@ -3,6 +3,7 @@
 {% block content %}
 <html>
 <body style="background-color:#F8F8F8">
+<!-- All the styles go in this style tag for any components within this page. Only use instyling if it is a one time use -->
 <style>
   h1 {
     font-family:"Trebuchet MS";
@@ -10,15 +11,15 @@
   div.searchContainer {
     display:flex;
     flex-wrap:wrap;
-    margin: 0% 20%;
     z-index:5;
     overflow:auto;
+    height: 100%;
   }
   div.searchBar {
     text-align:left;
   }
   p.searchLabel {
-    color:#2867b1;
+    color:white;
     margin-bottom:5px;
     font-family: "Trebuchet MS";
   }
@@ -31,15 +32,71 @@
     font-family: "Trebuchet MS"
   }
 </style>
+<!-- This is the first script which deals with the front end AJAX call to implement dynamic searching with /search and /update -->
 <script>
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
+  //This /search is called the moment you load the page, creating the various options
   $(document).ready(function() {
+    $.ajax({
+      url: '/search',
+      type: 'GET',
+      success: function (response) {
+        clientStr = ""
+        productStr = ""
+        releasesStr = ""
+        clustersStr = ""
+        clustersTagStr = ""
+        environmentsStr = ""
+        regionsStr = ""
+        componentsStr = ""
+        productsTagStr = ""
+        clientObj = {
+          "results": []
+        }
+        //These following forloops go through the passed in arrays of each possible search query, and creates an Option tag to add to the individual select2s
+        for (let client in response.clientsQ) {
+          let newOption = new Option(response.clientsQ[client], response.clientsQ[client], false, false);
+          $('#clients').append(newOption);
+        }
+        for (let product in response.productsQ) {
+          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
+          $('#products').append(newOption);
+        }
+        for (let release in response.releasesQ) {
+          let newOption = new Option(response.releasesQ[release], response.releasesQ[release], false, false);
+          $('#releases').append(newOption);
+        }
+        for (let cluster in response.clustersQ) {
+          let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
+          $('#clusters').append(newOption);
+        }
+        for (let region in response.regionsQ) {
+          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
+          $('#regions').append(newOption);
+        }
+        for (let environment in response.environmentsQ) {
+          let newOption = new Option(response.environmentsQ[environment], response.environmentsQ[environment], false, false);
+          $('#environments').append(newOption);
+        }
+        for (let component in response.componentsQ) {
+          let newOption = new Option(response.componentsQ[component], response.componentsQ[component], false, false);
+          $('#components').append(newOption);
+        }
+      }
+    })
+
+    //initializing the select2, .dropdowns is the classname for the main search page
     $('.dropdowns').select2({
       theme: "classic"
     });
 
-    //Listening event to get the information
+    //Closes dropdowns after you unselect to allow for better UI experience
+    $('.dropdowns').on('select2:unselect', function(e) {
+      $('.dropdowns').select2('close')
+    })
 
+    //When something is selected or unselected, this function takes care of the dynamic aspect of it, as it get's the values chosen, sends it back as AJAX data
+    //Once the backend generates the potential search queries, in the response, we delete the current options and reissue the new options
     $('.dropdowns').on('change.select2', function(e) {
       let values = getValues()
       $.ajax({
@@ -56,144 +113,101 @@
           Dates: values[7]
         }),
         success: function (response) {
-          response = response.slice(1, response.length-1)
-          parsingUpdate = response.split(',')
-          let newClients = []
-          let newProducts = []
-          let newReleases = []
-          let newRegions = []
-          let newClusters = []
-          let newEnvironments = []
-
-          for (let i = 0; i < parsingUpdate.length; i++) {
-            let info = parsingUpdate[i]
-            if(info[0] == ' '){
-                if (info[1] == 'u') {
-                  let envOrReg = info.slice(3, info.length-1)
-                  if (envOrReg == 'N. Virginia') {
-                    newRegions.push(envOrReg)
-                  }
-                  else {
-                    newEnvironments.push(envOrReg)
-                  }
-                }
-                else {
-                  let others = info.slice(2, info.length-1)
-                  let detailedInfo = others.split(' ')
-                  if (detailedInfo[0] == 'Client') {
-                    newClients.push(detailedInfo[1])
-                  }
-                  else if (detailedInfo[0] == 'Product'){
-                    newProducts.push(detailedInfo[1])
-                  }
-                  else if (detailedInfo[0] == 'Product_Release') {
-                    newReleases.push(detailedInfo[1])
-                  }
-                  else if (detailedInfo[0] == 'Cluster') {
-                    newClusters.push(detailedInfo[1])
-                  }
-                }
+          clientStr = ""
+          productStr = ""
+          releasesStr = ""
+          clustersStr = ""
+          environmentsStr = ""
+          regionsStr = ""
+          //These forloops delete all the options for each dropdown
+          $('#clients option').each(function() {
+            $("#clients option[value=" + $(this).val() +"]").remove()
+            $('.clients').select2('close')
+          })
+          $('#products option').each(function() {
+            $("#products option[value=" + $(this).val() +"]").remove()
+            $('.products').select2('close')
+          })
+          $('#releases option').each(function() {
+            $("#releases option[value=" + "'" + $(this).val() + "'" +"]").remove()
+            $('.releases').select2('close')
+          })
+          $('#regions option').each(function() {
+            $("#regions option[value=" + "'" + $(this).val() + "'" +"]").remove()
+            $('.regions').select2('close')
+          })
+          $('#clusters option').each(function() {
+            $("#clusters option[value=" + $(this).val() +"]").remove()
+            $('.clusters').select2('close')
+          })
+          $('#environments option').each(function() {
+            $("#environments option[value=" + $(this).val() +"]").remove()
+            $('.components').select2('close')
+          })
+          //This for loop recreates the Options based on the selected values, allowing for a dynamic search filter
+          for (let client in response.clientsUp) {
+            let newOption
+            if (values[0].includes(response.clientsUp[client])) {
+              newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, true);
+            } else {
+              newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, false);
             }
-            else {
-                  let client = info.slice(8, info.length-1)
-                  newClients.push(client)
-            }
+            $('#clients').append(newOption);
           }
-
-          $('.clientValues').remove()
-          let clientOptionsHTML = ''
-          for (let i = 0; i < newClients.length; i++) {
-            if (values[0].includes(newClients[i])) {
-              clientOptionsHTML += '<option selected="selected" class="clientValues" id="' + newClients[i] + '" value="' + newClients[i] + '">' + newClients[i] + '</option>'
+          for (let product in response.productsUp) {
+            let newOption
+            if (values[1].includes(response.productsUp[product])) {
+              newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
+            } else {
+              newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
             }
-            else {
-              clientOptionsHTML += '<option class="clientValues" id="' + newClients[i] + '" value="' + newClients[i] + '">' + newClients[i] + '</option>'
-            }
+            $('#products').append(newOption);
           }
-          $('.clients').append(clientOptionsHTML)
-
-          // for (let i = 0; i < values[0].length; i++) {
-          //     $('.clients').val(values[0][i])
-          // }
-
-          $('.productValues').remove()
-          let productOptionsHTML = ''
-          for (let i = 0; i < newProducts.length; i++) {
-            if (values[1].includes(newProducts[i])) {
-              productOptionsHTML += '<option selected="selected" class="productValues" id="' + newProducts[i] + '" value="' + newProducts[i] + '">' + newProducts[i] + '</option>'
+          for (let releases in response.releasesUp) {
+            let newOption
+            if (values[2].includes(response.releasesUp[releases])) {
+              newOption = new Option(response.releasesUp[releases], response.releasesUp[releases], true, true);
+            } else {
+              newOption = new Option(response.releasesUp[releases], response.releasesUp[releases], true, false);
             }
-            else {
-              productOptionsHTML += '<option class="productValues" id="' + newProducts[i] + '" value="' + newProducts[i] + '">' + newProducts[i] + '</option>'
-            }
+            $('#releases').append(newOption);
           }
-          $('.products').append(productOptionsHTML)
-
-          $('.releaseValues').remove()
-          let releaseOptionsHTML = ''
-          for (let i = 0; i < newReleases.length; i++) {
-            if (values[2].includes(newReleases[i])) {
-              releaseOptionsHTML += '<option selected="selected" class="releaseValues" id="' + newReleases[i] + '" value="' + newReleases[i] + '">' + newReleases[i] + '</option>'
+          for (let cluster in response.clustersUp) {
+            let newOption
+            if (values[4].includes(response.clustersUp[cluster])) {
+              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
+            } else {
+              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, false);
             }
-            else {
-              releaseOptionsHTML += '<option class="releaseValues" id="' + newReleases[i] + '" value="' + newReleases[i] + '">' + newReleases[i] + '</option>'
-            }
+            $('#clusters').append(newOption);
           }
-          $('.releases').append(releaseOptionsHTML)
-
-          $('.regionValues').remove()
-          let regionOptionsHTML = ''
-          for (let i = 0; i < newRegions.length; i++) {
-            if (values[3].includes(newRegions[i])) {
-              regionOptionsHTML += '<option selected="selected" class="regionValues" id="' + newRegions[i] + '" value="' + newRegions[i] + '">' + newRegions[i] + '</option>'
+          for (let env in response.environmentsUp) {
+            let newOption
+            if (values[5].includes(response.environmentsUp[env])) {
+              newOption = new Option(response.environmentsUp[env], response.environmentsUp[env], true, true);
+            } else {
+              newOption = new Option(response.environmentsUp[env], response.environmentsUp[env], true, false);
             }
-            else {
-              regionOptionsHTML += '<option class="regionValues" id="' + newRegions[i] + '" value="' + newRegions[i] + '">' + newRegions[i] + '</option>'
-            }
-
+            $('#environments').append(newOption);
           }
-          $('.regions').append(regionOptionsHTML)
-
-          $('.clusterValues').remove()
-          let clusterOptionsHTML = ''
-          for (let i = 0; i < newClusters.length; i++) {
-            if (values[4].includes(newClusters[i])) {
-              clusterOptionsHTML += '<option selected="selected" class="clusterValues" id="' + newClusters[i] + '" value="' + newClusters[i] + '">' + newClusters[i] + '</option>'
+          for (let region in response.regionsUp) {
+            let newOption
+            if (values[3].includes(response.regionsUp[region])) {
+              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
+            } else {
+              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
             }
-            else {
-              clusterOptionsHTML += '<option class="clusterValues" id="' + newClusters[i] + '" value="' + newClusters[i] + '">' + newClusters[i] + '</option>'
-            }
-
+            $('#regions').append(newOption);
           }
-          $('.clusters').append(clusterOptionsHTML)
-
-          $('.environmentValues').remove()
-          let environmentOptionsHTML = ''
-          for (let i = 0; i < newEnvironments.length; i++) {
-            if (values[5].includes(newEnvironments[i])) {
-              environmentOptionsHTML += '<option selected="selected" class="environmentValues" id="' + newEnvironments[i] + '" value="' + newEnvironments[i] + '">' + newEnvironments[i] + '</option>'
-            }
-            else {
-              environmentOptionsHTML += '<option class="environmentValues" id="' + newEnvironments[i] + '" value="' + newEnvironments[i] + '">' + newEnvironments[i] + '</option>'
-            }
-          }
-          $('.environments').append(environmentOptionsHTML)
-
-
-          console.log(newClients)
-          console.log(newProducts)
-          console.log(newReleases)
-          console.log(newRegions)
-          console.log(newClusters)
-          console.log(newEnvironments)
         }
       })
     })
   });
 
+//This function is used in multiple calls, and it just grabs all selected values throughout the search page.
   function getValues() {
     //The format of $('._____').val() gives the results from the select2 Tables
     var clientVal = $('.clients').val()
-    console.log($('.clients').val())
     var productVal = $('.products').val()
     var releaseVal = $('.releases').val()
     var regionVal = $('.regions').val()
@@ -236,22 +250,11 @@
     for (var com in componentVal) {
       componentList.push(componentVal[com])
     }
-
-    console.log(clientList)
-    console.log(productList)
-    console.log(releaseList)
-    console.log(regionList)
-    console.log(clusterList)
-    console.log(environmentList)
-    console.log(componentList)
-    console.log(dateList)
-
     return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList]
   }
-  // Sends the selected search tags to the backend
+  // This function sends the selected search tags to the backend and renders it onto the result-tag html
   function sendData() {
     let values = getValues()
-
     //send back and Ajax Request with the following information.
       $.ajax({
       url: '/result',
@@ -272,90 +275,179 @@
     })
   }
 
+  //This function clears all Search Bars and the trigger('change') makes for a reupdate on options
+  function clearSearchBars() {
+    $('.dropdowns').val(null).trigger('change');
+    $('.date').val('')
+  }
+
 </script>
 
-<h1 style="padding-top:70px; padding-bottom:11px; text-align: center"> Search <span style="color:#FF9900">aws</span> Resources</h1>
+<style>
+  #body-row {
+      margin-left:0;
+      margin-right:0;
+      width:100%;
+  }
+  #sidebar-container {
+      min-height: 90vh;
+      background-color: #8e8e93;
+      padding: 0;
+      overflow:auto;
+      height: 91vh;
+  }
 
-<div class="searchContainer">
-  <div class="searchBar col-md-6">
-    <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
-    <select class="dropdowns clients"  name="clients[]" multiple="multiple">
-      {% for client in clientsQ %}
-        <option class="clientValues" id="{{ client.client_name }} value="{{ client.client_name }}">{{ client.client_name }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel productSelect"> <b> Products: </b> </p>
-    <select class="dropdowns products"  name="products[]" multiple="multiple">
-      {% for product in productsQ %}
-        <option class="productValues" id="{{ product.product_name }}" value="{{ product.product_name }}">{{ product.product_name }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel releaseSelect"> <b> Releases: </b> </p>
-    <select class="dropdowns releases"  name="releases[]" multiple="multiple">
-      {% for release in releasesQ %}
-        <option class="releaseValues" id="{{ release.release_number }} value="{{ release.release_number }}">{{ release.release_number }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel regionSelect"> <b> Regions: </b> </p>
-    <select class="dropdowns regions"  name="regions[]" multiple="multiple">
-      {% for region in regionsQ %}
-        <option class="regionValues" id="{{ region }}" value="{{ region }}">{{ region }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel clusterSelect"> <b> Clusters: </b> </p>
-    <select class="dropdowns clusters"  name="clusters[]" multiple="multiple">
-      {% for cluster in clustersQ %}
-        <option class="clusterValues" id="{{ cluster.cluster_name }} value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel environmentSelect"> <b> Environments: </b> </p>
-    <select class="dropdowns environments"  name="environments[]" multiple="multiple">
-      {% for environment in environmentsQ %}
-        <option class="environmentValues" id="{{ environment }}" value="{{ environment }}">{{ environment }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel componentSelect"> <b> Components: </b> </p>
-    <select class="dropdowns components"  name="components[]" multiple="multiple">
-      {% for component in componentsQ %}
-        <option value="{{ component.component_name }}">{{ component.component_name }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="form-group col-md-3" style = padding-right:1%>
-      <!--<label for="date (from)">Date (From)</label>!-->
-      <p class="searchLabel"> <b> Date (From): </b> </p>
-      <input type="date" class="form-control" id="dateFrom"name="Date (From)">
-  </div>
-  <div class="form-group col-md-3">
-      <!--<label for="date (until)">Date (Until)</label>-->
-      <p class="searchLabel"> <b> Date (Until): </b> </p>
-      <input type="date" class="form-control" id="dateUntil" name="Date (Until)">
-  </div>
-  <div class="searchBar col-md-12">
-    <button type="button" class="btn btn-outline-primary" style="width:100%; font-weight:bold" onClick="sendData()">Search</button>
-  </div>
+  /* Sidebar sizes when expanded and expanded */
+  .sidebar-expanded {
+      width: 300px;
+  }
 
-  <br>
-  <br>
-  <br>
+  .sidebar-collapsed {
+      width: 60px;
+  }
 
+  /* Menu item*/
+  #sidebar-container .list-group a {
+      height: 50px;
+      color: white;
+  }
+
+  /* Submenu item*/
+  #sidebar-container .list-group .sidebar-submenu a {
+      height: 45px;
+      padding-left: 30px;
+  }
+
+  /* Separators */
+  .sidebar-separator-title {
+      background-color: #333;
+      height: 35px;
+  }
+  .sidebar-separator {
+      background-color: #333;
+      height: 25px;
+  }
+
+  /* Closed submenu icon */
+  #sidebar-container .list-group .list-group-item[aria-expanded="false"] .submenu-icon::after {
+    content: " \f0d7";
+    font-family: FontAwesome;
+    text-align: right;
+    padding-left: 5px;
+  }
+  /* Opened submenu icon */
+  #sidebar-container .list-group .list-group-item[aria-expanded="true"] .submenu-icon::after {
+    content: " \f0da";
+    font-family: FontAwesome;
+    text-align: right;
+    padding-left: 5px;
+  }
+
+  #result-tag {
+    height: 91vh;
+    overflow: auto;
+  }
+
+  .col {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  .modal-backdrop {
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+  }
+
+</style>
+
+<!-- This is the html for the actual search bars -->
+<!-- Bootstrap row -->
+<div class="row" id="body-row">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="sidebar-expanded d-none d-md-block"><!-- d-* hiddens the Sidebar in smaller devices. Its itens can be kept on the Navbar 'Menu' -->
+            <!-- /END Separator -->
+            <div class="searchContainer">
+              <br />
+              <br />
+              <br />
+              <div class="searchBar col-md-12">
+                <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
+                <select class="dropdowns clients" id="clients" name="clients[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel productSelect"> <b> Products: </b> </p>
+                <select class="dropdowns products" id="products" name="products[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel releaseSelect"> <b> Releases: </b> </p>
+                <select class="dropdowns releases" id="releases" name="releases[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel regionSelect"> <b> Regions: </b> </p>
+                <select class="dropdowns regions" id="regions" name="regions[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel clusterSelect"> <b> Clusters: </b> </p>
+                <select class="dropdowns clusters" id="clusters" name="clusters[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel environmentSelect"> <b> Environments: </b> </p>
+                <select class="dropdowns environments" id="environments"  name="environments[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel componentSelect"> <b> Components: </b> </p>
+                <select class="dropdowns components" id="components"  name="components[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                  <p class="searchLabel"> <b> Date (From): </b> </p>
+                  <input type="date" class="form-control date" id="dateFrom"name="Date (From)">
+              </div>
+              <div class="form-group col-md-6">
+                  <p class="searchLabel"> <b> Date (Until): </b> </p>
+                  <input type="date" class="form-control date" id="dateUntil" name="Date (Until)">
+              </div>
+
+              <div class="searchBar col-md-6">
+                <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold" onClick="sendData()">Search</button>
+              </div>
+
+              <div class ="clearButton col-md-6">
+                <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold" onClick="clearSearchBars()">Clear All</button>
+              </div>
+            </div>
+    </div><!-- sidebar-container END -->
+
+    <!-- MAIN -->
+    <div class="col" >
+      <!-- This is where the results are being rendered -->
+      <div id="result-tag">      </div>
+
+    </div><!-- Main Col END -->
+
+</div><!-- body-row END -->
+
+<!-- This script tag is to deal with the creation and receiving information of cluster tags -->
 <script>
 
 let addReleaseTag = {}
 let selectedCluster = []
 
+  //We seperately initialize these select2's because we want them to work independently from the rest of the search page as they require their own unique way of dynamicFiltering
   $(document).ready(function() {
     $('.productsTag').select2({
       theme: "classic"
@@ -369,14 +461,20 @@ let selectedCluster = []
       theme: "classic"
     });
 
+    //Since it's a single pill choice, we only need a select function so it finds the clusters for the products chosen.
     $('.productsTag').on('select2:select', function(e) {
       let data = e.params.data
       addReleaseTag['product'] = data.text
     })
+<<<<<<< HEAD
     $('.regionsTag').on('select2:select', function(e) {
       let data = e.params.data
       addReleaseTag['region'] = data.text
     })
+=======
+
+    //The following 2 event handlers keep track of the several clusters chosen
+>>>>>>> f21da74d1ce17f48b63c52cb64791b4354d012b8
     $('.clustersTag').on('select2:select', function(e) {
       let data = e.params.data
       selectedCluster.push(data.text)
@@ -422,7 +520,7 @@ let selectedCluster = []
     })
   });
 
-
+  //This function creates an object for the newTag and sends it to the backend for it to be created on AWS servers
   function newTag() {
     addReleaseTag['clusters'] = selectedCluster
     let releaseNum = document.getElementById('releaseNum').value
@@ -439,6 +537,14 @@ let selectedCluster = []
     })
   }
 
+  //This script clears out the add tag modal after submission/closing 
+  $('#addTagModal').on('hidden.bs.modal', function (e) {
+      $(this)
+        .find("input, select")
+        .val('')
+        .end()
+        $('#addClustersSelect2').val(null).trigger('change');
+  });
 
   </script>
   <!-- modal for adding/updating an AWS cluster tag -->
@@ -504,24 +610,10 @@ let selectedCluster = []
     </div>
   </div>
 
-  <!-- This script clears out the add tag modal after submission/closing -->
-  <script>
-    $('#addTagModal').on('hidden.bs.modal', function (e) {
-        $(this)
-          .find("input, select2")
-          .val('')
-          .end()
-          $('#addClustersSelect2').val(null).trigger('change');
-    });
-  </script>
 
-<!-- This is where the table is being rendered in! -->
-</div>
-<div id="result-tag"></div>
 </body>
 </html>
 
-{% block resultContent%}
-{% endblock %}
+
 
 {% endblock %}

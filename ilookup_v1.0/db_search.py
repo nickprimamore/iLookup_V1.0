@@ -1,6 +1,8 @@
 from app import db
 from app.models import Product, Client, Cluster, Task_Definition, Product_Release, CPRC, Component
 import pprint, json
+from sqlalchemy import and_, func
+
 class Search:
 
 	def getSearchResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
@@ -21,6 +23,7 @@ class Search:
 
 		if cluster_name:
 			search_result = search_result.filter(Cluster.cluster_name==cluster_name)
+			pprint.pprint(search_result)
 
 		if region:
 			search_result = search_result.filter(Cluster.region==region)
@@ -55,11 +58,15 @@ class Search:
 					task["release"] = task_definition.Task_Definition.release_number
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
+				if len(task_definition_list)>0:
+					results.append(result)
 				#results.append(result)
 
-			if (toDate and fromDate) is not None:
+			elif (toDate and fromDate) is not None:
 				print("toDate and fromDate")
-				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.date <= toDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
+				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.release_number==res.Product_Release.release_number).filter(and_(func.date(Task_Definition.date)>=fromDate), func.date(Task_Definition.date)<=toDate).all()
+
+				#task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.date <= toDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 				task_definition_list = []
 				for task_definition in task_definition_result:
 					task = {}
@@ -72,9 +79,11 @@ class Search:
 					task["release"] = task_definition.Task_Definition.release_number
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
+				if len(task_definition_list)>0:
+					results.append(result)
 				#results.append(result)
 
-			if (toDate) is not None:
+			elif (toDate) is not None:
 				print("toDate")
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date <= toDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 				task_definition_list = []
@@ -89,9 +98,12 @@ class Search:
 					task["release"] = task_definition.Task_Definition.release_number
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
+				if len(task_definition_list)>0:
+					results.append(result)
 				#results.append(result)
 
-			if (fromDate) is not None:
+			#if (fromDate) is not None:
+			else:
 				print("fromDate")
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 				#task_definition_result = task_definition_result.filter(Task_Definition.release_number==res.Product_Release.release_number)
@@ -107,8 +119,10 @@ class Search:
 					task["release"] = task_definition.Task_Definition.release_number
 					task_definition_list.append(task)
 				result["task_definitions"] = task_definition_list
-				#results.append(result)
-			results.append(result)
+				if len(task_definition_list)>0:
+					results.append(result)
+			# 	#results.append(result)
+			#results.append(result)
 		#pprint.pprint(results)
 		return 	results
 
