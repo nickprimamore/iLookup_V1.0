@@ -13,13 +13,7 @@
 	<body>
 		<style>
 			.navbar-brand{
-				position: fixed;
-				width: 50%;
-	 			left: 23.85%;
-				right: 25%;
-				top: 0;
-	 			text-align: center;
-				font-size: 30px;
+
 	 			margin: auto;
 				font-family: "Trebuchet MS";
 			}
@@ -35,47 +29,84 @@
 	 			background:inherit;
 			}
 
+			a {
+				color: white;
+			}
+
+			a:not([href]):not([tabindex]) {
+		    color:white;
+		    text-decoration: none;
+			}
+
+			a:hover, a:active, a:focus {
+  			color: #CCCC00;
+			}
+
+
+			.vl {
+			  border-left: 1px solid white;
+			  height: 30px;
+				margin: 0 10px;
+			}
+			/* width */
+			::-webkit-scrollbar {
+			  width: 5px;
+			}
+
+			/* Track */
+			::-webkit-scrollbar-track {
+			  background: #f1f1f1;
+			}
+
+			/* Handle */
+			::-webkit-scrollbar-thumb {
+			  background: #888;
+			}
+
+			/* Handle on hover */
+			::-webkit-scrollbar-thumb:hover {
+			  background: #555;
+			}
+
+
 		</style>
 		<div class="wrapper">
-		<nav class="navbar navbar-expand-lg navbar-light" id="topNav" role="navigation" style="background-color: #2867b1; color:#2867b1">
-			<div class="navbar-header" >
-		  	<div class="navbar-brand mb-0 h1" align="center" style="color:white">iLookup</div>
-			</div>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-		    <span class="navbar-toggler-icon"></span>
-		  </button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			 	<ul class="navbar-nav navbar-left mr-auto">
-				 	<li class="nav-item active">
-						<button type="button"class="btn btn-warning" style="margin-right: 40px; width: 90%; font-weight:bold" onclick="location.href='/'">
-							Search
-						</button>
-					</li>
-				 	<li class="nav-item">
-						<button type="button" class="btn btn-primary" style="background-color: #ffffff; font-weight:bold; color:#2867b1; width:100%" onclick="location.href='/'">
-					    Administrator Dashboard
-					  </button>
-				 	</li>
-				</ul>
-				<div class="pull-right">
-					<ul class="navbar-nav navbar-right mr-auto">
-					 	<li class="nav-item">
-							<button type="button" class="btn btn-primary" style="background-color: #ffffff; color:#2867b1; font-weight:bold; max-height: 40px; width:100%;" data-toggle="modal" data-target="#addTagModal">
-						    Add/Update Release Tag
-						  </button>
-					 	</li>
+			<nav class="navbar navbar-expand-lg navbar-light" id="topNav" role="navigation" style="background-color: #2867b1; color:#2867b1">
+			  <a class="navbar-brand" style="color:white" href="/"> iLookUp </a>
+			  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+			    <span class="navbar-toggler-icon"></span>
+			  </button>
+			  <div class="collapse navbar-collapse" id="navbarText">
+			    <ul class="navbar-nav ml-auto">
+			      <li class="nav-item">
+							<a href="/">
+						    Administrator Dashboard
+					    </a>
+			      </li>
+						<div class="vl"></div>
+			      <li class="nav-item">
+							<a href="/">
+								Search
+							</a>
+			      </li>
+						<div class="vl"></div>
+			      <li class="nav-item">
+							<a href="/" data-toggle="modal" data-target="#addTagModal">
+								Update Cluster Tags
+							</a>
+			      </li>
+						<div class="vl"></div>
 						<li class="nav-item">
-							<a href="/load"><button type="submit" class="btn btn-warning" style="width:100%; margin-left: 10px; font-weight:bold">Refresh</button></a>
-						</li>
-				 	</ul>
-				</div>
+			        <a href="/load">Refresh</a>
+			      </li>
+			    </ul>
+			  </div>
+			</nav>
 
-		 	</div>
-		</nav>
-	</div>
-	{% block content%}
-	{% endblock %}
+			{% block content%}
+			{% endblock %}
 
+		</div>
 	</body>
 
 </html>

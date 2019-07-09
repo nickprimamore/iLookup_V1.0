@@ -11,15 +11,15 @@
   div.searchContainer {
     display:flex;
     flex-wrap:wrap;
-    margin: 0% 20%;
     z-index:5;
     overflow:auto;
+    height: 100%;
   }
   div.searchBar {
     text-align:left;
   }
   p.searchLabel {
-    color:#2867b1;
+    color:white;
     margin-bottom:5px;
     font-family: "Trebuchet MS";
   }
@@ -278,78 +278,168 @@
   //This function clears all Search Bars and the trigger('change') makes for a reupdate on options
   function clearSearchBars() {
     $('.dropdowns').val(null).trigger('change');
+    $('.date').val('')
   }
 
 </script>
 
+<style>
+  #body-row {
+      margin-left:0;
+      margin-right:0;
+      width:100%;
+  }
+  #sidebar-container {
+      min-height: 90vh;
+      background-color: #8e8e93;
+      padding: 0;
+      overflow:auto;
+      height: 91vh;
+  }
+
+  /* Sidebar sizes when expanded and expanded */
+  .sidebar-expanded {
+      width: 300px;
+  }
+
+  .sidebar-collapsed {
+      width: 60px;
+  }
+
+  /* Menu item*/
+  #sidebar-container .list-group a {
+      height: 50px;
+      color: white;
+  }
+
+  /* Submenu item*/
+  #sidebar-container .list-group .sidebar-submenu a {
+      height: 45px;
+      padding-left: 30px;
+  }
+
+  /* Separators */
+  .sidebar-separator-title {
+      background-color: #333;
+      height: 35px;
+  }
+  .sidebar-separator {
+      background-color: #333;
+      height: 25px;
+  }
+
+  /* Closed submenu icon */
+  #sidebar-container .list-group .list-group-item[aria-expanded="false"] .submenu-icon::after {
+    content: " \f0d7";
+    font-family: FontAwesome;
+    text-align: right;
+    padding-left: 5px;
+  }
+  /* Opened submenu icon */
+  #sidebar-container .list-group .list-group-item[aria-expanded="true"] .submenu-icon::after {
+    content: " \f0da";
+    font-family: FontAwesome;
+    text-align: right;
+    padding-left: 5px;
+  }
+
+  #result-tag {
+    height: 91vh;
+    overflow: auto;
+  }
+
+  .col {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  .modal-backdrop {
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+  }
+
+</style>
+
 <!-- This is the html for the actual search bars -->
-<h1 style="padding-top:70px; padding-bottom:11px; text-align: center"> Search <span style="color:#FF9900">aws</span> Resources</h1>
+<!-- Bootstrap row -->
+<div class="row" id="body-row">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="sidebar-expanded d-none d-md-block"><!-- d-* hiddens the Sidebar in smaller devices. Its itens can be kept on the Navbar 'Menu' -->
+            <!-- /END Separator -->
+            <div class="searchContainer">
+              <br />
+              <br />
+              <br />
+              <div class="searchBar col-md-12">
+                <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
+                <select class="dropdowns clients" id="clients" name="clients[]" multiple="multiple">
 
-<div class="searchContainer">
-  <div class="searchBar col-md-6">
-    <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
-    <select class="dropdowns clients" id="clients" name="clients[]" multiple="multiple">
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel productSelect"> <b> Products: </b> </p>
+                <select class="dropdowns products" id="products" name="products[]" multiple="multiple">
 
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel productSelect"> <b> Products: </b> </p>
-    <select class="dropdowns products" id="products" name="products[]" multiple="multiple">
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel releaseSelect"> <b> Releases: </b> </p>
+                <select class="dropdowns releases" id="releases" name="releases[]" multiple="multiple">
 
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel releaseSelect"> <b> Releases: </b> </p>
-    <select class="dropdowns releases" id="releases" name="releases[]" multiple="multiple">
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel regionSelect"> <b> Regions: </b> </p>
+                <select class="dropdowns regions" id="regions" name="regions[]" multiple="multiple">
 
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel regionSelect"> <b> Regions: </b> </p>
-    <select class="dropdowns regions" id="regions" name="regions[]" multiple="multiple">
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel clusterSelect"> <b> Clusters: </b> </p>
+                <select class="dropdowns clusters" id="clusters" name="clusters[]" multiple="multiple">
 
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel clusterSelect"> <b> Clusters: </b> </p>
-    <select class="dropdowns clusters" id="clusters" name="clusters[]" multiple="multiple">
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel environmentSelect"> <b> Environments: </b> </p>
+                <select class="dropdowns environments" id="environments"  name="environments[]" multiple="multiple">
 
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel environmentSelect"> <b> Environments: </b> </p>
-    <select class="dropdowns environments" id="environments"  name="environments[]" multiple="multiple">
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel componentSelect"> <b> Components: </b> </p>
+                <select class="dropdowns components" id="components"  name="components[]" multiple="multiple">
 
-    </select>
-  </div>
-  <div class="searchBar col-md-6">
-    <p class="searchLabel componentSelect"> <b> Components: </b> </p>
-    <select class="dropdowns components" id="components"  name="components[]" multiple="multiple">
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                  <p class="searchLabel"> <b> Date (From): </b> </p>
+                  <input type="date" class="form-control date" id="dateFrom"name="Date (From)">
+              </div>
+              <div class="form-group col-md-6">
+                  <p class="searchLabel"> <b> Date (Until): </b> </p>
+                  <input type="date" class="form-control date" id="dateUntil" name="Date (Until)">
+              </div>
 
-    </select>
-  </div>
-  <div class="form-group col-md-3" style = padding-right:1%>
-      <!--<label for="date (from)">Date (From)</label>!-->
-      <p class="searchLabel"> <b> Date (From): </b> </p>
-      <input type="date" class="form-control" id="dateFrom"name="Date (From)">
-  </div>
-  <div class="form-group col-md-3">
-      <!--<label for="date (until)">Date (Until)</label>-->
-      <p class="searchLabel"> <b> Date (Until): </b> </p>
-      <input type="date" class="form-control" id="dateUntil" name="Date (Until)">
-  </div>
+              <div class="searchBar col-md-6">
+                <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold" onClick="sendData()">Search</button>
+              </div>
 
-  <div class="searchBar col-md-6">
-    <button type="button" class="btn btn-outline-primary" style="width:100%; font-weight:bold" onClick="sendData()">Search</button>
-  </div>
+              <div class ="clearButton col-md-6">
+                <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold" onClick="clearSearchBars()">Clear All</button>
+              </div>
+            </div>
+    </div><!-- sidebar-container END -->
 
-  <div class ="clearButton col-md-6">
-    <button type="button" class="btn btn-outline-primary" style="width:100%; font-weight:bold" onClick="clearSearchBars()">Clear All</button>
-  </div>
+    <!-- MAIN -->
+    <div class="col" >
+      <!-- This is where the results are being rendered -->
+      <div id="result-tag">      </div>
 
-  <br>
-  <br>
-  <br>
+    </div><!-- Main Col END -->
+
+</div><!-- body-row END -->
 
 <!-- This script tag is to deal with the creation and receiving information of cluster tags -->
 <script>
@@ -466,13 +556,9 @@ let selectedCluster = []
   </div>
 
 
-<!-- This is where the table is being rendered in! -->
-</div>
-<div id="result-tag">      </div>
 </body>
 </html>
 
-{% block resultContent%}
-{% endblock %}
+
 
 {% endblock %}
