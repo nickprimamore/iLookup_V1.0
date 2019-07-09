@@ -26,7 +26,7 @@
   select.dropdowns {
     width: 100%
   }
-  label.modalLabel {
+  .modalLabel {
     color:#2867b1;
     font-weight:bold;
     font-family: "Trebuchet MS"
@@ -61,6 +61,7 @@
         for (let product in response.productsQ) {
           let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
           $('#products').append(newOption);
+          $('#selectProduct').append(newOption)
         }
         for (let release in response.releasesQ) {
           let newOption = new Option(response.releasesQ[release], response.releasesQ[release], false, false);
@@ -69,10 +70,12 @@
         for (let cluster in response.clustersQ) {
           let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
           $('#clusters').append(newOption);
+          $('#addClustersSelect2').append(newOption);
         }
         for (let region in response.regionsQ) {
           let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
           $('#regions').append(newOption);
+          $('#selectRegion').append(newOption);
         }
         for (let environment in response.environmentsQ) {
           let newOption = new Option(response.environmentsQ[environment], response.environmentsQ[environment], false, false);
@@ -466,15 +469,14 @@ let selectedCluster = []
       let data = e.params.data
       addReleaseTag['product'] = data.text
     })
-<<<<<<< HEAD
+
     $('.regionsTag').on('select2:select', function(e) {
       let data = e.params.data
       addReleaseTag['region'] = data.text
     })
-=======
+
 
     //The following 2 event handlers keep track of the several clusters chosen
->>>>>>> f21da74d1ce17f48b63c52cb64791b4354d012b8
     $('.clustersTag').on('select2:select', function(e) {
       let data = e.params.data
       selectedCluster.push(data.text)
@@ -537,7 +539,7 @@ let selectedCluster = []
     })
   }
 
-  //This script clears out the add tag modal after submission/closing 
+  //This script clears out the add tag modal after submission/closing
   $('#addTagModal').on('hidden.bs.modal', function (e) {
       $(this)
         .find("input, select")
@@ -562,11 +564,8 @@ let selectedCluster = []
               <div class="form-group">
                 <label class="modalLabel" for="selectProduct">Product:</label>
                 <br>
-                <select class="productsTag" id="selectProduct" placeholder="Select product" style="width:100%">
+                <select class="productsTag" id="selectProduct" placeholder="Select product" style="width:100%" name="selectProduct">
                   <option value="" disabled selected>Select a product</option>
-                  {% for product in productsTag %}
-                    <option value="{{ product.product_name }}">{{ product.product_name }}</option>
-                  {% endfor %}
                 </select>
               </div>
           </form>
@@ -574,21 +573,15 @@ let selectedCluster = []
               <div class="form-group">
                 <label class="modalLabel" for="selectRegion">Region:</label>
                 <br>
-                <select class="regionsTag" id="selectRegion" placeholder="Select region" style="width:100%">
+                <select class="regionsTag" id="selectRegion" placeholder="Select region" style="width:100%" name="selectRegion">
                   <option value="" disabled selected>Select a region</option>
-                  {% for region in regionsQ %}
-                    <option value="{{ region }}">{{ region }}</option>
-                  {% endfor %}
                 </select>
               </div>
           </form>
           <form>
             <div class="searchBar col-md-6">
-              <p class="searchLabel"> <b> Cluster(s):</b> </p>
+              <p class="modalLabel"> <b> Cluster(s):</b> </p>
                 <select class="clustersTag" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
-                  {% for cluster in clustersTag %}
-                  <option value="{{ cluster.cluster_name }}">{{ cluster.cluster_name }}</option>
-                  {% endfor %}
                 </select>
             </div>
           </form>
