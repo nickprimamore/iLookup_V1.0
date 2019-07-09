@@ -20,9 +20,7 @@ def convertUnicodeToArray(unicodeArray):
 	for x in range(len(unicodeArray)):
 		utf8string = unicodeArray[x].encode("utf-8")
 		newArray.append(utf8string)
-
 	return newArray
-
 
 @app.route('/', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
@@ -151,8 +149,6 @@ def createTag():
 				updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['releaseNum'], cluster)
 	return 'Succeeded in updating the cluster(s)'
 
-
-
 #This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])
 def result():
@@ -170,19 +166,12 @@ def result():
 		objectified = json.loads(values)
 		clients = objectified['Clients']
 		products = objectified['Products']
-		pprint.pprint(products)
 		releases = objectified['Releases']
-		pprint.pprint(releases)
 		regions = objectified['Regions']
-		pprint.pprint(regions)
 		clusters = objectified['Clusters']
-		pprint.pprint(clusters)
 		environments = objectified['Environments']
-		pprint.pprint(environments)
 		components = objectified['Components']
-		pprint.pprint(components)
 		dates = objectified['Dates']
-		pprint.pprint(dates)
 		toDate = None
 		if len(clients) > 0:
 			client = clients[0]
@@ -207,22 +196,11 @@ def result():
 				fromDate = None
 		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
 		results = results + (result)
-		pprint.pprint(results)
-		# for client in clients:
-		# 	client_result = search(client_name=client)
-		# 	pprint.pprint(client_result)
-		# 	results = results + (client_result)
-		# for product in products:
-		# 	product_result = search(product_name=product)
-		# 	pprint.pprint(product_result)
-		# 	results = results + (product_result)
 	return render_template('result.html', results=results)
 
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 	search = Search()
-	print("calling search function.....")
 	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate)
-	#pprint.pprint(search_result)
 	return search_result
 
 # main function that triggers other helper functions to

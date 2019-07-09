@@ -3,6 +3,7 @@
 {% block content %}
 <html>
 <body style="background-color:#F8F8F8">
+<!-- All the styles go in this style tag for any components within this page. Only use instyling if it is a one time use -->
 <style>
   h1 {
     font-family:"Trebuchet MS";
@@ -31,8 +32,10 @@
     font-family: "Trebuchet MS"
   }
 </style>
+<!-- This is the first script which deals with the front end AJAX call to implement dynamic searching with /search and /update -->
 <script>
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
+  //This /search is called the moment you load the page, creating the various options
   $(document).ready(function() {
     $.ajax({
       url: '/search',
@@ -50,8 +53,8 @@
         clientObj = {
           "results": []
         }
+        //These following forloops go through the passed in arrays of each possible search query, and creates an Option tag to add to the individual select2s
         for (let client in response.clientsQ) {
-          console.log(client)
           let newOption = new Option(response.clientsQ[client], response.clientsQ[client], false, false);
           $('#clients').append(newOption);
         }
@@ -82,12 +85,18 @@
       }
     })
 
+    //initializing the select2, .dropdowns is the classname for the main search page
     $('.dropdowns').select2({
       theme: "classic"
     });
 
-    //have another click handler for on unselect in order to clear the list if it is empty.
+    //Closes dropdowns after you unselect to allow for better UI experience
+    $('.dropdowns').on('select2:unselect', function(e) {
+      $('.dropdowns').select2('close')
+    })
 
+    //When something is selected or unselected, this function takes care of the dynamic aspect of it, as it get's the values chosen, sends it back as AJAX data
+    //Once the backend generates the potential search queries, in the response, we delete the current options and reissue the new options
     $('.dropdowns').on('change.select2', function(e) {
       let values = getValues()
       $.ajax({
@@ -104,32 +113,38 @@
           Dates: values[7]
         }),
         success: function (response) {
-          console.log(response)
           clientStr = ""
           productStr = ""
           releasesStr = ""
           clustersStr = ""
           environmentsStr = ""
           regionsStr = ""
-          cliOptions = []
+          //These forloops delete all the options for each dropdown
           $('#clients option').each(function() {
             $("#clients option[value=" + $(this).val() +"]").remove()
+            $('.clients').select2('close')
           })
           $('#products option').each(function() {
             $("#products option[value=" + $(this).val() +"]").remove()
+            $('.products').select2('close')
           })
           $('#releases option').each(function() {
             $("#releases option[value=" + "'" + $(this).val() + "'" +"]").remove()
+            $('.releases').select2('close')
           })
           $('#regions option').each(function() {
             $("#regions option[value=" + "'" + $(this).val() + "'" +"]").remove()
+            $('.regions').select2('close')
           })
           $('#clusters option').each(function() {
             $("#clusters option[value=" + $(this).val() +"]").remove()
+            $('.clusters').select2('close')
           })
           $('#environments option').each(function() {
             $("#environments option[value=" + $(this).val() +"]").remove()
+            $('.components').select2('close')
           })
+          //This for loop recreates the Options based on the selected values, allowing for a dynamic search filter
           for (let client in response.clientsUp) {
             let newOption
             if (values[0].includes(response.clientsUp[client])) {
@@ -189,6 +204,7 @@
     })
   });
 
+//This function is used in multiple calls, and it just grabs all selected values throughout the search page.
   function getValues() {
     //The format of $('._____').val() gives the results from the select2 Tables
     var clientVal = $('.clients').val()
@@ -234,13 +250,11 @@
     for (var com in componentVal) {
       componentList.push(componentVal[com])
     }
-
     return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList]
   }
-  // Sends the selected search tags to the backend
+  // This function sends the selected search tags to the backend and renders it onto the result-tag html
   function sendData() {
     let values = getValues()
-
     //send back and Ajax Request with the following information.
       $.ajax({
       url: '/result',
@@ -261,8 +275,14 @@
     })
   }
 
+  //This function clears all Search Bars and the trigger('change') makes for a reupdate on options
+  function clearSearchBars() {
+    $('.dropdowns').val(null).trigger('change');
+  }
+
 </script>
 
+<!-- This is the html for the actual search bars -->
 <h1 style="padding-top:70px; padding-bottom:11px; text-align: center"> Search <span style="color:#FF9900">aws</span> Resources</h1>
 
 <div class="searchContainer">
@@ -319,19 +339,25 @@
       <input type="date" class="form-control" id="dateUntil" name="Date (Until)">
   </div>
 
-  <div class="searchBar col-md-12">
+  <div class="searchBar col-md-6">
     <button type="button" class="btn btn-outline-primary" style="width:100%; font-weight:bold" onClick="sendData()">Search</button>
+  </div>
+
+  <div class ="clearButton col-md-6">
+    <button type="button" class="btn btn-outline-primary" style="width:100%; font-weight:bold" onClick="clearSearchBars()">Clear All</button>
   </div>
 
   <br>
   <br>
   <br>
 
+<!-- This script tag is to deal with the creation and receiving information of cluster tags -->
 <script>
 
 let addReleaseTag = {}
 let selectedCluster = []
 
+  //We seperately initialize these select2's because we want them to work independently from the rest of the search page as they require their own unique way of dynamicFiltering
   $(document).ready(function() {
     $('.productsTag').select2({
       theme: "classic"
@@ -341,10 +367,13 @@ let selectedCluster = []
       theme: "classic"
     });
 
+    //Since it's a single pill choice, we only need a select function so it finds the clusters for the products chosen.
     $('.productsTag').on('select2:select', function(e) {
       let data = e.params.data
       addReleaseTag['product'] = data.text
     })
+
+    //The following 2 event handlers keep track of the several clusters chosen
     $('.clustersTag').on('select2:select', function(e) {
       let data = e.params.data
       selectedCluster.push(data.text)
@@ -361,7 +390,7 @@ let selectedCluster = []
     })
   });
 
-
+  //This function creates an object for the newTag and sends it to the backend for it to be created on AWS servers
   function newTag() {
     addReleaseTag['clusters'] = selectedCluster
     let releaseNum = document.getElementById('releaseNum').value
@@ -378,6 +407,7 @@ let selectedCluster = []
     })
   }
 
+  //This is just to initial the addTag Modal
   $('#addTagModal').on('hidden.bs.modal', function (e) {
       $(this)
         .find("input, select")
@@ -385,8 +415,6 @@ let selectedCluster = []
         .end()
         $('#addClustersSelect2').val(null).trigger('change');
   });
-
-
 
   </script>
   <!-- Modal for adding a release tag -->
@@ -440,7 +468,7 @@ let selectedCluster = []
 
 <!-- This is where the table is being rendered in! -->
 </div>
-<div id="result-tag"></div>
+<div id="result-tag">      </div>
 </body>
 </html>
 
