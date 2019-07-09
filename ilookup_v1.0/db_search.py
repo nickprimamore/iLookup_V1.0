@@ -6,7 +6,7 @@ from sqlalchemy import and_, func
 class Search:
 
 	def getSearchResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
-
+		print("Inside search.py file", toDate)
 		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
 
@@ -23,7 +23,7 @@ class Search:
 
 		if cluster_name:
 			search_result = search_result.filter(Cluster.cluster_name==cluster_name)
-			pprint.pprint(search_result)
+			#pprint.pprint(search_result)
 
 		if region:
 			search_result = search_result.filter(Cluster.region==region)
@@ -62,7 +62,7 @@ class Search:
 					results.append(result)
 				#results.append(result)
 
-			elif (toDate and fromDate) is not None:
+			if (toDate and fromDate) is not None:
 				print("toDate and fromDate")
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.release_number==res.Product_Release.release_number).filter(and_(func.date(Task_Definition.date)>=fromDate), func.date(Task_Definition.date)<=toDate).all()
 
@@ -81,9 +81,9 @@ class Search:
 				result["task_definitions"] = task_definition_list
 				if len(task_definition_list)>0:
 					results.append(result)
-				#results.append(result)
+			# 	#results.append(result)
 
-			elif (toDate) is not None:
+			if toDate:
 				print("toDate")
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date <= toDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 				task_definition_list = []
@@ -102,8 +102,8 @@ class Search:
 					results.append(result)
 				#results.append(result)
 
-			#if (fromDate) is not None:
-			else:
+			if fromDate:
+			#else:
 				print("fromDate")
 				task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.date >= fromDate).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 				#task_definition_result = task_definition_result.filter(Task_Definition.release_number==res.Product_Release.release_number)

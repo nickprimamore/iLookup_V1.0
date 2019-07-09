@@ -154,19 +154,19 @@ def result():
 		objectified = json.loads(values)
 		clients = objectified['Clients']
 		products = objectified['Products']
-		pprint.pprint(products)
+		#pprint.pprint(products)
 		releases = objectified['Releases']
-		pprint.pprint(releases)
+		#pprint.pprint(releases)
 		regions = objectified['Regions']
-		pprint.pprint(regions)
+		#pprint.pprint(regions)
 		clusters = objectified['Clusters']
 		pprint.pprint(clusters)
 		environments = objectified['Environments']
-		pprint.pprint(environments)
+		#pprint.pprint(environments)
 		components = objectified['Components']
-		pprint.pprint(components)
+		#pprint.pprint(components)
 		dates = objectified['Dates']
-		pprint.pprint(dates)
+		#pprint.pprint(dates)
 		toDate = None
 		if len(clients) > 0:
 			client = clients[0]
@@ -189,9 +189,10 @@ def result():
 				toDate = None
 			if fromDate == "":
 				fromDate = None
+				
 		result  = search(product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
 		results = results + (result)
-		pprint.pprint(results)
+		#pprint.pprint(results)
 		# for client in clients:
 		# 	client_result = search(client_name=client)
 		# 	pprint.pprint(client_result)
