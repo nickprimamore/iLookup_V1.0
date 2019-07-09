@@ -3,7 +3,7 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component_Type, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-# from awsdata import AWSData
+from awsdata import AWSData
 from db_search import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
@@ -14,48 +14,67 @@ import pprint
 
 client = boto3.client('ecs')
 
-@app.route('/search', methods=['GET', 'POST'])
+def convertUnicodeToArray(unicodeArray):
+	newArray = []
+	counter = 0
+	for x in range(len(unicodeArray)):
+		utf8string = unicodeArray[x].encode("utf-8")
+		newArray.append(utf8string)
+	return newArray
+
+@app.route('/', methods=['GET', 'POST'])
 #This function gathers all the data from the SQL tables to generate the search filters
+def load():
+	return render_template('search.html')
+
+@app.route('/search', methods=['GET'])
 def search():
 	clients = Client.query.all()
 	products = Product.query.all()
 	releases = Product_Release.query.all()
 	clusters = Cluster.query.all()
 	components = Component.query.all()
-	productsQ = Product.query.all()
-	clustersQ = Cluster.query.all()
-	environments = []
-	regions = []
+
+	clientsQ = []
+	productsQ = []
+	releasesQ = []
+	clustersQ = []
+	componentsQ = []
+	environmentsQ = []
+	regionsQ = []
+	productsTagQ = []
+	clustersTagQ = []
+
+	for client in clients:
+		clientsQ.append(client.client_name)
+	for product in products:
+		productsQ.append(product.product_name)
+		productsTagQ.append(product.product_name)
+	for release in releases:
+		releasesQ.append(release.release_number)
 	for cluster in clusters:
-	 	if cluster.environment not in environments:
-	 		environments.append(cluster.environment)
-		if cluster.region not in regions:
-			regions.append(cluster.region)
-	if (request.args.get("updated")):
-		print("Updated")
-		clients = request.args.getlist('clientsUpdate')
-		products = request.args.getlist('productsUpdate')
-		clusters = request.args.getlist('clustersUpdate')
-		releases = request.args.getlist('releasesUpdate')
-		environments = request.args.getlist('environmentsUpdate')
-		regions = request.args.getlist('regionsUpdate')
+		clustersQ.append(cluster.cluster_name)
+		clustersTagQ.append(cluster.cluster_name)
+		if cluster.environment not in environmentsQ:
+	 		environmentsQ.append(cluster.environment)
+		if cluster.region not in regionsQ:
+			regionsQ.append(cluster.region)
+	for component in components:
+		componentsQ.append(component.component_name)
 
-	#These two Arrays are for the update Release Tag
+	clientsQ = convertUnicodeToArray(clientsQ)
+	productsQ = convertUnicodeToArray(productsQ)
+	releasesQ = convertUnicodeToArray(releasesQ)
+	clustersQ = convertUnicodeToArray(clustersQ)
+	clustersTagQ = convertUnicodeToArray(clustersTagQ)
+	environmentsQ = convertUnicodeToArray(environmentsQ)
+	regionsQ = convertUnicodeToArray(regionsQ)
+	componentsQ = convertUnicodeToArray(componentsQ)
+	productsTagQ = convertUnicodeToArray(productsTagQ)
 
-	#search(product_name="iForms")
-	#updateRelease(product_name="iForms", release_number="3.3.3.3", cluster_name='asg-ecs-qa2-cluster')
-	#Remove duplicate values such as "dev" and "qa"
-		print(clients)
-		print(products)
-		print(clusters)
-		print(releases)
-		print(environments)
-		print(regions)
-
-	#Renders the Result.html file which extends Search.html which extends Layout.html
-	return render_template('search.html', clientsQ=clients,
-	productsQ=products, releasesQ=releases, clustersQ=clusters,
-	componentsQ=components, environmentsQ=environments, regionsQ=regions)
+	# Gets most recent releases
+	recentReleases = mostRecentReleases()
+	return jsonify(clientsQ=clientsQ, productsQ=productsQ, releasesQ=releasesQ, clustersQ=clustersQ, environmentsQ=environmentsQ, regionsQ=regionsQ, componentsQ=componentsQ, productsTagQ=productsTagQ, clustersTagQ=clustersTagQ)
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
@@ -89,29 +108,27 @@ def update():
 	clients = []
 	products = []
 	releases = []
-	environment = []
+	environments = []
 	regions = []
 	clusters = []
 	components = []
+
 	for res in result:
-		clients.append(res.Client)
-		products.append(res.Product)
-		clusters.append(res.Cluster)
-		releases.append(res.Product_Release)
+		clients.append(res.Client.client_name)
+		products.append(res.Product.product_name)
+		clusters.append(res.Cluster.cluster_name)
+		releases.append(res.Product_Release.release_number)
+		environments.append(res.Cluster.environment)
+		regions.append(res.Cluster.region)
 
-	clients = list(set(clients))
-	products = list(set(products))
-	clusters = list(set(clusters))
-	releases = list(set(releases))
-	environments = []
-	regions = []
-	for cluster in clusters:
-	 	if cluster.environment not in environments:
-	 		environments.append(cluster.environment)
-		if cluster.region not in regions:
-			regions.append(cluster.region)
+	clients = convertUnicodeToArray(list(set(clients)))
+	products = convertUnicodeToArray(list(set(products)))
+	clusters = convertUnicodeToArray(list(set(clusters)))
+	releases = convertUnicodeToArray(list(set(releases)))
+	environments = convertUnicodeToArray(list(set(environments)))
+	regions = convertUnicodeToArray(list(set(regions)))
 
-	return str(clients + products + clusters + environments + regions + releases)
+	return jsonify(clientsUp=clients, productsUp=products, clustersUp=clusters, environmentsUp=environments, regionsUp=regions, releasesUp=releases)
 
 
 #This route is to have a POST request in order to create a new release tag or update.
@@ -133,9 +150,27 @@ def createTag():
 						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':'Release', 'value': objectified['tagQuery']['releaseNum']}])
 				updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['releaseNum'], cluster)
-	return 'Succeeded in updating the cluster(s)'
+	return 'Successfully updated the cluster(s)'
 
-
+#Retrieves the tags for a given AWS cluster
+@app.route('/getTags', methods=['GET', 'POST'])
+def getTags():
+	data = request.form.keys()
+	clusterName = ''
+	for values in data:
+		objectified = json.loads(values)
+		clusterName = objectified['clusterName']
+	clusters = client.list_clusters()
+	clusterArns = clusters["clusterArns"]
+	for cluster in clusterArns:
+		cluster_split = cluster.split("/")
+		if(clusterName == cluster_split[1]):
+			currentTags = client.list_tags_for_resource(resourceArn=cluster)
+			tags = currentTags["tags"]
+			if(tags == []):
+				return 'No tags for the selected cluster'
+			return jsonify(tags)
+	return 'tags'
 
 #This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])
@@ -145,7 +180,7 @@ def result():
 	product = None
 	client= None
 	region = None
-	release =None
+	release = None
 	environment = None
 	cluster = None
 	toDate = None
@@ -154,19 +189,13 @@ def result():
 		objectified = json.loads(values)
 		clients = objectified['Clients']
 		products = objectified['Products']
-		#pprint.pprint(products)
 		releases = objectified['Releases']
-		#pprint.pprint(releases)
 		regions = objectified['Regions']
-		#pprint.pprint(regions)
 		clusters = objectified['Clusters']
-		pprint.pprint(clusters)
 		environments = objectified['Environments']
-		#pprint.pprint(environments)
 		components = objectified['Components']
-		#pprint.pprint(components)
 		dates = objectified['Dates']
-		#pprint.pprint(dates)
+
 		toDate = None
 		if len(clients) > 0:
 			client = clients[0]
@@ -189,25 +218,13 @@ def result():
 				toDate = None
 			if fromDate == "":
 				fromDate = None
-				
-		result  = search(product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
+		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
 		results = results + (result)
-		#pprint.pprint(results)
-		# for client in clients:
-		# 	client_result = search(client_name=client)
-		# 	pprint.pprint(client_result)
-		# 	results = results + (client_result)
-		# for product in products:
-		# 	product_result = search(product_name=product)
-		# 	pprint.pprint(product_result)
-		# 	results = results + (product_result)
 	return render_template('result.html', results=results)
 
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 	search = Search()
-	print("calling search function.....")
 	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate)
-	#pprint.pprint(search_result)
 	return search_result
 
 # main function that triggers other helper functions to
@@ -216,3 +233,8 @@ def updateRelease(product_name=None, release_number=None, cluster_name=None):
 	product_release_id = update_release.populateProductRelease(product_name,release_number)
 	update_release.populateCPRC(cluster_name, product_release_id)
 	update_release.populateTaskDefinition(cluster_name)
+
+def mostRecentReleases():
+	search = Search()
+	search_result = search.getLatestReleases()
+	return search_result
