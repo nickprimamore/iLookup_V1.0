@@ -37,7 +37,7 @@ class AWSData:
 			cluster_name=mysplit[1]
 			tags = self.fetchClusterTags(cluster,cluster_name,region_name)
 			print(cluster_name)
-			pprint.pprint(tags)
+			#pprint.pprint(tags)
 			client_names = []
 			client_name = "unknown"
 			product_name = "unknown"

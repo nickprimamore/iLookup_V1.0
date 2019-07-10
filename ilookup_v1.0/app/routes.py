@@ -71,6 +71,7 @@ def search():
 	regionsQ = convertUnicodeToArray(regionsQ)
 	componentsQ = convertUnicodeToArray(componentsQ)
 	productsTagQ = convertUnicodeToArray(productsTagQ)
+
 	return jsonify(clientsQ=clientsQ, productsQ=productsQ, releasesQ=releasesQ, clustersQ=clustersQ, environmentsQ=environmentsQ, regionsQ=regionsQ, componentsQ=componentsQ, productsTagQ=productsTagQ, clustersTagQ=clustersTagQ)
 
 @app.route('/update', methods=['GET', 'POST'])
@@ -193,6 +194,11 @@ def getTags():
 #This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])
 def result():
+
+	if request.method == 'GET':
+		recentReleases = mostRecentReleases()
+		return render_template('result.html', results=recentReleases)
+
 	results = []
 	data = request.form.keys()
 	product = None
@@ -213,6 +219,7 @@ def result():
 		environments = objectified['Environments']
 		components = objectified['Components']
 		dates = objectified['Dates']
+
 		toDate = None
 		if len(clients) > 0:
 			client = clients[0]
@@ -250,3 +257,8 @@ def updateRelease(product_name=None, release_number=None, cluster_name=None):
 	product_release_id = update_release.populateProductRelease(product_name,release_number)
 	update_release.populateCPRC(cluster_name, product_release_id)
 	update_release.populateTaskDefinition(cluster_name)
+
+def mostRecentReleases():
+	search = Search()
+	search_result = search.getLatestReleases()
+	return search_result
