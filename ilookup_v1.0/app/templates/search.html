@@ -61,7 +61,10 @@
         for (let product in response.productsQ) {
           let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
           $('#products').append(newOption);
-          $('#selectProduct').append(newOption)
+        }
+        for (let product in response.productsQ) {
+          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
+          $('#selectProduct').append(newOption);
         }
         for (let release in response.releasesQ) {
           let newOption = new Option(response.releasesQ[release], response.releasesQ[release], false, false);
@@ -70,11 +73,17 @@
         for (let cluster in response.clustersQ) {
           let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
           $('#clusters').append(newOption);
+        }
+        for (let cluster in response.clustersQ) {
+          let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
           $('#addClustersSelect2').append(newOption);
         }
         for (let region in response.regionsQ) {
           let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
           $('#regions').append(newOption);
+        }
+        for (let region in response.regionsQ) {
+          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
           $('#selectRegion').append(newOption);
         }
         for (let environment in response.environmentsQ) {
@@ -448,7 +457,6 @@
 <script>
 
 let addReleaseTag = {}
-let selectedCluster = []
 
   //We seperately initialize these select2's because we want them to work independently from the rest of the search page as they require their own unique way of dynamicFiltering
   $(document).ready(function() {
@@ -464,6 +472,12 @@ let selectedCluster = []
       theme: "classic"
     });
 
+    $('.editTag').select2({
+      theme: "classic",
+      tags: true
+    });
+
+
     //Since it's a single pill choice, we only need a select function so it finds the clusters for the products chosen.
     $('.productsTag').on('select2:select', function(e) {
       let data = e.params.data
@@ -476,57 +490,57 @@ let selectedCluster = []
     })
 
 
-    //The following 2 event handlers keep track of the several clusters chosen
-    $('.clustersTag').on('select2:select', function(e) {
-      let data = e.params.data
-      selectedCluster.push(data.text)
+    //The following event handlers keep track of the several clusters chosen
+    $('.clustersTag').on('change.select2', function(e) {
+      let selectedCluster = $('.clustersTag').val()
       $.ajax({
-        url:'/getTags',
-        type:'POST',
-        data: JSON.stringify({
-          clusterName: data.text
-        }),
-        success: function(response) {
-          //alert((JSON.stringify(response)))
-          let tags = JSON.stringify(response)
-          // let parsedTags = ''
-          // for(var index = 0; index < tags.length; index++){
-          //   if(tags[index] == ':'){
-          //     for(var temp = index+2; temp < 99999; temp++){
-          //       if(tags[temp] == '"'){
-          //         parsedTags.concat(':')
-          //         break
-          //       }
-          //       else{
-          //         parsedTags.concat(tags[temp])
-          //       }
-          //     }
-          //   }
-          // }
-          // console.log(parsedTags)
-          let tagsHTML = '<h6 class=' + data.text +'>' + tags + '</h6>'
-          $('.tags').append(tagsHTML)
-        }
-      })
-    })
+       url:'/getTags',
+       type:'POST',
+       data: JSON.stringify({
+         clusterList: selectedCluster
+       }),
+       success: function(response) {
+         $('.tagTable').remove()
 
-    $('.clustersTag').on('select2:unselect', function(e) {
-      let data = e.params.data
-      let unselected = data.text
-      for (let i = 0; i < selectedCluster.length; i++) {
-        if (selectedCluster[i] == unselected) {
-          selectedCluster.splice(i, 1)
-        }
-      }
-      $('.' + data.text).remove()
+         let tableStr = '<table class="table table-striped tagTable"><thead><tr>'
+         if (Object.keys(response).length != 0) {
+            tableStr += '<th scope="col">Cluster</th>'
+         }
+
+         for (resp in response) {
+           tableStr += '<th scope="col">' + resp + '</th>'
+         }
+
+         tableStr += '</tr></thead><tbody>'
+         for (i = 0; i < selectedCluster.length; i++) {
+           tableStr += '<tr><th scope="row">' + selectedCluster[i] + '</th>'
+           for (res in response) {
+             tableStr += '<td>' + response[res][i] + '</td>'
+           }
+           tableStr += '</tr>'
+         }
+         tableStr += '</tbody></table>'
+         $('.tags').append(tableStr)
+
+         $('#editTag option').each(function() {
+           $("#editTag option[value=" + $(this).val() +"]").remove()
+         })
+         for (resp in response) {
+           let newOption = new Option(resp, resp, true, false)
+           $('.editTag').append(newOption)
+         }
+       }
+     })
     })
   });
 
   //This function creates an object for the newTag and sends it to the backend for it to be created on AWS servers
   function newTag() {
-    addReleaseTag['clusters'] = selectedCluster
-    let releaseNum = document.getElementById('releaseNum').value
-    addReleaseTag['releaseNum'] = releaseNum
+    addReleaseTag['clusters'] = $('.clustersTag').val()
+    let tagValue = document.getElementById('tagValue').value
+    addReleaseTag['tagValue'] = tagValue
+    addReleaseTag['tagKey'] = $('.editTag').val()
+    console.log(addReleaseTag)
     $.ajax({
       url:'/newTag',
       type:'POST',
@@ -534,24 +548,15 @@ let selectedCluster = []
         tagQuery: addReleaseTag
       }),
       success: function(response) {
-        //alert(response)
+        alert(response)
       }
     })
   }
 
-  //This script clears out the add tag modal after submission/closing
-  $('#addTagModal').on('hidden.bs.modal', function (e) {
-      $(this)
-        .find("input, select")
-        .val('')
-        .end()
-        $('#addClustersSelect2').val(null).trigger('change');
-  });
-
-  </script>
+</script>
   <!-- modal for adding/updating an AWS cluster tag -->
   <div class="modal fade no-reload" id="addTagModal" tabindex="-1" role="dialog" aria-labelledby="addTagLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="addTagLabel">Add/Update an AWS Cluster Tag:</h5>
@@ -579,30 +584,47 @@ let selectedCluster = []
               </div>
           </form>
           <form>
-            <div class="searchBar col-md-6">
+            <div class="searchBar col-md-6" style="padding-left:0px; padding-right:25.5px">
               <p class="modalLabel"> <b> Cluster(s):</b> </p>
                 <select class="clustersTag" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
                 </select>
             </div>
           </form>
           <div class="tags">
+            <table class="table table-striped tagTable">
 
+            </table>
           </div>
           <form>
-            <div class="form-group">
-              <label class="modalLabel" for="releaseNum">Release Number:</label>
-              <input type="email" class="form-control" id="releaseNum" aria-describedby="releaseFormat" placeholder="Enter release">
-              <small id="releaseFormat" class="form-text text-muted">Example format: 1.1.1.1</small>
+            <div class="col-md-3" style="padding-left:0px; padding-right:25.5px; display: inline-block">
+              <label class="modalLabel" for="selectTag">Tag:</label>
+              <br>
+              <select class="editTag" id="editTag" placeholder="Select tag" style="width:100%" name="editTag">
+
+              </select>
+            </div>
+            <div class="col-md-8" style="padding-left:0px; padding-right:0px; display: inline-block">
+              <input type="text" class="form-control" id="tagValue" aria-describedby="tagFormat" placeholder="Enter new value here">
+              <!-- <small id="tagFormat" class="form-text text-muted">Example release format: 1.1.1.1</small> -->
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="newTag()">Add tag</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="newTag()">Save/Add Tag</button>
         </div>
       </div>
     </div>
   </div>
 
+<!-- This clears the tagging modal once you close it-->
+<script>
+  $('#addTagModal').on('hidden.bs.modal', function (e) {
+    $('#addClustersSelect2').val(null).trigger('change');
+    $('#selectRegion').val(null).trigger('change');
+    $('#selectProduct').val(null).trigger('change')
+    $('#tagValue').val(null).trigger('change')
+  });
+</script>
 
 </body>
 </html>

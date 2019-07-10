@@ -143,31 +143,52 @@ def createTag():
 				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
 				tags = currentTags["tags"]
 				for tag in tags:
-					if tag['key'] == 'Release':
-						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
-				client.tag_resource(resourceArn=awsCluster, tags=[{'key':'Release', 'value': objectified['tagQuery']['releaseNum']}])
-				updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['releaseNum'], cluster)
+					if tag['key'] == objectified['tagQuery']['tagKey']:
+						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+				client.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
+				if objectified['tagQuery']['tagKey'] == 'Release':
+					updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
 	return 'Successfully updated the cluster(s)'
 
-#Retrieves the tags for a given AWS cluster
+#Retrieves the tags for given AWS clusters
 @app.route('/getTags', methods=['GET', 'POST'])
 def getTags():
 	data = request.form.keys()
-	clusterName = ''
+	clusterList = []
+	totalTagList = []
+	clusterTagObj = {}
 	for values in data:
 		objectified = json.loads(values)
-		clusterName = objectified['clusterName']
-	clusters = client.list_clusters()
-	clusterArns = clusters["clusterArns"]
-	for cluster in clusterArns:
-		cluster_split = cluster.split("/")
-		if(clusterName == cluster_split[1]):
-			currentTags = client.list_tags_for_resource(resourceArn=cluster)
-			tags = currentTags["tags"]
-			if(tags == []):
-				return 'No tags for the selected cluster'
-			return jsonify(tags)
-	return 'tags'
+		clusterList = objectified['clusterList']
+	# clusterList = convertUnicodeToArray(clusterList)
+	for cluster in clusterList:
+		clusters = client.list_clusters()
+		clusterArns = clusters["clusterArns"]
+		for awsCluster in clusterArns:
+			cluster_split = awsCluster.split("/")
+			if (cluster == cluster_split[1]):
+				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+				if(currentTags["tags"] != []):
+					for tag in currentTags["tags"]:
+						totalTagList.append(tag["key"])
+	totalTagList = convertUnicodeToArray(list(set(totalTagList)))
+	for tag in totalTagList:
+		clusterTagObj[tag] = {}
+	counter = -1
+	for cluster in clusterList:
+		counter = counter + 1
+		clusters = client.list_clusters()
+		clusterArns = clusters["clusterArns"]
+		for awsCluster in clusterArns:
+			cluster_split = awsCluster.split("/")
+			if(cluster == cluster_split[1]):
+				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+				if (currentTags["tags"] != []):
+					for awsTag in currentTags["tags"]:
+						key = awsTag["key"]
+						value = awsTag["value"]
+						clusterTagObj[str(key)][counter] = str(value)
+	return jsonify(clusterTagObj)
 
 #This function communicates with the HTML and gathers the responses in order to load the table data.
 @app.route('/result', methods=['GET','POST'])
