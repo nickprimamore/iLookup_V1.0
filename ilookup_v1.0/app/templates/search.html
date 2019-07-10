@@ -85,6 +85,15 @@
       }
     })
 
+    //Pre-loads result table with initial information
+    $.ajax({
+      url:'/result',
+      type: 'GET',
+      success: function(response) {
+        $('#result-tag').html(response)
+      }
+    })
+
     //initializing the select2, .dropdowns is the classname for the main search page
     $('.dropdowns').select2({
       theme: "classic"
