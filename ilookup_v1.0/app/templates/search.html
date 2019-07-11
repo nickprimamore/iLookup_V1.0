@@ -568,6 +568,7 @@ let addReleaseTag = {}
        success: function(response) {
          $('.tagTable').remove()
 
+         //sets up the table with AWS tags to be appended in the modal
          let tableStr = '<table class="table table-striped tagTable"><thead><tr>'
          if (Object.keys(response).length != 0) {
             tableStr += '<th scope="col">Cluster</th>'
