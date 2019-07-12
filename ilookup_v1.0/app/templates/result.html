@@ -59,6 +59,8 @@
 
 <style>
   div.modal-header {
+    font-family: "Lato Light";
+    font-weight: bold;
     padding: 10px; 10px;
     padding-bottom: 3px
   }
@@ -96,6 +98,7 @@
       <th scope="col">Cluster</th>
       <th scope="col">Environment</th>
       <th scope="col">Region</th>
+      <th scope="col">Task Definitions</th>
     </tr>
   </thead>
   <tbody>
@@ -104,18 +107,20 @@
 
     {% for result in results %}
 
-    <tr
-      data-toggle="modal"
-      data-target="#clusterDetail"
-      data-clustername="{{result.cluster_name}}"
-      data-tasks='{{result.task_definitions}}'
-      >
+    <tr>
       <th scope="row">{{result.client_name}}</th>
       <td> {{result.product_name}} </td>
       <td> {{result.release}} </td>
       <td> {{result.cluster_name}} </td>
       <td> {{result.environment}} </td>
       <td> {{result.region}} </td>
+      <td
+        data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-tasks='{{result.task_definitions}}'
+      > <button type="button" class="btn btn-primary" style="background-color:#00508F">Click Here</button>
+      </td>
     </tr>
 
     {% endfor %}
