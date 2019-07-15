@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, jsonify, json
 from app import app, db
-from app.models import Client, Product, Product_Release, Cluster, Component_Type, Component, Task_Definition, CPRC
+from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 # from awsdata import AWSData
@@ -18,7 +18,7 @@ def convertUnicodeToArray(unicodeArray):
 	newArray = []
 	counter = 0
 	for x in range(len(unicodeArray)):
-		utf8string = unicodeArray[x].encode("utf-8")
+		utf8string = unicodeArray[x].encode("utf-8").decode('utf-8')
 		newArray.append(utf8string)
 	return newArray
 
@@ -137,7 +137,7 @@ def createTag():
 	clusterArns = clusters["clusterArns"]
 	for values in data:
 		objectified = json.loads(values)
-	for cluster in objectified['tagQuery']['clusters']:
+	for cluster in objectified["tagQuery"]["clusters"]:
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
 			if (cluster == cluster_split[1]):
@@ -305,3 +305,5 @@ def mostRecentReleases():
 	search = Search()
 	search_result = search.getLatestReleases()
 	return search_result
+
+
