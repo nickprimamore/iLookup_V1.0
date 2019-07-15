@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, jsonify, json
 from app import app, db
-from app.models import Client, Product, Product_Release, Cluster, Component_Type, Component, Task_Definition, CPRC
+from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 from awsdata import AWSData
@@ -264,3 +264,5 @@ def mostRecentReleases():
 	search = Search()
 	search_result = search.getLatestReleases()
 	return search_result
+
+
