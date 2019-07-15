@@ -6,7 +6,7 @@
 <!-- All the styles go in this style tag for any components within this page. Only use instyling if it is a one time use -->
 <style>
   h1 {
-    font-family:"Trebuchet MS";
+    font-family:"Lato Light";
   }
   div.searchContainer {
     display:flex;
@@ -21,15 +21,16 @@
   p.searchLabel {
     color:white;
     margin-bottom:5px;
-    font-family: "Trebuchet MS";
+    font-family: "Lato Light";
   }
   select.dropdowns {
     width: 100%
   }
   .modalLabel {
-    color:#2867b1;
+    color:#00508F;
+    font-size: 18;
     font-weight:bold;
-    font-family: "Trebuchet MS"
+    font-family: "Lato Light"
   }
 </style>
 <!-- This is the first script which deals with the front end AJAX call to implement dynamic searching with /search and /update -->
@@ -216,7 +217,6 @@
     var regionVal = $('.regions').val()
     var clusterVal = $('.clusters').val()
     var environmentVal = $('.environments').val()
-    var componentVal = $('components').val()
 
     var dateFrom = document.getElementById("dateFrom").value;
     var dateUntil = document.getElementById("dateUntil").value;
@@ -250,9 +250,7 @@
     for (var env in environmentVal) {
       environmentList.push(environmentVal[env])
     }
-    for (var com in componentVal) {
-      componentList.push(componentVal[com])
-    }
+
     return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList]
   }
   // This function sends the selected search tags to the backend and renders it onto the result-tag html
@@ -294,10 +292,13 @@
   }
   #sidebar-container {
       min-height: 90vh;
-      background-color: #8e8e93;
+      background-color: #00508F;
       padding: 0;
+      padding-top:14px;
+      padding-left:0px;
+      padding-right:2px;
       overflow:auto;
-      height: 91vh;
+      height: 93vh;
   }
 
   /* Sidebar sizes when expanded and expanded */
@@ -368,12 +369,12 @@
 <!-- Bootstrap row -->
 <div class="row" id="body-row">
     <!-- Sidebar -->
-    <div id="sidebar-container" class="sidebar-expanded d-none d-md-block"><!-- d-* hiddens the Sidebar in smaller devices. Its itens can be kept on the Navbar 'Menu' -->
+    <div id="sidebar-container" class="sidebar-expanded d-none d-md-block"><!-- d-* hides the Sidebar in smaller devices. Its itens can be kept on the Navbar 'Menu' -->
             <!-- /END Separator -->
             <div class="searchContainer">
-              <br />
-              <br />
-              <br />
+              <div class="searchBar col-md-12">
+                <p class="searchLabel clientSelect" style="text-align:center; font-size:18"> <b> Search AWS Resources </b> </p>
+              </div>
               <div class="searchBar col-md-12">
                 <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
                 <select class="dropdowns clients" id="clients" name="clients[]" multiple="multiple">
@@ -410,27 +411,21 @@
 
                 </select>
               </div>
-              <div class="searchBar col-md-12">
-                <p class="searchLabel componentSelect"> <b> Components: </b> </p>
-                <select class="dropdowns components" id="components"  name="components[]" multiple="multiple">
-
-                </select>
-              </div>
-              <div class="form-group col-md-6">
+              <div class="form-group col-md-12">
                   <p class="searchLabel"> <b> Date (From): </b> </p>
                   <input type="date" class="form-control date" id="dateFrom"name="Date (From)">
               </div>
-              <div class="form-group col-md-6">
-                  <p class="searchLabel"> <b> Date (Until): </b> </p>
+              <div class="form-group col-md-12" style="margin-top:-18">
+                  <p class="searchLabel"> <b> Date (To): </b> </p>
                   <input type="date" class="form-control date" id="dateUntil" name="Date (Until)">
               </div>
 
               <div class="searchBar col-md-6">
-                <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold" onClick="sendData()">Search</button>
+                <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold; color:#00508F" onClick="sendData()">Search</button>
               </div>
 
               <div class ="clearButton col-md-6">
-                <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold" onClick="clearSearchBars()">Clear All</button>
+                <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold; color:#00508F" onClick="clearSearchBars()">Clear All</button>
               </div>
             </div>
     </div><!-- sidebar-container END -->
@@ -470,23 +465,25 @@ let addReleaseTag = {}
 
 
     //Since it's a single pill choice, we only need a select function so it finds the clusters for the products chosen.
-    $('.productsTag').on('select2:select', function(e) {
-      let data = e.params.data
-      addReleaseTag['product'] = data.text
-    })
-
-    $('.regionsTag').on('select2:select', function(e) {
-      let data = e.params.data
-      addReleaseTag['region'] = data.text
-    })
+    // $('.productsTag').on('select2:select', function(e) {
+    //   let data = e.params.data
+    //   addReleaseTag['product'] = data.text
+    // })
+    //
+    // $('.regionsTag').on('select2:select', function(e) {
+    //   let data = e.params.data
+    //   addReleaseTag['region'] = data.text
+    // })
 
     function getTagValues() {
-      var productTag = $('.productsTag').val()
-      var regionTag = $('.regionsTag').val()
-      var clusterTag = $('.clustersTag').val()
+      var productTag = $('#selectProduct').val()
+      var regionTag = $('#selectRegion').val()
+      var clusterTag = $('#addClustersSelect2').val()
+      console.log(productTag, regionTag, clusterTag)
+      console.log("Will this get called?")
+      var clusterList = []
       var productList = []
       var regionList = []
-      var clusterList = []
       for (var pro in productTag) {
         productList.push(productTag[pro])
       }
@@ -499,63 +496,6 @@ let addReleaseTag = {}
       return [productList, regionList, clusterList]
     }
 
-    $('.updateTags').on('change.select2', function(e) {
-      values = getTagValues()
-      $.ajax({
-        url:'/update',
-        type: 'POST',
-        data: JSON.stringify({
-          Clients: [],
-          Products: values[0],
-          Releases: [],
-          Regions: values[1],
-          Clusters: [],
-          Environments: [],
-          Dates: []
-        }),
-        success: function (response) {
-          $('#selectProduct option').each(function() {
-            $("#selectProduct option[value=" + $(this).val() + "]").remove()
-            $("#selectProduct").select2('close')
-          })
-          $('#selectRegion option').each(function() {
-            $("#selectRegion option[value=" + "'" + $(this).val() + "'" + "]").remove()
-            $("#selectRegion").select2('close')
-          })
-          $('#addClustersSelect2 option').each(function() {
-            $("#addClustersSelect2 option[value=" + $(this).val() + "]").remove()
-            $("#addClustersSelect2").select2('close')
-          })
-          for (let product in response.productsUp) {
-            let newOption
-            if (values[0].includes(response.productsUp[product])) {
-              newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
-            } else {
-              newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
-            }
-            $('#selectProduct').append(newOption);
-          }
-          for (let region in response.regionsUp) {
-            let newOption
-            if (values[1].includes(response.regionsUp[region])) {
-              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
-            } else {
-              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
-            }
-            $('#selectRegion').append(newOption);
-          }
-          for (let cluster in response.clustersUp) {
-            let newOption
-            if (values[2].includes(response.clustersUp[cluster])) {
-              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
-            } else {
-              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, false);
-            }
-            $('#addClustersSelect2').append(newOption);
-          }
-        }
-      })
-    })
     //The following event handlers keep track of the several clusters chosen
     $('.clustersTag').on('change.select2', function(e) {
       let selectedCluster = $('.clustersTag').val()
@@ -599,6 +539,71 @@ let addReleaseTag = {}
        }
      })
     })
+
+    $('.updateTags').on('change.select2', function(e) {
+      addReleaseTag['product'] = $('.productsTag').val()[0]
+      addReleaseTag['region'] = $('.regionsTag').val()[0]
+      console.log(addReleaseTag)
+      values = getTagValues()
+      console.log('The Values Are', values)
+      $.ajax({
+        url:'/update',
+        type: 'POST',
+        data: JSON.stringify({
+          Clients: [],
+          Products: values[0],
+          Releases: [],
+          Regions: values[1],
+          Clusters: [],
+          Environments: [],
+          Dates: []
+        }),
+        success: function (response) {
+          $('#selectProduct option').each(function() {
+            $("#selectProduct option[value=" +  $(this).val()  + "]").remove()
+            $("#selectProduct").select2('close')
+          })
+          $('#selectRegion option').each(function() {
+            $("#selectRegion option[value=" + "'" + $(this).val() + "'" + "]").remove()
+            $("#selectRegion").select2('close')
+          })
+          $('#addClustersSelect2 option').each(function() {
+            $("#addClustersSelect2 option[value=" + $(this).val() + "]").remove()
+            $("#addClustersSelect2").select2('close')
+          })
+          console.log("does this move?")
+          for (let product in response.productsUp) {
+            let newOption
+            if (values[0].includes(response.productsUp[product])) {
+              newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
+            } else {
+              newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
+            }
+            $('#selectProduct').append(newOption);
+          }
+          for (let region in response.regionsUp) {
+            console.log(region)
+            let newOption
+            if (values[1].includes(response.regionsUp[region])) {
+              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
+            } else {
+              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
+            }
+            $('#selectRegion').append(newOption);
+          }
+          for (let cluster in response.clustersUp) {
+            let newOption
+            console.log(cluster)
+            if (values[2].includes(response.clustersUp[cluster])) {
+              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
+            } else {
+              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, false);
+            }
+            $('#addClustersSelect2').append(newOption);
+          }
+        }
+      })
+    })
   });
 
   //This function creates an object for the newTag and sends it to the backend for it to be created on AWS servers
@@ -626,7 +631,7 @@ let addReleaseTag = {}
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addTagLabel">Add/Update an AWS Cluster Tag:</h5>
+          <h5 class="modal-title" id="addTagLabel" style="font-family:Lato Light; font-weight:bold">Add/Update an AWS Cluster Tag:</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -636,8 +641,8 @@ let addReleaseTag = {}
               <div class="form-group">
                 <label class="modalLabel" for="selectProduct">Product:</label>
                 <br>
-                <select class="productsTag updateTags" id="selectProduct" placeholder="Select product" style="width:100%" name="selectProduct">
-                  <option value="" disabled selected>Select a product</option>
+                <select class="productsTag updateTags" id="selectProduct" style="width:100%" name="selectProduct" multiple="multiple">
+
                 </select>
               </div>
           </form>
@@ -645,13 +650,13 @@ let addReleaseTag = {}
               <div class="form-group">
                 <label class="modalLabel" for="selectRegion">Region:</label>
                 <br>
-                <select class="regionsTag updateTags" id="selectRegion" placeholder="Select region" style="width:100%" name="selectRegion">
-                  <option value="" disabled selected>Select a region</option>
+                <select class="regionsTag updateTags" id="selectRegion" style="width:100%" name="selectRegion" multiple="multiple">
+
                 </select>
               </div>
           </form>
           <form>
-            <div class="searchBar col-md-6" style="padding-left:0px; padding-right:25.5px">
+            <div class="searchBar col-md-6" style="padding-left:0px; padding-right:24.8px">
               <p class="modalLabel"> <b> Cluster(s):</b> </p>
                 <select class="clustersTag" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
                 </select>
@@ -677,7 +682,7 @@ let addReleaseTag = {}
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="newTag()">Save/Add Tag</button>
+          <button type="button" class="btn btn-primary" style="background-color:#007ACC; font-family: Lato Light; font-weight:bold" data-dismiss="modal" onclick="newTag()">Save/Add Tag</button>
         </div>
       </div>
     </div>
