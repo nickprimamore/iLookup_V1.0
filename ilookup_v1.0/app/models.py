@@ -5,6 +5,7 @@ class Client(db.Model):
     __tablename__ = 'client'
     client_id = db.Column(db.Integer, primary_key=True)
     client_name = db.Column(db.String(100))
+    is_active = db.Column(db.Boolean,default=True)
 
     def __repr__(self):
         return '<Client {}>'.format(self.client_name)
@@ -14,7 +15,7 @@ class Product(db.Model):
     __table_args__ = {'sqlite_autoincrement': True}
     product_id = db.Column(db.Integer, primary_key=True)
     product_name = db.Column(db.String(100))
-
+    is_active = db.Column(db.Boolean,default=True)
 
     def __repr__(self):
         return '<Product {}>'.format(self.product_name)
@@ -25,6 +26,7 @@ class Product_Release(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.product_id'))
     release_number = db.Column(db.String(100))
     product = db.relationship('Product', backref='product_releases')
+    inserted_at = db.Column(db.String(100))
 
 
     def __repr__(self):
@@ -36,30 +38,20 @@ class Cluster(db.Model):
     cluster_name = db.Column(db.String(100))
     environment = db.Column(db.String(100))
     region = db.Column(db.String(100))
+    is_active = db.Column(db.Boolean,default = True)
 
 
     def __repr__(self):
         return '<Cluster {}>'.format(self.cluster_name, self.environment, self.region)
 
-class Component_Type(db.Model):
-    __tablename__ = 'component_type'
-    component_type_id = db.Column(db.Integer, primary_key=True)
-    component_type_name = db.Column(db.String(100))
-    product_id = db.Column(db.Integer, db.ForeignKey('product.product_id'))
-    product = db.relationship('Product', backref='product_ref')
-
-
-    def __repr__(self):
-        return '<Component_Type {}>'.format(self.component_type_name, self.product_id)
 
 class Component(db.Model):
     __tablename__ = 'component'
     component_id = db.Column(db.Integer, primary_key=True)
     component_name = db.Column(db.String(100))
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.cluster_id'))
-    component_type_id = db.Column(db.Integer, db.ForeignKey('component_type.component_type_id'))
+    is_active = db.Column(db.Boolean,default = True)
     cluster = db.relationship('Cluster', backref='component_cluster')
-    component_type = db.relationship('Component_Type', backref='components')
 
 
     def __repr__(self):
@@ -74,7 +66,9 @@ class Task_Definition(db.Model):
     date = db.Column(db.String(100))
     cpu = db.Column(db.String(100))
     memory = db.Column(db.String(100))
-    release_number = db.Column(db.String(11))
+    release_number = db.Column(db.String(100))
+    inserted_at = db.Column(db.String(100))
+    is_active = db.Column(db.Boolean,default=True)
     component_id = db.Column(db.Integer, db.ForeignKey('component.component_id'))
     component = db.relationship('Component', backref='task_definitions')
 
