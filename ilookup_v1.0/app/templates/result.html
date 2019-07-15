@@ -12,7 +12,7 @@
       strObject = tasks[i]
       strObject = "{" + strObject
       strObject = strObject.substring(0, strObject.length-1)
-      strObject = strObject.replace(/'/g, '"').replace(/u/g, '')
+      strObject = strObject.replace(/'/g, '"')
       if (i+1 != tasks.length) {
         strObject = strObject.substring(0, strObject.length-1)
       }
@@ -23,11 +23,10 @@
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
 
     for (task of compTasks) {
-      console.log(task)
       let image = task.image_tag.substring(task.image_tag.length-7, task.image_tag.length)
       let memory = task.memory
       let date = task.date
-      let cpu = task.cp
+      let cpu = task.cpu
       let revision = task.revision
       let task_name = task.task_definition_name
 

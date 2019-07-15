@@ -23,7 +23,6 @@ class Search:
 
 		if cluster_name:
 			search_result = search_result.filter(Cluster.cluster_name==cluster_name)
-			#pprint.pprint(search_result)
 
 		if region:
 			search_result = search_result.filter(Cluster.region==region)
