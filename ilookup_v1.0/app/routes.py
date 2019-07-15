@@ -3,9 +3,9 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component_Type, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-from awsdata import AWSData
+# from awsdata import AWSData
 from db_search import Search
-from db_update_release import Update_Release
+# from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
 import requests
 import json
@@ -151,6 +151,24 @@ def createTag():
 					updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
 	return 'Successfully updated the cluster(s)'
 
+@app.route('/deleteTag', methods=['GET', 'POST'])
+def deleteTag():
+	data = request.form.keys()
+	clusters = client.list_clusters()
+	clusterArns = clusters["clusterArns"]
+	for values in data:
+		objectified = json.loads(values)
+	for cluster in objectified['tagQuery']['clusters']:
+		for awsCluster in clusterArns:
+			cluster_split = awsCluster.split('/')
+			if (cluster == cluster_split[1]):
+				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+				tags = currentTags["tags"]
+				for tag in tags:
+					if tag['key'] == objectified['tagQuery']['tagKey']:
+						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+	return "Successfully deleted the tag"
+
 #Retrieves the tags for given AWS clusters
 @app.route('/getTags', methods=['GET', 'POST'])
 def getTags():
@@ -219,6 +237,8 @@ def result():
 		environments = objectified['Environments']
 		components = objectified['Components']
 		dates = objectified['Dates']
+		individualEntries = []
+		clusterNames = []
 
 		toDate = None
 		if len(clients) > 0:
@@ -243,8 +263,29 @@ def result():
 			if fromDate == "":
 				fromDate = None
 		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
+		print("==============================")
+		for res in result:
+			if res["cluster_name"] not in clusterNames:
+				individualEntries.append({'Cluster': res["cluster_name"], 'TotalReleases': [res["release"]], 'Releases': [{"Release": res["release"], "Tasks": res["task_definitions"]}]})
+				clusterNames.append(res["cluster_name"])
+			else:
+				for ind in individualEntries:
+					if res["cluster_name"] == ind["Cluster"]:
+						if res["release"] not in ind["TotalReleases"]:
+							ind["TotalReleases"].append(res["release"])
+							ind["Releases"].append({"Tasks": res["task_definitions"], "Releases": res["release"]})
+
+		for ind in individualEntries:
+			allReleases = ind["TotalReleases"]
+			allReleases = convertUnicodeToArray(allReleases)
+			for res in result:
+				if res["cluster_name"] == ind["Cluster"] and res["release"] == ind["TotalReleases"][-1]:
+					res["release_history"] = ind['Releases']
+				else:
+					res["release_history"] = []
 		results = results + (result)
 		pprint.pprint(results)
+
 		# Within results, create an object that {cluster_name: [releases] or {Release: 1.1.1.1, Info: Etc}} and pass it into the front end, where we map it by connecting release numbers - Having it as hidden dropdowns
 	return render_template('result.html', results=results)
 

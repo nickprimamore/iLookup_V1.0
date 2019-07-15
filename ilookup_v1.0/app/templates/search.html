@@ -32,6 +32,9 @@
     font-weight:bold;
     font-family: "Lato Light"
   }
+  /* .modal-header{
+     border-bottom: 1px solid white;
+  } */
 </style>
 <!-- This is the first script which deals with the front end AJAX call to implement dynamic searching with /search and /update -->
 <script>
@@ -464,23 +467,10 @@ let addReleaseTag = {}
     });
 
 
-    //Since it's a single pill choice, we only need a select function so it finds the clusters for the products chosen.
-    // $('.productsTag').on('select2:select', function(e) {
-    //   let data = e.params.data
-    //   addReleaseTag['product'] = data.text
-    // })
-    //
-    // $('.regionsTag').on('select2:select', function(e) {
-    //   let data = e.params.data
-    //   addReleaseTag['region'] = data.text
-    // })
-
     function getTagValues() {
       var productTag = $('#selectProduct').val()
       var regionTag = $('#selectRegion').val()
       var clusterTag = $('#addClustersSelect2').val()
-      console.log(productTag, regionTag, clusterTag)
-      console.log("Will this get called?")
       var clusterList = []
       var productList = []
       var regionList = []
@@ -621,9 +611,35 @@ let addReleaseTag = {}
       }),
       success: function(response) {
         console.log("Created")
-        alert("Created")
+        alert("Successfully added/updated tag")
       }
     })
+  }
+
+  function deleteTag() {
+    if (!$('.editTag').val()) {
+      alert("Select a tag in order to delete")
+      return;
+    }
+    if ($('.editTag').val() == 'Product' || $('.editTag').val() == 'Release') {
+      alert("Cannot delete that tag")
+      return;
+    }
+    addReleaseTag['clusters'] = $('.clustersTag').val()
+    addReleaseTag['tagKey'] = $('.editTag').val()
+    if (confirm("Are you sure you want to delete " + addReleaseTag['tagKey'] + " from the following Cluster(s)?: " + addReleaseTag["clusters"])) {
+      $.ajax({
+        url:"/deleteTag",
+        type:'POST',
+        data:JSON.stringify({
+          tagQuery: addReleaseTag
+        }),
+        success: function(response) {
+          console.log("Tag Deleted")
+          alert("Tag deleted")
+        }
+      })
+    }
   }
 </script>
   <!-- modal for adding/updating an AWS cluster tag -->
@@ -631,7 +647,7 @@ let addReleaseTag = {}
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addTagLabel" style="font-family:Lato Light; font-weight:bold">Add/Update an AWS Cluster Tag:</h5>
+          <h5 class="modal-title" id="addTagLabel" style="font-family:Lato Light; font-weight:bold">Add/Update an AWS Cluster Tag</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -682,7 +698,8 @@ let addReleaseTag = {}
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" style="background-color:#007ACC; font-family: Lato Light; font-weight:bold" data-dismiss="modal" onclick="newTag()">Save/Add Tag</button>
+          <button type="button" class="btn btn-danger mr-auto" style="font-family: Lato Light; font-weight:bold;" onclick="deleteTag()">Delete tag</button>
+          <button type="button" class="btn btn-primary" style="background-color:#007ACC; font-family: Lato Light; font-weight:bold" data-dismiss="modal" onclick="newTag()">Save/add tag</button>
         </div>
       </div>
     </div>
@@ -700,7 +717,5 @@ let addReleaseTag = {}
 
 </body>
 </html>
-
-
 
 {% endblock %}
