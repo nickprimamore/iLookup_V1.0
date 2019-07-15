@@ -35,12 +35,12 @@ class Search:
 		results = []
 		for res in search_result:
 			result = {}
-			result['client_name'] = res.Client.client_name
-			result['product_name'] = res.Product.product_name
-			result['release'] = res.Product_Release.release_number
-			result['cluster_name'] = res.Cluster.cluster_name
-			result['region'] = res.Cluster.region
-			result['environment'] = res.Cluster.environment
+			result["client_name"] = res.Client.client_name
+			result["product_name"] = res.Product.product_name
+			result["release"] = res.Product_Release.release_number
+			result["cluster_name"] = res.Cluster.cluster_name
+			result["region"] = res.Cluster.region
+			result["environment"] = res.Cluster.environment
 
 
 			if (toDate and fromDate) is None:
@@ -156,12 +156,12 @@ class Search:
 		results=[]
 		for res in maxResult:
 			result = {}
-			result['client_name'] = res.Client.client_name
-			result['product_name'] = res.Product.product_name
-			result['release'] = res.Product_Release.release_number
-			result['cluster_name'] = res.Cluster.cluster_name
-			result['region'] = res.Cluster.region
-			result['environment'] = res.Cluster.environment
+			result["client_name"] = res.Client.client_name
+			result["product_name"] = res.Product.product_name
+			result["release"] = res.Product_Release.release_number
+			result["cluster_name"] = res.Cluster.cluster_name
+			result["region"] = res.Cluster.region
+			result["environment"] = res.Cluster.environment
 			task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
 			task_definition_list = []
 			for task_definition in task_definition_result:
