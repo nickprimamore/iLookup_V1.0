@@ -13,13 +13,14 @@
 	<body>
 		<style>
 			.navbar-brand{
-
 	 			margin: auto;
-				font-family: "Trebuchet MS";
+				font-size:30;
+				font-family: "Lato Light";
+			  font-weight:;
 			}
 
 			button {
-				font-family: "Trebuchet MS";
+				font-family: "Lato";
 			}
 
 			.wrapper {
@@ -44,7 +45,7 @@
 
 
 			.vl {
-			  border-left: 1px solid white;
+			  border-left: 1px solid #00508F;
 			  height: 30px;
 				margin: 0 10px;
 			}
@@ -71,33 +72,36 @@
 
 		</style>
 		<div class="wrapper">
-			<nav class="navbar navbar-expand-lg navbar-light" id="topNav" role="navigation" style="background-color: #2867b1; color:#2867b1">
-			  <a class="navbar-brand" style="color:white" href="/"> iLookUp </a>
+			<nav class="navbar navbar-expand-lg navbar-light" id="topNav" role="navigation" style="background-color: white; color:#2867b1">
+				<!-- <img class="d-inline-block mr-1" src="ACORD_Logo.png" width="100" height="30" alt=""> -->
+			  <a class="navbar-brand" style="color:#00508F" href="/"> iLookup </a>
 			  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
 			    <span class="navbar-toggler-icon"></span>
 			  </button>
 			  <div class="collapse navbar-collapse" id="navbarText">
 			    <ul class="navbar-nav ml-auto">
-			      <li class="nav-item">
+			      <!-- <li class="nav-item">
 							<a href="/">
 						    Administrator Dashboard
 					    </a>
 			      </li>
-						<div class="vl"></div>
+						<div class="vl"></div> -->
 			      <li class="nav-item">
-							<a href="/">
+							<a href="/" style="color:#00508F; font-family:Lato Light; font-size:17">
 								Search
 							</a>
 			      </li>
 						<div class="vl"></div>
 			      <li class="nav-item">
-							<a href="/" data-toggle="modal" data-target="#addTagModal">
+							<a href="/" data-toggle="modal" data-target="#addTagModal" style="color:#00508F; font-family:Lato Light; font-size:17">
 								Update Cluster Tags
 							</a>
 			      </li>
 						<div class="vl"></div>
 						<li class="nav-item">
-			        <a href="/load">Refresh</a>
+			        <a href="/load" style="color:#00508F; font-family:Lato Light; font-size:17">
+								Refresh
+							</a>
 			      </li>
 			    </ul>
 			  </div>

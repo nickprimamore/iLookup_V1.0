@@ -3,10 +3,10 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-# from awsdata import AWSData
-# from db_search import Search
-# from db_update_release import Update_Release
-# from db_dynamic_filter import DynamicFilter
+from awsdata import AWSData
+from db_search import Search
+from db_update_release import Update_Release
+from db_dynamic_filter import DynamicFilter
 import requests
 import json
 import boto3
@@ -18,7 +18,7 @@ def convertUnicodeToArray(unicodeArray):
 	newArray = []
 	counter = 0
 	for x in range(len(unicodeArray)):
-		utf8string = unicodeArray[x].encode("utf-8")
+		utf8string = unicodeArray[x].encode("utf-8").decode('utf-8')
 		newArray.append(utf8string)
 	return newArray
 
@@ -80,7 +80,7 @@ def update():
 	for values in data:
 		stringified = values
 		objectified = json.loads(values)
-
+		print("it runs in here?")
 		client=""
 		product=""
 		release=""
@@ -137,7 +137,7 @@ def createTag():
 	clusterArns = clusters["clusterArns"]
 	for values in data:
 		objectified = json.loads(values)
-	for cluster in objectified['tagQuery']['clusters']:
+	for cluster in objectified["tagQuery"]["clusters"]:
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
 			if (cluster == cluster_split[1]):
@@ -244,6 +244,8 @@ def result():
 				fromDate = None
 		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
 		results = results + (result)
+		pprint.pprint(results)
+		# Within results, create an object that {cluster_name: [releases] or {Release: 1.1.1.1, Info: Etc}} and pass it into the front end, where we map it by connecting release numbers - Having it as hidden dropdowns
 	return render_template('result.html', results=results)
 
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
