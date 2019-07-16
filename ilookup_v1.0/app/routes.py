@@ -264,5 +264,3 @@ def mostRecentReleases():
 	search = Search()
 	search_result = search.getLatestReleases()
 	return search_result
-
-

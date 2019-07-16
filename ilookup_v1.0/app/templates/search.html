@@ -463,24 +463,10 @@ let addReleaseTag = {}
       tags: true
     });
 
-
-    //Since it's a single pill choice, we only need a select function so it finds the clusters for the products chosen.
-    // $('.productsTag').on('select2:select', function(e) {
-    //   let data = e.params.data
-    //   addReleaseTag['product'] = data.text
-    // })
-    //
-    // $('.regionsTag').on('select2:select', function(e) {
-    //   let data = e.params.data
-    //   addReleaseTag['region'] = data.text
-    // })
-
     function getTagValues() {
       var productTag = $('#selectProduct').val()
       var regionTag = $('#selectRegion').val()
       var clusterTag = $('#addClustersSelect2').val()
-      console.log(productTag, regionTag, clusterTag)
-      console.log("Will this get called?")
       var clusterList = []
       var productList = []
       var regionList = []
@@ -543,9 +529,7 @@ let addReleaseTag = {}
     $('.updateTags').on('change.select2', function(e) {
       addReleaseTag['product'] = $('.productsTag').val()[0]
       addReleaseTag['region'] = $('.regionsTag').val()[0]
-      console.log(addReleaseTag)
       values = getTagValues()
-      console.log('The Values Are', values)
       $.ajax({
         url:'/update',
         type: 'POST',
@@ -571,7 +555,6 @@ let addReleaseTag = {}
             $("#addClustersSelect2 option[value=" + $(this).val() + "]").remove()
             $("#addClustersSelect2").select2('close')
           })
-          console.log("does this move?")
           for (let product in response.productsUp) {
             let newOption
             if (values[0].includes(response.productsUp[product])) {
@@ -582,7 +565,6 @@ let addReleaseTag = {}
             $('#selectProduct').append(newOption);
           }
           for (let region in response.regionsUp) {
-            console.log(region)
             let newOption
             if (values[1].includes(response.regionsUp[region])) {
               newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
@@ -593,7 +575,6 @@ let addReleaseTag = {}
           }
           for (let cluster in response.clustersUp) {
             let newOption
-            console.log(cluster)
             if (values[2].includes(response.clustersUp[cluster])) {
               newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
             } else {
@@ -612,7 +593,6 @@ let addReleaseTag = {}
     let tagValue = document.getElementById('tagValue').value
     addReleaseTag['tagValue'] = tagValue
     addReleaseTag['tagKey'] = $('.editTag').val()
-    console.log(addReleaseTag)
     $.ajax({
       url:'/newTag',
       type:'POST',
