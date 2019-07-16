@@ -80,7 +80,6 @@ def update():
 	for values in data:
 		stringified = values
 		objectified = json.loads(values)
-		print("it runs in here?")
 		client=""
 		product=""
 		release=""
@@ -151,6 +150,24 @@ def createTag():
 				if objectified['tagQuery']['tagKey'] == 'Release':
 					updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
 	return 'Successfully updated the cluster(s)'
+
+@app.route('/deleteTag', methods=['GET', 'POST'])
+def deleteTag():
+	data = request.form.keys()
+	clusters = client.list_clusters()
+	clusterArns = clusters["clusterArns"]
+	for values in data:
+		objectified = json.loads(values)
+	for cluster in objectified['tagQuery']['clusters']:
+		for awsCluster in clusterArns:
+			cluster_split = awsCluster.split('/')
+			if (cluster == cluster_split[1]):
+				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+				tags = currentTags["tags"]
+				for tag in tags:
+					if tag['key'] == objectified['tagQuery']['tagKey']:
+						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+	return "Successfully deleted the tag"
 
 #Retrieves the tags for given AWS clusters
 @app.route('/getTags', methods=['GET', 'POST'])
@@ -244,8 +261,7 @@ def result():
 			if fromDate == "":
 				fromDate = None
 		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
-		results = results + (result)
-		pprint.pprint(results)
+
 		# Within results, create an object that {cluster_name: [releases] or {Release: 1.1.1.1, Info: Etc}} and pass it into the front end, where we map it by connecting release numbers - Having it as hidden dropdowns
 	return render_template('result.html', results=results)
 
@@ -271,3 +287,4 @@ def getTaskDefinitions(cluster_name, release_number):
 	search = Search()
 	task_definitions = search.getTaskDefinitions(cluster_name,release_number)
 	return task_definitions
+

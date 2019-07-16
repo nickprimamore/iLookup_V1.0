@@ -1,6 +1,9 @@
 
 <!-- This script is the one that takes the entry clicked on and relays the information into the modal -->
 <script>
+  $(document).ready(function() {
+    $('.releaseReview').select2();
+  })
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
     let tasks = trigger.data('tasks')
@@ -12,7 +15,7 @@
       strObject = tasks[i]
       strObject = "{" + strObject
       strObject = strObject.substring(0, strObject.length-1)
-      strObject = strObject.replace(/'/g, '"').replace(/u/g, '')
+      strObject = strObject.replace(/'/g, '"')
       if (i+1 != tasks.length) {
         strObject = strObject.substring(0, strObject.length-1)
       }
@@ -23,15 +26,14 @@
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
 
     for (task of compTasks) {
-      console.log(task)
       let image = task.image_tag.substring(task.image_tag.length-7, task.image_tag.length)
       let memory = task.memory
       let date = task.date
-      let cpu = task.cp
+      let cpu = task.cpu
       let revision = task.revision
       let task_name = task.task_definition_name
 
-      $( "#accordion" ).append('<div class="card deleteOnClose">' +
+      $( "#accordion1" ).append('<div class="card deleteOnClose">' +
         '<div class="card-header deleteOnClose" id="headingOne">' +
           '<h5 class="mb-0 deleteOnClose">' +
             '<button class="btn btn-link deleteOnClose" data-toggle="collapse" data-target="#' + image + '" aria-expanded="true" aria-controls="' + image + '">' +
@@ -40,13 +42,30 @@
           '</h5>' +
         '</div>'+
         '<div id="' + image + '" class="collapse deleteOnClose" aria-labelledby="headingOne" data-parent="#accordion">' +
-          '<div class="card-body deleteOnClose">' +
-            'Image Tag: ' + image + '<br class="deleteOnClose" />' +
-            'Revision: ' + revision + '<br class="deleteOnClose"/>' +
-            'Memory: ' + memory + '<br class="deleteOnClose"/>' +
-            'Date Started: ' + date + '<br class="deleteOnClose"/>' +
-            'CPU: ' + cpu + '<br class="deleteOnClose" />' +
-          '</div>' +
+          '<table class="table table-bordered">' +
+            '<tbody>' +
+              '<tr>' +
+                '<th scope="row">' + "Image Tag" + '</th>' +
+                '<td>' + image  + '</td>' +
+              '</tr>' +
+              '<tr>' +
+                '<th scope="row">' + "Revision" + '</th>' +
+                '<td>' + revision  + '</td>' +
+              '</tr>' +
+              '<tr>' +
+                '<th scope="row">' + "Date Started" + '</th>' +
+                '<td>' + date  + '</td>' +
+              '</tr>' +
+              '<tr>' +
+                '<th scope="row">' + "Memory" + '</th>' +
+                '<td>' + memory  + '</td>' +
+              '</tr>' +
+              '<tr>' +
+                '<th scope="row">' + "CPU" + '</th>' +
+                '<td>' + cpu  + '</td>' +
+              '</tr>' +
+            '</tbody>' +
+          '</table>' +
         '</div>' +
       '</div>')
     }
@@ -61,7 +80,7 @@
   div.modal-header {
     font-family: "Lato Light";
     font-weight: bold;
-    padding: 10px; 10px;
+    padding: 10px;
     padding-bottom: 3px
   }
   .modal-backdrop {
@@ -69,21 +88,69 @@
     height: 100vh;
     z-index: 0;
   }
-</style>
+  .modalWrapper {
+    display: flex;
+  }
+  .comparisons {
+    display: flex;
+  }
+}
 
+
+</style>
+<script>
+  $(document).ready(function() {
+    $('#searchReleaseHistory').select2({
+      theme: "classic"
+    });
+
+  })
+</script>
 <!-- This is the modal and it is working with the function above to create multiple unique modal's based on which entry was pressed. -->
 <div class="modal fade bd-example-modal-lg" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="cluster-title" id="clusterLabel"></h4>
+        <!-- <select class="searchReleaseHistory" id="searchReleaseHistory" style="width:25%" multiple="multiple">
+
+        </select> -->
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div id="accordion">
+      <div class="comparisons">
+        <div id="Screen1" style="width:50%; display: inline-block;">
+          <div class="modalWrapper">
+            <h5 id="accordionHeader" class="header1" style="width:50%">  Release Number </h5>
+            <div style="width:50%">
+            <select class="releaseReview" id="release1" name="releases[]" style="width: 100%">
+              <option value="AL">Alabama</option>
+            </select>
+            </div>
+          </div>
+          <div id="accordion1">
 
 
+          </div>
+        </div>
+        <div id="divider" style="width: 0.5%; background-color: #00508F">
+
+        </div>
+        <div id="Screen2" style="width:50%">
+          <div class="modalWrapper">
+            <h5 id="accordionHeader" class="header2" style="width:50%">  Release Number </h5>
+            <div style="width:50%">
+              <select class="releaseReview" id="release2" name="releases[]" style="width: 100%">
+                <option value="1.1.1.1">1.1.1.1</option>
+              </select>
+            </div>
+          </div>
+          <div id="accordion2">
+
+
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -92,13 +159,12 @@
 <table class="table table-hover table-striped">
   <thead>
     <tr>
-      <th scope="col">Client</th>
-      <th scope="col">Product</th>
-      <th scope="col">Release #</th>
-      <th scope="col">Cluster</th>
-      <th scope="col">Environment</th>
-      <th scope="col">Region</th>
-      <th scope="col">Task Definitions</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Product</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Release #</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Cluster</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Environment</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Region</th>
     </tr>
   </thead>
   <tbody>
@@ -107,46 +173,20 @@
 
     {% for result in results %}
 
-    <tr>
-      <th scope="row">{{result.client_name}}</th>
-      <td> {{result.product_name}} </td>
-      <td> {{result.release}} </td>
-      <td> {{result.cluster_name}} </td>
-      <td> {{result.environment}} </td>
-      <td> {{result.region}} </td>
-      <td> {{result.releases}} </td>
-
-      <!-- <td
-        data-toggle="modal"
-        data-target="#clusterDetail"
-        data-clustername="{{result.cluster_name}}"
-        data-tasks='{{result.task_definitions}}'
-      > <button type="button" class="btn btn-primary" style="background-color:#00508F">Click Here</button>
-      </td> -->
+    <tr
+      data-toggle="modal"
+      data-target="#clusterDetail"
+      data-clustername="{{result.cluster_name}}"
+      data-tasks='{{result.task_definitions}}'>
+      <th scope="row" style="font-family:Lato Light; font-size:18px">{{result.client_name}}</th>
+      <td style="font-family:Lato Light; font-size:18px"> {{result.product_name}} </td>
+      <td style="font-family:Lato Light; font-size:18px"> {{result.release}} </td>
+      <td style="font-family:Lato Light; font-size:18px"> {{result.cluster_name}} </td>
+      <td style="font-family:Lato Light; font-size:18px"> {{result.environment}} </td>
+      <td style="font-family:Lato Light; font-size:18px"> {{result.region}} </td>
     </tr>
 
     {% endfor %}
 
   </tbody>
 </table>
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
