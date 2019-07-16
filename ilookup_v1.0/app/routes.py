@@ -4,7 +4,7 @@ from app.models import Client, Product, Product_Release, Cluster, Component, Tas
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 from awsdata import AWSData
-from db_search import Search
+from db_search_v2 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
 import requests
@@ -147,6 +147,7 @@ def createTag():
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
+				
 				if objectified['tagQuery']['tagKey'] == 'Release':
 					updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
 	return 'Successfully updated the cluster(s)'
@@ -266,3 +267,7 @@ def mostRecentReleases():
 	return search_result
 
 
+def getTaskDefinitions(cluster_name, release_number):
+	search = Search()
+	task_definitions = search.getTaskDefinitions(cluster_name,release_number)
+	return task_definitions

@@ -155,7 +155,7 @@ class AWSData:
 			#self.populateTaskDefinition(component_id, cluster, service, latest_product_release_number, region_name)
 
 
-	def populateTaskDefinition(self, component_id,cluster, service, product_release_number, region_name, ):
+	def populateTaskDefinition(self, component_id,cluster, service, product_release_number, region_name ):
 		client = boto3.client("ecs", region_name=region_name)
 		tasks = client.list_tasks(cluster = cluster, serviceName = service)
 		tasks = tasks["taskArns"]
@@ -209,8 +209,8 @@ class AWSData:
 		latestTime = db.session.query(func.max(Product_Release.inserted_at).label("inserted_at"), Product_Release.release_number, Product_Release.product_id)
 		#print(latestTime)
 		latestTime = latestTime.group_by(Product_Release.product_id).filter(Product_Release.product_id==product_id).first()
-		# print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		# print(latestTime)
+		print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		print(latestTime)
 		# print(tag_release_number)
 		# print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		#release_number = latestTime[0]
@@ -229,9 +229,13 @@ class AWSData:
 			else:
 				release_number = tag_release_number
 				print("im in loop 1")
-		elif latestTime[0]:
+		elif latestTime[1]:
 			if tag_release_number:
-				if latestTime[0] == tag_release_number:
+				print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+				print("latest time, tag_release_number", latestTime[0], tag_release_number)
+				print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
+				if latestTime[1] == tag_release_number:
 					print("tag is not empty and two release numbers are equal!............")
 					current_time = datetime.utcnow()
 					release_number = current_time
