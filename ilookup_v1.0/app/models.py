@@ -82,6 +82,7 @@ class CPRC(db.Model):
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.cluster_id'))
     product_release_id = db.Column(db.Integer, db.ForeignKey('product_release.product_release_id'))
     client_id = db.Column(db.Integer, db.ForeignKey('client.client_id'))
+    #is_active = db.Column(db.Boolean,default=True)
     cluster = db.relationship('Cluster', backref='clusters')
     product_release = db.relationship('Product_Release', backref='product_releases')
     client = db.relationship('Client', backref='clients')

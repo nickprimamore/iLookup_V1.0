@@ -475,7 +475,6 @@ let addReleaseTag = {}
       tags: true
     });
 
-
     function getTagValues() {
       var productTag = $('#selectProduct').val()
       var regionTag = $('#selectRegion').val()
@@ -542,9 +541,7 @@ let addReleaseTag = {}
     $('.updateTags').on('change.select2', function(e) {
       addReleaseTag['product'] = $('.productsTag').val()[0]
       addReleaseTag['region'] = $('.regionsTag').val()[0]
-      console.log(addReleaseTag)
       values = getTagValues()
-      console.log('The Values Are', values)
       $.ajax({
         url:'/update',
         type: 'POST',
@@ -570,7 +567,6 @@ let addReleaseTag = {}
             $("#addClustersSelect2 option[value=" + $(this).val() + "]").remove()
             $("#addClustersSelect2").select2('close')
           })
-          console.log("does this move?")
           for (let product in response.productsUp) {
             let newOption
             if (values[0].includes(response.productsUp[product])) {
@@ -581,7 +577,6 @@ let addReleaseTag = {}
             $('#selectProduct').append(newOption);
           }
           for (let region in response.regionsUp) {
-            console.log(region)
             let newOption
             if (values[1].includes(response.regionsUp[region])) {
               newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
@@ -592,7 +587,6 @@ let addReleaseTag = {}
           }
           for (let cluster in response.clustersUp) {
             let newOption
-            console.log(cluster)
             if (values[2].includes(response.clustersUp[cluster])) {
               newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
             } else {
@@ -611,7 +605,6 @@ let addReleaseTag = {}
     let tagValue = document.getElementById('tagValue').value
     addReleaseTag['tagValue'] = tagValue
     addReleaseTag['tagKey'] = $('.editTag').val()
-    console.log(addReleaseTag)
     $.ajax({
       url:'/newTag',
       type:'POST',
@@ -703,7 +696,7 @@ let addReleaseTag = {}
               </select>
             </div>
             <div class="col-md-8" style="padding-left:0px; padding-right:0px; display: inline-block">
-              <input type="text" class="form-control" id="tagValue" aria-describedby="tagFormat" placeholder="Enter new value here">
+              <input type="text" class="form-control" style="width:112%" id="tagValue" aria-describedby="tagFormat" placeholder="Enter new value here">
               <!-- <small id="tagFormat" class="form-text text-muted">Example release format: 1.1.1.1</small> -->
             </div>
             <br><br>

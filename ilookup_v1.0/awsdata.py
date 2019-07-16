@@ -2,6 +2,7 @@ from app import db
 from app.models import Product, Client, Cluster, Component, Task_Definition, Product_Release, CPRC
 from sqlalchemy import func
 from datetime import datetime
+
 import boto3
 import json
 import pprint
@@ -12,7 +13,7 @@ import re
 
 class AWSData:
 	def newMainFunction(self):
-		nvirginia = "us-east-1"  
+		nvirginia = "us-east-1"
 		london = "eu-west-2"
 		print("Running London Region")
 		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -48,7 +49,7 @@ class AWSData:
 				if ("Client") in key:
 					client_name = tags[key]
 					client_names.append(client_name)
-					self.populateClient(client_name) 
+					self.populateClient(client_name)
 					#print("Tagging client name", client_name)
 				if ("Product") in key:
 					product_name = tags["Product"]
@@ -58,7 +59,7 @@ class AWSData:
 					product_release_number = tags[key]
 				if ("Environment") in key:
 					environment = tags[key]
-			
+
 			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
 				#clients = Client.query.all()
 			# if (product_name!="unknown" and product_release_number!=""):
@@ -97,7 +98,7 @@ class AWSData:
 			# 		self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 	def populateClusters(self, cluster,cluster_name,environment,region,product_release_number,region_name, product_name,client_names):
-		
+
 		exists_cluster = db.session.query(Cluster.cluster_name).filter_by(cluster_name=cluster_name).filter_by(region=region).scalar() is not None
 		if exists_cluster:
 			print("nothing")
@@ -130,7 +131,7 @@ class AWSData:
 			exists_component = db.session.query(Component.component_name).filter_by(component_name=service_name).filter_by(cluster_id=cluster_id[0]).scalar() is not None
 			if exists_component:
 				print(" Component Already Exists")
-			else: 
+			else:
 				print(service_name)
 				component = Component(component_name = service_name, cluster_id= cluster_id[0], is_active=True)
 				db.session.add(component)
@@ -138,10 +139,10 @@ class AWSData:
 
 			##get the component_id of the corresponding component
 			component_id = db.session.query(Component.component_id).filter_by(component_name=service_name).first()
-			
+
 			tasks = client.list_tasks(cluster=cluster, serviceName=service)
 			tasks = tasks["taskArns"]
-			task_component_dict = {}	
+			task_component_dict = {}
 			task_component_dict["component_id"] = component_id
 			print(tasks)
 			task_component_dict["task"] = tasks
@@ -155,7 +156,7 @@ class AWSData:
 			#self.populateTaskDefinition(component_id, cluster, service, latest_product_release_number, region_name)
 
 
-	def populateTaskDefinition(self, component_id,cluster, service, product_release_number, region_name, ):
+	def populateTaskDefinition(self, component_id,cluster, service, product_release_number, region_name ):
 		client = boto3.client("ecs", region_name=region_name)
 		tasks = client.list_tasks(cluster = cluster, serviceName = service)
 		tasks = tasks["taskArns"]
@@ -176,10 +177,10 @@ class AWSData:
 				cpu =  str(task_definition["taskDefinition"]["cpu"])
 				memory =  str(task_definition["taskDefinition"]["memory"])
 				revision = str(task_definition["taskDefinition"]["revision"])
-				
+
 				#if task_definition['taskDefinition'][release_number] is None:
 				release_number = product_release_number # To be updated in later version
-				
+
 
 				if (lastStatus == "RUNNING"):
 					date =  tasks_description["startedAt"]
@@ -209,8 +210,8 @@ class AWSData:
 		latestTime = db.session.query(func.max(Product_Release.inserted_at).label("inserted_at"), Product_Release.release_number, Product_Release.product_id)
 		#print(latestTime)
 		latestTime = latestTime.group_by(Product_Release.product_id).filter(Product_Release.product_id==product_id).first()
-		# print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		# print(latestTime)
+		print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		print(latestTime)
 		# print(tag_release_number)
 		# print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		#release_number = latestTime[0]
@@ -226,12 +227,17 @@ class AWSData:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 				current_time = datetime.utcnow()
 				release_number = current_time
+
 			else:
 				release_number = tag_release_number
 				print("im in loop 1")
-		elif latestTime[0]:
+		elif latestTime[1]:
 			if tag_release_number:
-				if latestTime[0] == tag_release_number:
+				print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+				print("latest time, tag_release_number", latestTime[0], tag_release_number)
+				print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
+				if latestTime[1] == tag_release_number:
 					print("tag is not empty and two release numbers are equal!............")
 					current_time = datetime.utcnow()
 					release_number = current_time
@@ -241,6 +247,7 @@ class AWSData:
 				print("release number aws tag is empty")
 				current_time = datetime.utcnow()
 				release_number = current_time
+
 			# update aws release tag here
 		#if (tag_release_number != "") and (tag_release_number!=None):
 		else:
@@ -259,9 +266,9 @@ class AWSData:
 		res = client.list_tags_for_resource(resourceArn = clusterArn)
 		tagsDict =  {}
 		tagsDict["cluster_name"] = cluster_name
-		for tag in res["tags"]: 
+		for tag in res["tags"]:
 			tagsDict[tag["key"]] = tag["value"]
-		return tagsDict   
+		return tagsDict
 
 	def populateProduct(self, product_name):
 		product_id = db.session.query(Product.product_id).filter_by(product_name=product_name).first()
@@ -271,7 +278,7 @@ class AWSData:
 		# product_id = product_id[0]
 		#print(product_id)
 		exists_product = db.session.query(Product.product_id).filter_by(product_id=product_id).scalar() is not None
-			
+
 		#print("New entry is added in product table")y(Product.product_id).filter_by(product_id=product_id).scalar() is not None
 		if exists_product:
 			print("Product already exists in database")
@@ -279,7 +286,7 @@ class AWSData:
 			productValue = Product(product_name=product_name, is_active=True)
 			db.session.add(productValue)
 			db.session.commit()
-	
+
 	def populateClient(self, client_name):
 		client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
 		print("this is client id.......", client_id, client_name)
@@ -306,9 +313,9 @@ class AWSData:
 
 		#print(exists_product_release)
 		if exists_product_release:
-			print("already exists record for product_release")		
-		
-		else:		
+			print("already exists record for product_release")
+
+		else:
 			product_release_value = Product_Release(product_id=product_id, release_number=release_number, inserted_at=datetime.utcnow())
 			db.session.add(product_release_value)
 			#print('inserted new record in product_release table')
@@ -330,13 +337,13 @@ class AWSData:
 		exists_cprc = db.session.query(CPRC).filter_by(client_id=client_id).filter_by(cluster_id=cluster_id).filter_by(product_release_id=product_release_id).scalar() is not None
 
 		if exists_cprc:
-			print("already exists record for cprc")	
+			print("already exists record for cprc")
 		else:
 			cprc_value = CPRC(client_id=client_id, cluster_id=cluster_id, product_release_id=product_release_id)
 			db.session.add(cprc_value)
 			#print('inserted new record in product_release table')
-			db.session.commit()		
-			print("Added new record in CPRC")	
+			db.session.commit()
+			print("Added new record in CPRC")
 
 	def compareTaskDefinition(self,cluster, cluster_name, product_release_number, region_name,cluster_task_list, product_name, client_names):
 		client = boto3.client("ecs", region_name=region_name)
@@ -348,7 +355,7 @@ class AWSData:
 		# 	component_id = cluster_task["component_id"]
 		# 	task = cluster_task["task"]
 		# 	tasks.append(task)
-		
+
 		size = len(cluster_task_list)
 
 		pprint.pprint(cluster_task_list)
@@ -368,7 +375,7 @@ class AWSData:
 				for cluster_task in cluster_task_list:
 					#print("printing aws task..........",cluster_task["task"])
 					# Assuming no new task added or old task deleted just revision number changed
-					
+
 					task_descriptions = client.describe_tasks(cluster = cluster, tasks = cluster_task["task"])
 					task_descriptions = task_descriptions["tasks"]
 					task_def_description = task_descriptions[0]["taskDefinitionArn"]
@@ -393,9 +400,9 @@ class AWSData:
 							component_id = cluster_task["component_id"]
 							service = cluster_task["service"]
 							self.populateTaskDefinition(component_id,cluster,service,latest_product_release_number,region_name)
-						
+
 						### Update my product release if new task def is found
-						
+
 						if (product_name!="unknown" and product_release_number!=""):
 							print(product_release_number) # tag/time
 							product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
@@ -437,8 +444,8 @@ class AWSData:
 							task.is_active = False
 							db.session.commit()
 						break
-						 
-						
+
+
 					else:
 						print("Already exists in the database! - Task Def")
 			else:
@@ -492,7 +499,7 @@ class AWSData:
 
 
 
-						
+
 
 
 
