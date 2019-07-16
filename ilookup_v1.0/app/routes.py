@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 # from awsdata import AWSData
 from db_search import Search
-# from db_update_release import Update_Release
+# # from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
 import requests
 import json
@@ -305,5 +305,3 @@ def mostRecentReleases():
 	search = Search()
 	search_result = search.getLatestReleases()
 	return search_result
-
-
