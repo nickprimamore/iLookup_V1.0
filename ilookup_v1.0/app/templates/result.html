@@ -82,17 +82,20 @@
         for (let rel in response) {
           let newOption
           let secondOption
+          let thirdOption
           if (release == response[rel]) {
             newOption = new Option(response[rel], response[rel], true, true);
             loadAccordion(1, clusterName, release)
             secondOption = new Option(response[rel], response[rel], true, false)
+            thirdOption = new Option(response[rel], response[rel], true, false)
           } else {
             newOption = new Option(response[rel], response[rel], true, false);
             secondOption = new Option(response[rel], response[rel], true, false)
+            thirdOption = new Option(response[rel], response[rel], true, false)
           }
           $('#release1').append(newOption)
           $('#release2').append(secondOption)
-          $('#changeRelease').append(secondOption)
+          $('#changeRelease').append(Option)
         }
 
       }
@@ -140,6 +143,10 @@
     $('#release2 option').each(function() {
       $("#release2 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
       $("#release2").select2('close')
+    })
+    $('#changeRelease option').each(function() {
+      $("#changeRelease option[value=" + "'" + $(this).val()  + "'" + "]").remove()
+      $("#changeRelease").select2('close')
     })
   })
 

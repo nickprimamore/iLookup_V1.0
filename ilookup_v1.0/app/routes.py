@@ -284,7 +284,7 @@ def sendReleases():
 	releasesStrArray = []
 	for x in releases:
 		strX = str(x)
-		releasesStrArray.append(strX[2: len(strX)-3])
+		releasesStrArray.append(strX[3: len(strX)-3])
 	return jsonify(releasesStrArray)
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])
