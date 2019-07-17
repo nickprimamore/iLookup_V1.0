@@ -61,9 +61,9 @@ class Search:
 
 
 		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
-			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
+			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).filter(CPRC.is_active==True).distinct()
 		maxResult = []
-		maxReleases = db.session.query(func.max(Product_Release.release_number).label("release_number"),Product_Release.product_release_id, Product_Release.product_id)
+		maxReleases = db.session.query(func.max(Product_Release.inserted_at).label("inserted_at"),Product_Release.product_release_id, Product_Release.release_number)
 		maxReleases = maxReleases.group_by(Product_Release.product_id).all()
 		for res in maxReleases:
 			#print(res.release_number, res.product_release_id)
@@ -74,42 +74,23 @@ class Search:
 			print(res.Client.client_name, res.Product.product_name, res.Product_Release.release_number, res.Cluster.cluster_name)
 
 
-	    # print("Before")
-	    # print(maxReleases)
-	    # print("After")
-	    # maxReleases = maxReleases.group_by(Product_Release.product_id, Client.client_id).all()
-	    # print(maxReleases)
-			   #maxReleases = db.session.query(func.max(Product_Release.release_number).label("release_number"),CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id==Client.client_id,CPRC.product_release_id == Product_Release.product_release_id,Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id)
 
 
-		task_definitions = []
-		results=[]
-		for res in maxResult:
-			result = {}
-			result["client_name"] = res.Client.client_name
-			result["product_name"] = res.Product.product_name
-			result["release"] = res.Product_Release.release_number
-			result["cluster_name"] = res.Cluster.cluster_name
-			result["region"] = res.Cluster.region
-			result["environment"] = res.Cluster.environment
-			task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
-			task_definition_list = []
-			for task_definition in task_definition_result:
-				task = {}
-				task["task_definition_name"] = task_definition.Task_Definition.task_definition_name
-				task["image_tag"] = task_definition.Task_Definition.image_tag
-				task["revision"] = task_definition.Task_Definition.revision
-				task["date"] = task_definition.Task_Definition.date
-				task["cpu"] = task_definition.Task_Definition.cpu
-				task["memory"] = task_definition.Task_Definition.memory
-				task["release"] = task_definition.Task_Definition.release_number
-				task_definition_list.append(task)
-				result["task_definitions"] = task_definition_list
-			if len(task_definition_list)>0:
-				results.append(result)
-		print(len(results))
-		#pprint.pprint(results)
-		return results
+		# task_definitions = []
+		# results=[]
+		# for res in maxResult:
+		# 	result = {}
+		# 	result["client_name"] = res.Client.client_name
+		# 	result["product_name"] = res.Product.product_name
+		# 	result["release"] = res.Product_Release.release_number
+		# 	result["cluster_name"] = res.Cluster.cluster_name
+		# 	result["region"] = res.Cluster.region
+		# 	result["environment"] = res.Cluster.environment
+			
+		# print(len(results))
+		# #pprint.pprint(results)
+		# return results
+		return maxResult
 
 
 ### NEW FUNCTION
@@ -131,8 +112,7 @@ class Search:
 
 
 
-
-#search_result = Search()
+# search_result = Search()
 # search_result.getLatestReleases()
 
 # print("Searching for client_name")

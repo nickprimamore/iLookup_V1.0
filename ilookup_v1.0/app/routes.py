@@ -3,10 +3,11 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-from awsdata import AWSData
+# from awsdata import AWSData
 from db_search_v2 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
+from addUpdateDB import AddUpdateRecords
 import requests
 import json
 import boto3
@@ -140,13 +141,27 @@ def createTag():
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
 			if (cluster == cluster_split[1]):
-				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
-				tags = currentTags["tags"]
+				currentTags = client.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
+				tags = currentTags["tags"] 
 				for tag in tags:
+					if tag['key'] == "client1":
+						old_client_name = tag['value']
+					# get old tag value here
+					print(tag['key'],tag["value"])
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
+				print(objectified['tagQuery']['tagValue'])
 				
+				if "Client" in objectified['tagQuery']['tagKey']:
+					new_client_key = objectified['tagQuery']['tagKey']
+					new_client_name = objectified['tagQuery']['tagValue']
+					cluster_name = cluster_split[1]
+					fetchClientKeyValue(new_client_key,new_client_name,cluster_name,currentTags)
+				if "Environment" in objectified['tagQuery']['tagKey']:
+					cluster_name = cluster_split[1]
+					addUpdateRecord = AddUpdateRecords()
+					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'])
 				if objectified['tagQuery']['tagKey'] == 'Release':
 					updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
 	return 'Successfully updated the cluster(s)'
@@ -287,4 +302,24 @@ def getTaskDefinitions(cluster_name, release_number):
 	search = Search()
 	task_definitions = search.getTaskDefinitions(cluster_name,release_number)
 	return task_definitions
+
+
+def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTags):
+	print(currentTags)
+	currentTags = currentTags['tags']
+	for tag in currentTags:
+		if tag['key'] == new_client_key:
+			old_client_name = tag['value']
+		if tag['key'] == "Product":
+			product_name = tag['value']
+		if tag['key'] == "Release":
+			release_number = tag['value']
+		if tag['key'] == "Environment":
+			environment = tag['value']
+	addUpdateRecord = AddUpdateRecords()
+	addUpdateRecord.addUpdateClient(old_client_name,new_client_name,product_name,cluster_name,release_number)
+	#addUpdateRecord.updateEnvironment(cluster_name,environment)
+	# call other addUpdate functions here
+
+
 
