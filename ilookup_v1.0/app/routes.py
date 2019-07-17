@@ -151,6 +151,7 @@ def createTag():
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
+
 				print(objectified['tagQuery']['tagValue'])
 				
 				if "Client" in objectified['tagQuery']['tagKey']:
@@ -162,6 +163,7 @@ def createTag():
 					cluster_name = cluster_split[1]
 					addUpdateRecord = AddUpdateRecords()
 					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'])
+
 				if objectified['tagQuery']['tagKey'] == 'Release':
 					updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
 	return 'Successfully updated the cluster(s)'
@@ -276,9 +278,52 @@ def result():
 			if fromDate == "":
 				fromDate = None
 		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
-
+		results = results + (result)
 		# Within results, create an object that {cluster_name: [releases] or {Release: 1.1.1.1, Info: Etc}} and pass it into the front end, where we map it by connecting release numbers - Having it as hidden dropdowns
+
 	return render_template('result.html', results=results)
+
+@app.route('/getTasks', methods=["GET", "POST"])
+def sendTasks():
+	data = request.form.keys()
+	for values in data:
+		objectified = json.loads(values)
+	tasks = getTaskDefinitions(objectified["clusterName"], objectified["releaseNum"])
+
+	return jsonify(tasks)
+
+@app.route('/getReleaseHistory', methods=["GET", "POST"])
+def sendReleases():
+	data = request.form.keys()
+	for values in data:
+		objectified = json.loads(values)
+	releases = getReleases(objectified["clusterName"])
+	releasesStrArray = []
+	for x in releases:
+		strX = str(x)
+		releasesStrArray.append(strX[2: len(strX)-3])
+	return jsonify(releasesStrArray)
+
+@app.route('/updateReleaseTable', methods=["GET", "POST"])
+def updateReleaseTable():
+	data = request.form.keys()
+	clusters = client.list_clusters()
+	clusterArns = cluster["clusterArns"]
+	for values in data:
+		objectified = json.loads(values)
+	# this is where you will add the code to update the Task Definition and PRID table with the newRelease using objectified["newRelease"]
+	for awsCluster in clusterArns:
+		cluster_split = awsCluster.split("/")
+		if (objectified["clusterName"] == cluster_split[1]):
+			currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+			tags = currentTags["tags"]
+			for tag in tags:
+				if tag["key"] == "Release":
+					if tag["value"] == objectified["oldRelease"]:
+						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
+						client.tag_resource(resourceArn=awsCluster, tags=[{'key': 'Release', 'value': objectified["newRelease"]}])
+	return "Helo"
+
 
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 	search = Search()
@@ -297,12 +342,10 @@ def mostRecentReleases():
 	search_result = search.getLatestReleases()
 	return search_result
 
-
 def getTaskDefinitions(cluster_name, release_number):
 	search = Search()
 	task_definitions = search.getTaskDefinitions(cluster_name,release_number)
 	return task_definitions
-
 
 def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTags):
 	print(currentTags)
@@ -322,4 +365,8 @@ def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTa
 	# call other addUpdate functions here
 
 
+def getReleases(cluster_name):
+	search = Search()
+	releases = search.getReleases(cluster_name)
+	return releases
 

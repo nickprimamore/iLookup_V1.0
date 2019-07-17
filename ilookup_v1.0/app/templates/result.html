@@ -4,74 +4,143 @@
   $(document).ready(function() {
     $('.releaseReview').select2();
   })
+
+  function loadAccordion(screen, cluster_name, release_number) {
+    $.ajax({
+      url:"/getTasks",
+      type: "POST",
+      data: JSON.stringify({
+        clusterName: cluster_name,
+        releaseNum: release_number
+      }),
+      success: function(response) {
+        for (task of response) {
+          let image = task.image_tag.substring(task.image_tag.length-7, task.image_tag.length)
+          let memory = task.memory
+          let date = task.date
+          let cpu = task.cpu
+          let revision = task.revision
+          let task_name = task.task_definition_name
+
+          let header = document.getElementById('accordionHeader' + screen.toString())
+          header.innerHTML = release_number
+          $( "#accordion" + screen.toString() ).append('<div class="card deleteOnClose' + screen.toString() + '">' +
+            '<div class="card-header deleteOnClose" id="headingOne">' +
+              '<h5 class="mb-0 deleteOnClose">' +
+                '<button class="btn btn-link deleteOnClose" data-toggle="collapse" data-target="#' + image + screen.toString() + '" aria-expanded="true" aria-controls="' + image + screen.toString() + '">' +
+                task_name + '<br class="deleteOnClose"/>' +
+                '</button>' +
+              '</h5>' +
+            '</div>'+
+            '<div id="' + image + screen.toString() + '" class="collapse deleteOnClose" aria-labelledby="headingOne" data-parent="#accordion">' +
+              '<table class="table table-bordered">' +
+                '<tbody>' +
+                  '<tr>' +
+                    '<th scope="row">' + "Image Tag" + '</th>' +
+                    '<td>' + image  + '</td>' +
+                  '</tr>' +
+                  '<tr>' +
+                    '<th scope="row">' + "Revision" + '</th>' +
+                    '<td>' + revision  + '</td>' +
+                  '</tr>' +
+                  '<tr>' +
+                    '<th scope="row">' + "Date Started" + '</th>' +
+                    '<td>' + date  + '</td>' +
+                  '</tr>' +
+                  '<tr>' +
+                    '<th scope="row">' + "Memory" + '</th>' +
+                    '<td>' + memory  + '</td>' +
+                  '</tr>' +
+                  '<tr>' +
+                    '<th scope="row">' + "CPU" + '</th>' +
+                    '<td>' + cpu  + '</td>' +
+                  '</tr>' +
+                '</tbody>' +
+              '</table>' +
+            '</div>' +
+          '</div>')
+        }
+      }
+    })
+  }
+
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
-    let tasks = trigger.data('tasks')
+    let releases = trigger.data('releases')
+    let release = trigger.data('release')
     let clusterName = trigger.data('clustername')
-    tasks = tasks.split('{')
-    tasks.shift()
-    let compTasks = []
-    for (let i = 0; i < tasks.length; i++) {
-      strObject = tasks[i]
-      strObject = "{" + strObject
-      strObject = strObject.substring(0, strObject.length-1)
-      strObject = strObject.replace(/'/g, '"')
-      if (i+1 != tasks.length) {
-        strObject = strObject.substring(0, strObject.length-1)
+    let product = trigger.data('product')
+    $.ajax({
+      url:"/getReleaseHistory",
+      type: "POST",
+      data: JSON.stringify({
+        clusterName: clusterName
+      }),
+      success: function(response) {
+        blankOption = new Option("", "", true, false)
+        $('#release2').append(blankOption)
+        for (let rel in response) {
+          let newOption
+          let secondOption
+          if (release == response[rel]) {
+            newOption = new Option(response[rel], response[rel], true, true);
+            loadAccordion(1, clusterName, release)
+            secondOption = new Option(response[rel], response[rel], true, false)
+          } else {
+            newOption = new Option(response[rel], response[rel], true, false);
+            secondOption = new Option(response[rel], response[rel], true, false)
+          }
+          $('#release1').append(newOption)
+          $('#release2').append(secondOption)
+          $('#changeRelease').append(secondOption)
+        }
+
       }
-      strObject = JSON.parse(strObject)
-      compTasks.push(strObject)
-    }
+    })
     let modal = $(this)
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
 
-    for (task of compTasks) {
-      let image = task.image_tag.substring(task.image_tag.length-7, task.image_tag.length)
-      let memory = task.memory
-      let date = task.date
-      let cpu = task.cpu
-      let revision = task.revision
-      let task_name = task.task_definition_name
+    $('#release1').on('select2:select', function(e) {
+      $('.deleteOnClose1').remove()
+      loadAccordion(1, clusterName, $('#release1').val())
+    })
 
-      $( "#accordion1" ).append('<div class="card deleteOnClose">' +
-        '<div class="card-header deleteOnClose" id="headingOne">' +
-          '<h5 class="mb-0 deleteOnClose">' +
-            '<button class="btn btn-link deleteOnClose" data-toggle="collapse" data-target="#' + image + '" aria-expanded="true" aria-controls="' + image + '">' +
-            task_name + '<br class="deleteOnClose"/>' +
-            '</button>' +
-          '</h5>' +
-        '</div>'+
-        '<div id="' + image + '" class="collapse deleteOnClose" aria-labelledby="headingOne" data-parent="#accordion">' +
-          '<table class="table table-bordered">' +
-            '<tbody>' +
-              '<tr>' +
-                '<th scope="row">' + "Image Tag" + '</th>' +
-                '<td>' + image  + '</td>' +
-              '</tr>' +
-              '<tr>' +
-                '<th scope="row">' + "Revision" + '</th>' +
-                '<td>' + revision  + '</td>' +
-              '</tr>' +
-              '<tr>' +
-                '<th scope="row">' + "Date Started" + '</th>' +
-                '<td>' + date  + '</td>' +
-              '</tr>' +
-              '<tr>' +
-                '<th scope="row">' + "Memory" + '</th>' +
-                '<td>' + memory  + '</td>' +
-              '</tr>' +
-              '<tr>' +
-                '<th scope="row">' + "CPU" + '</th>' +
-                '<td>' + cpu  + '</td>' +
-              '</tr>' +
-            '</tbody>' +
-          '</table>' +
-        '</div>' +
-      '</div>')
-    }
+    $('#release2').on('select2:select', function(e) {
+      $('.deleteOnClose2').remove()
+      loadAccordion(2, clusterName, $('#release2').val())
+    })
+
+    // function updateRelease() {
+    //   $.ajax({
+    //     url:"/updateReleaseTable",
+    //     type:"POST",
+    //     data: JSON.stringify({
+    //       clusterName: clusterName,
+    //       product: product,
+    //       newRelease: document.getElementById('newRelease').value,
+    //       oldRelease: $('#changeRelease').val()
+    //     }),
+    //     success: function(response) {
+    //
+    //     }
+    //   })
+    // }
+
+
   })
-  $('#clusterDetail').on('hide.bs.modal', function (event) {
-    $('.deleteOnClose').remove();
+  $('#clusterDetail').on('hide.bs.modal', function (event){
+    let header = document.getElementById('accordionHeader2')
+    header.innerHTML = "Release Number"
+    $('.deleteOnClose1').remove();
+    $('.deleteOnClose2').remove()
+    $('#release1 option').each(function() {
+      $("#release1 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
+      $("#release1").select2('close')
+    })
+    $('#release2 option').each(function() {
+      $("#release2 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
+      $("#release2").select2('close')
+    })
   })
 
 </script>
@@ -94,61 +163,64 @@
   .comparisons {
     display: flex;
   }
+  .insideModal {
+    display: flex;
+    flex-direction: column
+  }
 }
 
 
 </style>
-<script>
-  $(document).ready(function() {
-    $('#searchReleaseHistory').select2({
-      theme: "classic"
-    });
-
-  })
-</script>
 <!-- This is the modal and it is working with the function above to create multiple unique modal's based on which entry was pressed. -->
 <div class="modal fade bd-example-modal-lg" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="cluster-title" id="clusterLabel"></h4>
-        <!-- <select class="searchReleaseHistory" id="searchReleaseHistory" style="width:25%" multiple="multiple">
-
-        </select> -->
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="comparisons">
-        <div id="Screen1" style="width:50%; display: inline-block;">
-          <div class="modalWrapper">
-            <h5 id="accordionHeader" class="header1" style="width:50%">  Release Number </h5>
-            <div style="width:50%">
-            <select class="releaseReview" id="release1" name="releases[]" style="width: 100%">
-              <option value="AL">Alabama</option>
-            </select>
-            </div>
-          </div>
-          <div id="accordion1">
-
-
-          </div>
+      <div class="insideModal">
+        <div id="release_form" style="width:100%; display: block; border:1px solid #00508F">
+          <label class="modalLabel" for="changeRelease">Change Release Number:</label>
+          <br>
+          <select class="releaseReview" id="changeRelease" style="width:45%" >
+          </select>
+          <input type="text" style="width:36%" id="newRelease" aria-describedby="newRelease" placeholder="Enter new Release">
+          <button type="button" class="btn btn-primary" style="background-color:#007ACC" onclick="updateRelease()">Update Release</button>
         </div>
-        <div id="divider" style="width: 0.5%; background-color: #00508F">
+        <div class="comparisons">
+          <div id="Screen1" style="width:50%">
+            <div class="modalWrapper">
+              <h5 style="width:50%"><div id="accordionHeader1">Release Number</div></h5>
+              <div style="width:50%">
+              <select class="releaseReview" id="release1" name="releases[]" style="width: 100%">
 
-        </div>
-        <div id="Screen2" style="width:50%">
-          <div class="modalWrapper">
-            <h5 id="accordionHeader" class="header2" style="width:50%">  Release Number </h5>
-            <div style="width:50%">
-              <select class="releaseReview" id="release2" name="releases[]" style="width: 100%">
-                <option value="1.1.1.1">1.1.1.1</option>
               </select>
+              </div>
+            </div>
+            <div id="accordion1">
+
+
             </div>
           </div>
-          <div id="accordion2">
+          <div id="divider" style="width: 0.5%; background-color: #00508F">
+
+          </div>
+          <div id="Screen2" style="width:50%">
+            <div class="modalWrapper">
+              <h5 style="width:50%"><div id="accordionHeader2"> Release Number </div></h5>
+              <div style="width:50%">
+                <select class="releaseReview" id="release2" name="releases[]" style="width: 100%">
+
+                </select>
+              </div>
+            </div>
+            <div id="accordion2">
 
 
+            </div>
           </div>
         </div>
       </div>
@@ -177,13 +249,15 @@
       data-toggle="modal"
       data-target="#clusterDetail"
       data-clustername="{{result.cluster_name}}"
-      data-tasks='{{result.task_definitions}}'>
-      <th scope="row" style="font-family:Lato Light; font-size:18px">{{result.client_name}}</th>
-      <td style="font-family:Lato Light; font-size:18px"> {{result.product_name}} </td>
-      <td style="font-family:Lato Light; font-size:18px"> {{result.release}} </td>
-      <td style="font-family:Lato Light; font-size:18px"> {{result.cluster_name}} </td>
-      <td style="font-family:Lato Light; font-size:18px"> {{result.environment}} </td>
-      <td style="font-family:Lato Light; font-size:18px"> {{result.region}} </td>
+      data-releases="{{result.releases}}"
+      data-release="{{result.release}}"
+      data-product="{{result.product}}">
+      <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.client_name}}</th>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.product_name}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.release}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.cluster_name}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.environment}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.region}} </td>
     </tr>
 
     {% endfor %}

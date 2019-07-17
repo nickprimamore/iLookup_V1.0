@@ -45,10 +45,10 @@ class Search:
 			#call cprc to fetch records based on same client, cluster
 			# get prid and the  corresponding release numbers from PRID Table
 			# shove it here
-			
-			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
-			release_numbers = list(set(release_numbers))
-			result["releases"] = release_numbers
+
+			# release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
+			# release_numbers = list(set(release_numbers))
+			# result["releases"] = release_numbers
 			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			#print(result)
 			#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -110,6 +110,12 @@ class Search:
 		pprint.pprint(result)
 		return result
 
+	def getReleases(self, cluster_name=None):
+		release_numbers = []
+		release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).all()
+		release_numbers = list(set(release_numbers))
+
+		return release_numbers
 
 
 # search_result = Search()
