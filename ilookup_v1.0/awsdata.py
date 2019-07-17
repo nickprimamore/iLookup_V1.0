@@ -2,11 +2,12 @@ from app import db
 from app.models import Product, Client, Cluster, Component, Task_Definition, Product_Release, CPRC
 from sqlalchemy import func
 from datetime import datetime
-from releaseEmail import Email
+
 import boto3
 import json
 import pprint
 import re
+
 
 # client = boto3.client("ecs")
 
@@ -20,8 +21,6 @@ class AWSData:
 		print("Running N. Virginia Region")
 		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		self.mainFunction(nvirginia)
-
-
 
 	def mainFunction(self,region_name):
 		client = boto3.client("ecs", region_name=region_name)
@@ -202,7 +201,7 @@ class AWSData:
 
 				#print("================================")
 
-	def checkForLatestRelease(self, product_name, tag_release_number):
+	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name):
 
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
@@ -229,8 +228,6 @@ class AWSData:
 				current_time = datetime.utcnow()
 				release_number = current_time
 
-
-
 			else:
 				release_number = tag_release_number
 				print("im in loop 1")
@@ -251,6 +248,10 @@ class AWSData:
 				current_time = datetime.utcnow()
 				release_number = current_time
 
+
+
+
+
 			# update aws release tag here
 		#if (tag_release_number != "") and (tag_release_number!=None):
 		else:
@@ -259,6 +260,15 @@ class AWSData:
 			print("im in loop 2")
 
 		print(release_number)
+
+		# call aws 
+		print("?????????????????>>>>>>>>>>>>>>>>>>>????????????????????")
+		print(cluster)
+		print("?????????????????>>>>>>>>>>>>>>>>>>>????????????????????")
+		client = boto3.client("ecs", region_name=region_name)
+		release_number = str(release_number)
+		print(release_number)
+		client.tag_resource(resourceArn=cluster, tags=[{'key':"Release", 'value': release_number}])
 
 		return release_number
 
@@ -370,6 +380,7 @@ class AWSData:
 			print("==================================================")
 			print("In compareTaskDefinition function", product_name, product_release_number, client_names)
 			print("==================================================")
+
 			if len(db_task_defs)>0:
 				db_task_def_names = []
 				for db_task in db_task_defs:
@@ -378,83 +389,86 @@ class AWSData:
 					#print("printing aws task..........",cluster_task["task"])
 					# Assuming no new task added or old task deleted just revision number changed
 
-					task_descriptions = client.describe_tasks(cluster = cluster, tasks = cluster_task["task"])
-					task_descriptions = task_descriptions["tasks"]
-					task_def_description = task_descriptions[0]["taskDefinitionArn"]
-					newsplit = task_def_description.split("/")
-					task_def = newsplit[1]
+					# check for emtpy list or None type object
+					if len(cluster_task['task']) >0:
 
-					print(".................................................")
-					print("task definition in aws", task_def)
-					print(".................................................")
+						task_descriptions = client.describe_tasks(cluster = cluster, tasks = cluster_task["task"])
+						task_descriptions = task_descriptions["tasks"]
+						task_def_description = task_descriptions[0]["taskDefinitionArn"]
+						newsplit = task_def_description.split("/")
+						task_def = newsplit[1]
 
-
-
-					if task_def not in db_task_def_names:
-						print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-						print("task def in aws:", cluster_task["task"])
-						print(db_task_def_names)
-						print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-						#is_active = True
-						latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-						for cluster_task in cluster_task_list:
-							component_id = cluster_task["component_id"]
-							service = cluster_task["service"]
-							self.populateTaskDefinition(component_id,cluster,service,latest_product_release_number,region_name)
-
-						### Update my product release if new task def is found
-
-						if (product_name!="unknown" and product_release_number!=""):
-							print(product_release_number) # tag/time
-							product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-						if (product_name=="unknown" and product_release_number!=""):
-							print("------------------------------------------calling populateproduct----------------------------------------------")
-							# product_release_number = datetime.utcnow()
-							print(product_release_number) # time
-							#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-							product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
-						if (product_name!="unknown" and product_release_number==""):
-							product_release_number = datetime.utcnow()
-
-							#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-							product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-						if (product_name=="unknown" and product_release_number==""):
-							product_release_number = datetime.utcnow()
-							#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-							product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
+						print(".................................................")
+						print("task definition in aws", task_def)
+						print(".................................................")
 
 
-						if (product_name!="" and product_release_number!="" ):
-							for client in client_names:
-								client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
-										#print(client_id)
-								self.populateCPRC(cluster_name,product_release_id, client_id[0])
-						else:
-							if len(client_names) > 0:
+
+						if task_def not in db_task_def_names:
+							print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+							print("task def in aws:", cluster_task["task"])
+							print(db_task_def_names)
+							print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+							#is_active = True
+							latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number, cluster, region_name)
+
+							for cluster_task in cluster_task_list:
+								component_id = cluster_task["component_id"]
+								service = cluster_task["service"]
+								self.populateTaskDefinition(component_id,cluster,service,latest_product_release_number,region_name)
+
+							### Update my product release if new task def is found
+
+							if (product_name!="unknown" and product_release_number!=""):
+								print(product_release_number) # tag/time
+								product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
+							if (product_name=="unknown" and product_release_number!=""):
+								print("------------------------------------------calling populateproduct----------------------------------------------")
+								# product_release_number = datetime.utcnow()
+								print(product_release_number) # time
+								#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+								product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
+							if (product_name!="unknown" and product_release_number==""):
+								product_release_number = datetime.utcnow()
+								#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+								product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
+							if (product_name=="unknown" and product_release_number==""):
+								product_release_number = datetime.utcnow()
+								#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+								product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
+
+
+							if (product_name!="" and product_release_number!="" ):
 								for client in client_names:
 									client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
 											#print(client_id)
 									self.populateCPRC(cluster_name,product_release_id, client_id[0])
 							else:
-								client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
-								self.populateCPRC(cluster_name,product_release_id, client_id[0])
+								if len(client_names) > 0:
+									for client in client_names:
+										client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
+												#print(client_id)
+										self.populateCPRC(cluster_name,product_release_id, client_id[0])
+								else:
+									client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
+									self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 
-						### This means there will also be a new entry in cprc
-						for db_task in db_task_def_names:
-							task = Task_Definition.query.filter_by(task_definition_name=db_task).first()
-							task.is_active = False
-							db.session.commit()
-						break
+							### This means there will also be a new entry in cprc
+							for db_task in db_task_def_names:
+								task = Task_Definition.query.filter_by(task_definition_name=db_task).first()
+								task.is_active = False
+								db.session.commit()
+							break
 
 
-					else:
-						print("Already exists in the database! - Task Def")
+						else:
+							print("Already exists in the database! - Task Def")
 			else:
 				#is_active = True
 				#self.populateTaskDefinition(component_id,cluster,service,release_number,region_name, is_active)
 
-				latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+				latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number,cluster, region_name)
 				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 				print("latest release:",latest_product_release_number)
 				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
