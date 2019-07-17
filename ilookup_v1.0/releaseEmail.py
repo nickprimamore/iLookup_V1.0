@@ -6,10 +6,10 @@ from email.mime.text import MIMEText
 utility = email.utils
 
 class Email:
-    def sendEmail(self, releaseChanges):
+    def sendEmail(self, info):
         # Replace sender@example.com with your "From" address.
         # This address must be verified.
-        print(releaseChanges)
+        #print(releaseChanges)
         SENDER = 'kpatel@acord.org'
         SENDERNAME = 'Krish Patel'
 
@@ -33,20 +33,32 @@ class Email:
         PORT = 587
 
         # The subject line of the email.
-        SUBJECT = 'Amazon SES Test (Python smtplib)'
+        SUBJECT = 'Release Numbers Needed - iLookup'
 
-        # The HTML body of the email.
-        BODY_HTML = """<html>
-        <head></head>
-        <body>
-          <h1>The Following Cluster Need Releases Updated</h1>
-          <p>This email was sent with Amazon SES using the
+        #Dummy cluster/release/product info for testing
+
+        htmlStr = """<html>
+        <head>
+          <h3>The following clusters need their timestamps updated to release numbers:</h3>
+        </head>
+        <body>"""
+
+        for object in info:
+            clusterName = object["Cluster"]
+            productName = object["Product"]
+            releaseList = object["Releases"]
+            htmlStr += "<h3>" + clusterName + ": " + productName + "</h3><ul>"
+            for release in releaseList:
+                htmlStr += "<li>" + release + "</li>"
+            htmlStr += "</ul>"
+
+        htmlStr += """<p>This email was sent with Amazon SES using the
             <a href='https://www.python.org/'>Python</a>
             <a href='https://docs.python.org/3/library/smtplib.html'>
-            smtplib</a> library.</p>
-        </body>
-        </html>
-                    """
+            smtplib</a> library.</p></body></html>"""
+
+        # The HTML body of the email.
+        BODY_HTML = htmlStr
 
         # Create message container - the correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
@@ -78,6 +90,7 @@ class Email:
         else:
             print ("Email sent!")
 
-# email = Email()
-#
-# email.sendEmail("hello")
+email = Email()
+
+email.sendEmail([{"Cluster": "asg-ecs-qa2-cluster", "Product": "iConductor", "Releases": ["2019-07-15 18:27:09.762688", "2019-07-15 18:27:33.138756"]},
+        {"Cluster": "asg-uat-iconductor-cluster", "Product": "iConductor", "Releases": ["2019-07-16 19:18:56.178954", "2019-07-16 19:19:09.410748"]}])
