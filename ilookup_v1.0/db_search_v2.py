@@ -63,7 +63,7 @@ class Search:
 		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).filter(CPRC.is_active==True).distinct()
 		maxResult = []
-		maxReleases = db.session.query(func.max(cast(Product_Release.inserted_at, Date)).label("inserted_at"),Product_Release.product_release_id, Product_Release.release_number)
+		maxReleases = db.session.query(func.max(Product_Release.inserted_at).label("inserted_at"),Product_Release.product_id)
 		print("before..............")
 		print(maxReleases)
 		maxReleases = maxReleases.group_by(Product_Release.product_id).all()
@@ -71,7 +71,7 @@ class Search:
 		print(maxReleases)
 		for res in maxReleases:
 			#print(res.release_number, res.product_release_id)
-			tempResult = search_result.filter(Product_Release.product_release_id == res.product_release_id).all()
+			tempResult = search_result.filter(Product_Release.product_id==res.product_id).filter(Product_Release.inserted_at==res.inserted_at).all()
 			#print(tempResult)
 			maxResult = maxResult + (tempResult)
 		for res in maxResult:
@@ -90,7 +90,7 @@ class Search:
 			result["is_active"] = res.CPRC.is_active		
 			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")	
 			results.append(result)
-		#pprint.pprint(results)
+		pprint.pprint(results)
 		return results
 
 
@@ -119,8 +119,8 @@ class Search:
 
 		return release_numbers
 
-search_result = Search()
-search_result.getLatestReleases()
+# search_result = Search()
+# search_result.getLatestReleases()
 
 # print("Searching for client_name")
 # search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")

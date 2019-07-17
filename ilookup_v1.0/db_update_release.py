@@ -2,7 +2,7 @@ from app import db
 from app.models import Product, Client, Cluster, Task_Definition, Product_Release, CPRC, Component
 import pprint, json
 import boto3
-# from awsdata import AWSData
+from awsdata import AWSData
 
 class Update_Release:
 

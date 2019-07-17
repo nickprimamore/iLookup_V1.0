@@ -201,7 +201,7 @@ class AWSData:
 
 				#print("================================")
 
-	def checkForLatestRelease(self, product_name, tag_release_number, cluster):
+	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name):
 
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
@@ -265,8 +265,9 @@ class AWSData:
 		print("?????????????????>>>>>>>>>>>>>>>>>>>????????????????????")
 		print(cluster)
 		print("?????????????????>>>>>>>>>>>>>>>>>>>????????????????????")
-		client = boto3.client("ecs")
+		client = boto3.client("ecs", region_name=region_name)
 		release_number = str(release_number)
+		print(release_number)
 		client.tag_resource(resourceArn=cluster, tags=[{'key':"Release", 'value': release_number}])
 
 		return release_number
@@ -409,7 +410,7 @@ class AWSData:
 							print(db_task_def_names)
 							print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 							#is_active = True
-							latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number, cluster)
+							latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number, cluster, region_name)
 
 							for cluster_task in cluster_task_list:
 								component_id = cluster_task["component_id"]
@@ -467,7 +468,7 @@ class AWSData:
 				#is_active = True
 				#self.populateTaskDefinition(component_id,cluster,service,release_number,region_name, is_active)
 
-				latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number,cluster)
+				latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number,cluster, region_name)
 				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 				print("latest release:",latest_product_release_number)
 				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
