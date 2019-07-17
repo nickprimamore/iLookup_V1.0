@@ -1,7 +1,7 @@
 from app import db
 from app.models import Product, Client, Cluster, Task_Definition, Product_Release, CPRC, Component
 import pprint, json
-from sqlalchemy import and_, func, desc
+from sqlalchemy import and_, func, desc, cast, Date
 
 class Search:
 
@@ -46,9 +46,9 @@ class Search:
 			# get prid and the  corresponding release numbers from PRID Table
 			# shove it here
 
-			# release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
-			# release_numbers = list(set(release_numbers))
-			# result["releases"] = release_numbers
+			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
+			release_numbers = list(set(release_numbers))
+			result["releases"] = release_numbers
 			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			#print(result)
 			#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -61,10 +61,14 @@ class Search:
 
 
 		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
-			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
+			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).filter(CPRC.is_active==True).distinct()
 		maxResult = []
-		maxReleases = db.session.query(func.max(Product_Release.release_number).label("release_number"),Product_Release.product_release_id, Product_Release.product_id)
+		maxReleases = db.session.query(func.max(cast(Product_Release.inserted_at, Date)).label("inserted_at"),Product_Release.product_release_id, Product_Release.release_number)
+		print("before..............")
+		print(maxReleases)
 		maxReleases = maxReleases.group_by(Product_Release.product_id).all()
+		print("after..............")
+		print(maxReleases)
 		for res in maxReleases:
 			#print(res.release_number, res.product_release_id)
 			tempResult = search_result.filter(Product_Release.product_release_id == res.product_release_id).all()
@@ -74,16 +78,7 @@ class Search:
 			print(res.Client.client_name, res.Product.product_name, res.Product_Release.release_number, res.Cluster.cluster_name)
 
 
-	    # print("Before")
-	    # print(maxReleases)
-	    # print("After")
-	    # maxReleases = maxReleases.group_by(Product_Release.product_id, Client.client_id).all()
-	    # print(maxReleases)
-			   #maxReleases = db.session.query(func.max(Product_Release.release_number).label("release_number"),CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id==Client.client_id,CPRC.product_release_id == Product_Release.product_release_id,Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id)
-
-
-		task_definitions = []
-		results=[]
+		results = []
 		for res in maxResult:
 			result = {}
 			result["client_name"] = res.Client.client_name
@@ -92,22 +87,9 @@ class Search:
 			result["cluster_name"] = res.Cluster.cluster_name
 			result["region"] = res.Cluster.region
 			result["environment"] = res.Cluster.environment
-			task_definition_result = db.session.query(Cluster, Component, Task_Definition).filter(Component.cluster_id == Cluster.cluster_id, Component.component_id == Task_Definition.component_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).filter(Task_Definition.release_number==res.Product_Release.release_number).all()
-			task_definition_list = []
-			for task_definition in task_definition_result:
-				task = {}
-				task["task_definition_name"] = task_definition.Task_Definition.task_definition_name
-				task["image_tag"] = task_definition.Task_Definition.image_tag
-				task["revision"] = task_definition.Task_Definition.revision
-				task["date"] = task_definition.Task_Definition.date
-				task["cpu"] = task_definition.Task_Definition.cpu
-				task["memory"] = task_definition.Task_Definition.memory
-				task["release"] = task_definition.Task_Definition.release_number
-				task_definition_list.append(task)
-				result["task_definitions"] = task_definition_list
-			if len(task_definition_list)>0:
-				results.append(result)
-		print(len(results))
+			result["is_active"] = res.CPRC.is_active		
+			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")	
+			results.append(result)
 		#pprint.pprint(results)
 		return results
 
@@ -125,6 +107,7 @@ class Search:
 			task["cpu"] = task_definition.Task_Definition.cpu
 			task["memory"] = task_definition.Task_Definition.memory
 			task["release"] = task_definition.Task_Definition.release_number
+			task["is_active"] = task_definition.Task_Definition.is_active
 			result.append(task)
 		pprint.pprint(result)
 		return result
@@ -136,10 +119,8 @@ class Search:
 
 		return release_numbers
 
-
-
-#search_result = Search()
-# search_result.getLatestReleases()
+search_result = Search()
+search_result.getLatestReleases()
 
 # print("Searching for client_name")
 # search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
