@@ -9,6 +9,7 @@ import pprint
 import re
 
 # client = boto3.client("ecs")
+email = Email()
 
 class AWSData:
 	def newMainFunction(self):
@@ -62,41 +63,6 @@ class AWSData:
 					environment = tags[key]
 
 			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
-				#clients = Client.query.all()
-			# if (product_name!="unknown" and product_release_number!=""):
-			# 	print(product_release_number) # tag/time
-			# 	latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-			# 	product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-			# if (product_name=="unknown" and product_release_number!=""):
-			# 	print("------------------------------------------calling populateproduct----------------------------------------------")
-			# 	# product_release_number = datetime.utcnow()
-			# 	print(product_release_number) # time
-			# 	latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-			# 	product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
-			# if (product_name!="unknown" and product_release_number==""):
-			# 	product_release_number = datetime.utcnow()
-			# 	latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-			# 	product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-			# if (product_name=="unknown" and product_release_number==""):
-			# 	product_release_number = datetime.utcnow()
-			# 	latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-			# 	product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
-
-
-			# if (product_name!="" and product_release_number!="" ):
-			# 	for client in client_names:
-			# 		client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
-			# 				#print(client_id)
-			# 		self.populateCPRC(cluster_name,product_release_id, client_id[0])
-			# else:
-			# 	if len(client_names) > 0:
-			# 		for client in client_names:
-			# 			client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
-			# 					#print(client_id)
-			# 			self.populateCPRC(cluster_name,product_release_id, client_id[0])
-			# 	else:
-			# 		client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
-			# 		self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 	def populateClusters(self, cluster,cluster_name,environment,region,product_release_number,region_name, product_name,client_names):
 
@@ -202,9 +168,9 @@ class AWSData:
 
 				#print("================================")
 
-	def checkForLatestRelease(self, product_name, tag_release_number):
+	def checkForLatestRelease(self, product_name, tag_release_number, cluster_name):
 
-		print(product_name,tag_release_number)
+		print(product_name,tag_release_number, cluster_name)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_id = product_id[0]
 		#print(product_id)
@@ -228,7 +194,6 @@ class AWSData:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 				current_time = datetime.utcnow()
 				release_number = current_time
-
 
 
 			else:
@@ -358,7 +323,7 @@ class AWSData:
 		# 	component_id = cluster_task["component_id"]
 		# 	task = cluster_task["task"]
 		# 	tasks.append(task)
-
+		clusters = []
 		size = len(cluster_task_list)
 
 		pprint.pprint(cluster_task_list)
@@ -396,7 +361,7 @@ class AWSData:
 						print(db_task_def_names)
 						print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 						#is_active = True
-						latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+						latest_product_release_number = self.checkForLatestRelease(clusters, product_name,product_release_number, cluster_name)
 						for cluster_task in cluster_task_list:
 							component_id = cluster_task["component_id"]
 							service = cluster_task["service"]
@@ -454,7 +419,7 @@ class AWSData:
 				#is_active = True
 				#self.populateTaskDefinition(component_id,cluster,service,release_number,region_name, is_active)
 
-				latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+				latest_product_release_number = self.checkForLatestRelease(clusters, product_name,product_release_number, cluster_name)
 				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 				print("latest release:",latest_product_release_number)
 				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -497,7 +462,8 @@ class AWSData:
 					else:
 						client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
 						self.populateCPRC(cluster_name,product_release_id, client_id[0])
-
+			if (len(clusters) > 0):
+				email.sendEmail()
 
 
 

@@ -272,7 +272,7 @@ def sendTasks():
 	for values in data:
 		objectified = json.loads(values)
 	tasks = getTaskDefinitions(objectified["clusterName"], objectified["releaseNum"])
-
+	print("Does this keep getting called?")
 	return jsonify(tasks)
 
 @app.route('/getReleaseHistory', methods=["GET", "POST"])
@@ -285,7 +285,6 @@ def sendReleases():
 	for x in releases:
 		strX = str(x)
 		releasesStrArray.append(strX[2: len(strX)-3])
-	print(releasesStrArray)
 	return jsonify(releasesStrArray)
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])

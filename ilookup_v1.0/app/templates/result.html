@@ -63,13 +63,14 @@
       }
     })
   }
-
+  clusterName = ""
+  product = ""
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
     let releases = trigger.data('releases')
     let release = trigger.data('release')
-    let clusterName = trigger.data('clustername')
-    let product = trigger.data('product')
+    clusterName = trigger.data('clustername')
+    product = trigger.data('product')
     $.ajax({
       url:"/getReleaseHistory",
       type: "POST",
@@ -102,37 +103,34 @@
     })
     let modal = $(this)
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
-    console.log('does this keep re-running?')
-    $('#release1').on('select2:select', function(e) {
-      $('.deleteOnClose1').remove()
-      console.log("hello")
-      loadAccordion(1, clusterName, $('#release1').val())
-    })
-
-    $('#release2').on('select2:select', function(e) {
-      $('.deleteOnClose2').remove()
-      console.log("hello2")
-      loadAccordion(2, clusterName, $('#release2').val())
-    })
-
-    // function updateRelease() {
-    //   $.ajax({
-    //     url:"/updateReleaseTable",
-    //     type:"POST",
-    //     data: JSON.stringify({
-    //       clusterName: clusterName,
-    //       product: product,
-    //       newRelease: document.getElementById('newRelease').value,
-    //       oldRelease: $('#changeRelease').val()
-    //     }),
-    //     success: function(response) {
-    //
-    //     }
-    //   })
-    // }
-
-
   })
+
+  function updateRelease() {
+    $.ajax({
+      url:"/updateReleaseTable",
+      type:"POST",
+      data: JSON.stringify({
+        clusterName: clusterName,
+        product: product,
+        newRelease: document.getElementById('newRelease').value,
+        oldRelease: $('#changeRelease').val()
+      }),
+      success: function(response) {
+        console.log(response)
+      }
+    })
+  }
+
+  $('#release1').on('select2:select', function(e) {
+    $('.deleteOnClose1').remove()
+    loadAccordion(1, clusterName, $('#release1').val())
+  })
+
+  $('#release2').on('select2:select', function(e) {
+    $('.deleteOnClose2').remove()
+    loadAccordion(2, clusterName, $('#release2').val())
+  })
+
   $('#clusterDetail').on('hide.bs.modal', function (event){
     let header = document.getElementById('accordionHeader2')
     header.innerHTML = "Release Number"
