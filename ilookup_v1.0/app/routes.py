@@ -3,9 +3,9 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-#from awsdata import AWSData
+from awsdata import AWSData
 from db_search_v2 import Search
-#from db_update_release import Update_Release
+from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
 from addUpdateDB import AddUpdateRecords
 import requests
@@ -302,7 +302,7 @@ def sendTasks():
 	for values in data:
 		objectified = json.loads(values)
 	tasks = getTaskDefinitions(objectified["clusterName"], objectified["releaseNum"])
-
+	print("Does this keep getting called?")
 	return jsonify(tasks)
 
 @app.route('/getReleaseHistory', methods=["GET", "POST"])
@@ -315,7 +315,7 @@ def sendReleases():
 	for x in releases:
 		strX = str(x)
 		releasesStrArray.append(strX[3: len(strX)-3])
-	print(releasesStrArray)
+	print('BLAMBLAM', releasesStrArray)
 	return jsonify(releasesStrArray)
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])

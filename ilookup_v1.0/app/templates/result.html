@@ -71,7 +71,6 @@
     let release = trigger.data('release')
     clusterName = trigger.data('clustername')
     product = trigger.data('product')
-    console.log(product)
     $.ajax({
       url:"/getReleaseHistory",
       type: "POST",
@@ -104,21 +103,6 @@
     })
     let modal = $(this)
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
-    
-
-
-  })
-
-  $('#release1').on('select2:select', function(e) {
-    $('.deleteOnClose1').remove()
-    console.log("hello")
-    loadAccordion(1, clusterName, $('#release1').val())
-  })
-
-  $('#release2').on('select2:select', function(e) {
-    $('.deleteOnClose2').remove()
-    console.log("hello2")
-    loadAccordion(2, clusterName, $('#release2').val())
   })
 
   function updateRelease() {
@@ -132,10 +116,21 @@
         oldRelease: $('#changeRelease').val()
       }),
       success: function(response) {
-      console.log("Working Fine")
+        console.log(response)
       }
     })
   }
+
+  $('#release1').on('select2:select', function(e) {
+    $('.deleteOnClose1').remove()
+    loadAccordion(1, clusterName, $('#release1').val())
+  })
+
+  $('#release2').on('select2:select', function(e) {
+    $('.deleteOnClose2').remove()
+    loadAccordion(2, clusterName, $('#release2').val())
+  })
+
   $('#clusterDetail').on('hide.bs.modal', function (event){
     let header = document.getElementById('accordionHeader2')
     header.innerHTML = "Release Number"

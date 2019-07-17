@@ -4,9 +4,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 utility = email.utils
-
 class Email:
-    def sendEmail(self, info):
+    def sendEmail(self, clusters):
         # Replace sender@example.com with your "From" address.
         # This address must be verified.
         #print(releaseChanges)
@@ -43,14 +42,15 @@ class Email:
         </head>
         <body>"""
 
-        for object in info:
-            clusterName = object["Cluster"]
-            productName = object["Product"]
-            releaseList = object["Releases"]
-            htmlStr += "<h3>" + clusterName + ": " + productName + "</h3><ul>"
-            for release in releaseList:
-                htmlStr += "<li>" + release + "</li>"
-            htmlStr += "</ul>"
+        if len(clusters) > 0:
+            for object in clusters:
+                clusterName = object["Cluster"]
+                productName = object["Product"]
+                releaseList = object["Releases"]
+                htmlStr += "<h3>" + clusterName + ": " + productName + "</h3><ul>"
+                for release in releaseList:
+                    htmlStr += "<li>" + release + "</li>"
+                htmlStr += "</ul>"
 
         htmlStr += """<p>This email was sent with Amazon SES using the
             <a href='https://www.python.org/'>Python</a>
