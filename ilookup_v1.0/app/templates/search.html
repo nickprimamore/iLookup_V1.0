@@ -129,7 +129,7 @@
         success: function (response) {
           //These forloops delete all the options for each dropdown
           $('#clients option').each(function() {
-            $("#clients option[value=" + $(this).val() +"]").remove()
+            $("#clients option[value=" +"'"+ $(this).val() +"'"+"]").remove()
             $('.clients').select2('close')
           })
           $('#products option').each(function() {

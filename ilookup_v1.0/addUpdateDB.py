@@ -1,5 +1,5 @@
 from app import db
-from app.models import Client, Cluster, CPRC, Product, Product_Release
+from app.models import Client, Cluster, CPRC, Product, Product_Release, Task_Definition, Component
 
 class AddUpdateRecords:
 	def addUpdateClient(self,old_client_name,new_client_name, product_name, cluster_name, release_number):
@@ -86,3 +86,24 @@ class AddUpdateRecords:
 		cluster = db.session.query(Cluster).filter(Cluster.cluster_name==cluster_name).first()
 		cluster.environment = environment
 		db.session.commit()
+
+	def updateProductRelease(self, product_name, old_release_number, new_release_number):
+		print( product_name, old_release_number, new_release_number)
+		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
+		product_id = product_id[0]
+		print(new_release_number)
+		print(product_id)
+		product_release_number = db.session.query(Product_Release).filter(Product_Release.product_id==product_id).filter(Product_Release.release_number==old_release_number).first()
+		print("product_release_number before",product_release_number)
+		product_release_number.release_number = new_release_number
+		db.session.commit()
+		print("product_release_number after", product_release_number)
+		print("......................................updated Product_Release...................................")
+
+	def updateTaskDefinition(self, cluster_name, old_release_number, new_release_number):
+		search_result = db.session.query(Task_Definition).filter(Cluster.cluster_id==Component.cluster_id,Component.component_id==Task_Definition.component_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.release_number==old_release_number).all()
+		print(search_result)
+		for res in search_result:
+			res.release_number = new_release_number
+		db.session.commit()
+		print("......................................updated Task_Definition...................................")

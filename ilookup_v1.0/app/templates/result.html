@@ -25,7 +25,7 @@
           let header = document.getElementById('accordionHeader' + screen.toString())
           header.innerHTML = release_number
           $( "#accordion" + screen.toString() ).append('<div class="card deleteOnClose' + screen.toString() + '">' +
-            '<div class="card-header deleteOnClose" id="headingOne">' +
+            '<div class="card-header" id="headingOne">' +
               '<h5 class="mb-0 deleteOnClose">' +
                 '<button class="btn btn-link deleteOnClose" data-toggle="collapse" data-target="#' + image + screen.toString() + '" aria-expanded="true" aria-controls="' + image + screen.toString() + '">' +
                 task_name + '<br class="deleteOnClose"/>' +
@@ -63,13 +63,15 @@
       }
     })
   }
-
+  clusterName = ""
+  product = ""
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
     let releases = trigger.data('releases')
     let release = trigger.data('release')
-    let clusterName = trigger.data('clustername')
-    let product = trigger.data('product')
+    clusterName = trigger.data('clustername')
+    product = trigger.data('product')
+    console.log(product)
     $.ajax({
       url:"/getReleaseHistory",
       type: "POST",
@@ -82,57 +84,63 @@
         for (let rel in response) {
           let newOption
           let secondOption
+          let thirdOption
           if (release == response[rel]) {
             newOption = new Option(response[rel], response[rel], true, true);
             loadAccordion(1, clusterName, release)
             secondOption = new Option(response[rel], response[rel], true, false)
+            thirdOption = new Option(response[rel], response[rel], true, false)
           } else {
             newOption = new Option(response[rel], response[rel], true, false);
             secondOption = new Option(response[rel], response[rel], true, false)
+            thirdOption = new Option(response[rel], response[rel], true, false)
           }
           $('#release1').append(newOption)
           $('#release2').append(secondOption)
-          $('#changeRelease').append(secondOption)
+          $('#changeRelease').append(thirdOption)
         }
 
       }
     })
     let modal = $(this)
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
-
-    $('#release1').on('select2:select', function(e) {
-      $('.deleteOnClose1').remove()
-      loadAccordion(1, clusterName, $('#release1').val())
-    })
-
-    $('#release2').on('select2:select', function(e) {
-      $('.deleteOnClose2').remove()
-      loadAccordion(2, clusterName, $('#release2').val())
-    })
-
-    // function updateRelease() {
-    //   $.ajax({
-    //     url:"/updateReleaseTable",
-    //     type:"POST",
-    //     data: JSON.stringify({
-    //       clusterName: clusterName,
-    //       product: product,
-    //       newRelease: document.getElementById('newRelease').value,
-    //       oldRelease: $('#changeRelease').val()
-    //     }),
-    //     success: function(response) {
-    //
-    //     }
-    //   })
-    // }
+    
 
 
   })
+
+  $('#release1').on('select2:select', function(e) {
+    $('.deleteOnClose1').remove()
+    console.log("hello")
+    loadAccordion(1, clusterName, $('#release1').val())
+  })
+
+  $('#release2').on('select2:select', function(e) {
+    $('.deleteOnClose2').remove()
+    console.log("hello2")
+    loadAccordion(2, clusterName, $('#release2').val())
+  })
+
+  function updateRelease() {
+    $.ajax({
+      url:"/updateReleaseTable",
+      type:"POST",
+      data: JSON.stringify({
+        clusterName: clusterName,
+        product: product,
+        newRelease: document.getElementById('newRelease').value,
+        oldRelease: $('#changeRelease').val()
+      }),
+      success: function(response) {
+      console.log("Working Fine")
+      }
+    })
+  }
   $('#clusterDetail').on('hide.bs.modal', function (event){
     let header = document.getElementById('accordionHeader2')
     header.innerHTML = "Release Number"
     $('.deleteOnClose1').remove();
-    $('.deleteOnClose2').remove()
+    $('.deleteOnClose2').remove();
     $('#release1 option').each(function() {
       $("#release1 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
       $("#release1").select2('close')
@@ -140,6 +148,10 @@
     $('#release2 option').each(function() {
       $("#release2 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
       $("#release2").select2('close')
+    })
+    $('#changeRelease option').each(function() {
+      $("#changeRelease option[value=" + "'" + $(this).val() + "'" + "]").remove()
+      $("#changeRelease").select2('close')
     })
   })
 
@@ -251,7 +263,7 @@
       data-clustername="{{result.cluster_name}}"
       data-releases="{{result.releases}}"
       data-release="{{result.release}}"
-      data-product="{{result.product}}">
+      data-product="{{result.product_name}}">
       <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.client_name}}</th>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.product_name}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.release}} </td>

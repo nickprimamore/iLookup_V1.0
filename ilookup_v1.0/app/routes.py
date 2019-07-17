@@ -4,10 +4,10 @@ from app.models import Client, Product, Product_Release, Cluster, Component, Tas
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 # from awsdata import AWSData
-from db_search_v2 import Search
-from db_update_release import Update_Release
-from db_dynamic_filter import DynamicFilter
-from addUpdateDB import AddUpdateRecords
+# from db_search_v2 import Search
+# from db_update_release import Update_Release
+# from db_dynamic_filter import DynamicFilter
+# from addUpdateDB import AddUpdateRecords
 import requests
 import json
 import boto3
@@ -146,6 +146,8 @@ def createTag():
 				for tag in tags:
 					if tag['key'] == "client1":
 						old_client_name = tag['value']
+					if tag['key'] == "Release":
+						old_release_number = tag['value']
 					# get old tag value here
 					print(tag['key'],tag["value"])
 					if tag['key'] == objectified['tagQuery']['tagKey']:
@@ -165,7 +167,18 @@ def createTag():
 					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'])
 
 				if objectified['tagQuery']['tagKey'] == 'Release':
-					updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
+					cluster_name = cluster_split[1]
+					if objectified['tagQuery']["product"]:
+						product_name = objectified['tagQuery']['product']
+					else:
+						product_name = "unknown"
+					new_release_number = objectified['tagQuery']['tagValue']
+					# get old release tag
+					# get new release tag
+					addUpdateRecord = AddUpdateRecords()
+					#updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
+					addUpdateRecord.updateProductRelease(product_name, old_release_number, new_release_number)
+					addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
 	return 'Successfully updated the cluster(s)'
 
 @app.route('/deleteTag', methods=['GET', 'POST'])
@@ -301,17 +314,28 @@ def sendReleases():
 	releasesStrArray = []
 	for x in releases:
 		strX = str(x)
-		releasesStrArray.append(strX[2: len(strX)-3])
+		releasesStrArray.append(strX[3: len(strX)-3])
+	print(releasesStrArray)
 	return jsonify(releasesStrArray)
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])
 def updateReleaseTable():
+	print("?????///////////////////////???????/////////////////????????/?/////////")
 	data = request.form.keys()
+	print(data)
 	clusters = client.list_clusters()
-	clusterArns = cluster["clusterArns"]
+	clusterArns = clusters["clusterArns"]
 	for values in data:
 		objectified = json.loads(values)
 	# this is where you will add the code to update the Task Definition and PRID table with the newRelease using objectified["newRelease"]
+	product_name = objectified["product"]
+	cluster_name = objectified["clusterName"]
+	old_release_number = objectified["oldRelease"]
+	new_release_number = objectified["newRelease"]
+	addUpdateRecord = AddUpdateRecords()
+	addUpdateRecord.updateProductRelease(product_name, old_release_number, new_release_number)
+	addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
+	print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 	for awsCluster in clusterArns:
 		cluster_split = awsCluster.split("/")
 		if (objectified["clusterName"] == cluster_split[1]):
