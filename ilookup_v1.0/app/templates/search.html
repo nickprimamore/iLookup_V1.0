@@ -20,6 +20,7 @@
   }
   p.searchLabel {
     color:white;
+    font-size:18px;
     margin-bottom:5px;
     font-family: "Lato Light";
   }
@@ -297,7 +298,7 @@
       min-height: 90vh;
       background-color: #00508F;
       padding: 0;
-      padding-top:14px;
+      padding-top:5px;
       padding-left:0px;
       padding-right:2px;
       overflow:auto;
@@ -366,6 +367,13 @@
     z-index: 0;
   }
 
+  .iLookup{
+    margin: auto;
+    font-size:19;
+    font-family: "Lato Light";
+    color: white;
+  }
+
 </style>
 
 <!-- This is the html for the actual search bars -->
@@ -376,7 +384,7 @@
             <!-- /END Separator -->
             <div class="searchContainer">
               <div class="searchBar col-md-12">
-                <p class="searchLabel clientSelect" style="text-align:center; font-size:18"> <b> Search AWS Resources </b> </p>
+                <p class="iLookup" style="text-align:center;padding-top:5"> <b> Search AWS Resources </b> </p>
               </div>
               <div class="searchBar col-md-12">
                 <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
@@ -441,6 +449,7 @@
     </div><!-- Main Col END -->
 
 </div><!-- body-row END -->
+
 
 <!-- This script tag is to deal with the creation and receiving information of cluster tags -->
 <script>
@@ -603,19 +612,19 @@ let addReleaseTag = {}
         tagQuery: addReleaseTag
       }),
       success: function(response) {
-        console.log("Created")
-        alert("Successfully added/updated tag")
+        console.log("Tag created")
+        $('#successTagAlert').show('fade');
       }
     })
   }
 
   function deleteTag() {
     if (!$('.editTag').val()) {
-      alert("Select a tag in order to delete")
+      $('#selectBeforeDeleteAlert').show('fade');
       return;
     }
     if ($('.editTag').val() == 'Product' || $('.editTag').val() == 'Release') {
-      alert("Cannot delete that tag")
+      $('#cannotDeleteAlert').show('fade');
       return;
     }
     addReleaseTag['clusters'] = $('.clustersTag').val()
@@ -628,19 +637,21 @@ let addReleaseTag = {}
           tagQuery: addReleaseTag
         }),
         success: function(response) {
-          console.log("Tag Deleted")
-          alert("Tag deleted")
+          console.log("Tag deleted")
+          $('#deleteAlert').show('fade');
         }
       })
     }
   }
 </script>
+
   <!-- modal for adding/updating an AWS cluster tag -->
   <div class="modal fade no-reload" id="addTagModal" tabindex="-1" role="dialog" aria-labelledby="addTagLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="addTagLabel" style="font-family:Lato Light; font-weight:bold">Add/Update an AWS Cluster Tag</h5>
+          <br><br>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -688,15 +699,49 @@ let addReleaseTag = {}
               <input type="text" class="form-control" style="width:112%" id="tagValue" aria-describedby="tagFormat" placeholder="Enter new value here">
               <!-- <small id="tagFormat" class="form-text text-muted">Example release format: 1.1.1.1</small> -->
             </div>
+            <br><br>
+            <div id="successTagAlert" class="alert alert-primary collapse">
+              <a id="closeSuccessAlert" href="#" class="close">&times;</a>
+              <strong>Successfully added/updated tag!</strong>
+            </div>
+            <div id="selectBeforeDeleteAlert" class="alert alert-danger collapse">
+              <a id="closeSelectBeforeDeleteAlert" href="#" class="close">&times;</a>
+              <strong>Select a tag in order to delete it.</strong>
+            </div>
+            <div id="cannotDeleteAlert" class="alert alert-danger collapse">
+              <a id="closeCannotDeleteAlert" href="#" class="close">&times;</a>
+              <strong>Deletion of that tag is restricted.</strong>
+            </div>
+            <div id="deleteAlert" class="alert alert-danger collapse">
+              <a id="closeDeleteAlert" href="#" class="close">&times;</a>
+              <strong>Tag deleted.</strong>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger mr-auto" style="font-family: Lato Light; font-weight:bold;" onclick="deleteTag()">Delete tag</button>
-          <button type="button" class="btn btn-primary" style="background-color:#007ACC; font-family: Lato Light; font-weight:bold" data-dismiss="modal" onclick="newTag()">Save/add tag</button>
+          <button id="deleteButton" type="button" class="btn btn-danger mr-auto" style="font-family: Lato Light; font-weight:bold;" onclick="deleteTag()">Delete tag</button>
+          <button id="saveButton" type="button" class="btn btn-primary" style="background-color:#007ACC; font-family: Lato Light; font-weight:bold" onclick="newTag()">Save/add tag</button>
         </div>
       </div>
     </div>
   </div>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('#closeSuccessAlert').click(function () {
+        $('#successTagAlert').hide('fade');
+      });
+      $('#closeSelectBeforeDeleteAlert').click(function () {
+        $('#selectBeforeDeleteAlert').hide('fade');
+      });
+      $('#closeCannotDeleteAlert').click(function () {
+        $('#cannotDeleteAlert').hide('fade');
+      });
+      $('#deleteAlert').click(function () {
+        $('#closeDeleteAlert').hide('fade');
+      });
+    });
+  </script>
 
 <!-- This clears the tagging modal once you close it-->
 <script>
