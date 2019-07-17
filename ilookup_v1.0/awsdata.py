@@ -2,12 +2,11 @@ from app import db
 from app.models import Product, Client, Cluster, Component, Task_Definition, Product_Release, CPRC
 from sqlalchemy import func
 from datetime import datetime
-
+from releaseEmail import Email
 import boto3
 import json
 import pprint
 import re
-
 
 # client = boto3.client("ecs")
 
@@ -21,6 +20,8 @@ class AWSData:
 		print("Running N. Virginia Region")
 		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		self.mainFunction(nvirginia)
+
+
 
 	def mainFunction(self,region_name):
 		client = boto3.client("ecs", region_name=region_name)
@@ -228,6 +229,8 @@ class AWSData:
 				current_time = datetime.utcnow()
 				release_number = current_time
 
+
+
 			else:
 				release_number = tag_release_number
 				print("im in loop 1")
@@ -367,7 +370,6 @@ class AWSData:
 			print("==================================================")
 			print("In compareTaskDefinition function", product_name, product_release_number, client_names)
 			print("==================================================")
-
 			if len(db_task_defs)>0:
 				db_task_def_names = []
 				for db_task in db_task_defs:
@@ -395,7 +397,6 @@ class AWSData:
 						print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 						#is_active = True
 						latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-
 						for cluster_task in cluster_task_list:
 							component_id = cluster_task["component_id"]
 							service = cluster_task["service"]
@@ -414,6 +415,7 @@ class AWSData:
 							product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
 						if (product_name!="unknown" and product_release_number==""):
 							product_release_number = datetime.utcnow()
+
 							#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
 							product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
 						if (product_name=="unknown" and product_release_number==""):

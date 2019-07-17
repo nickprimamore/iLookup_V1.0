@@ -25,7 +25,7 @@
           let header = document.getElementById('accordionHeader' + screen.toString())
           header.innerHTML = release_number
           $( "#accordion" + screen.toString() ).append('<div class="card deleteOnClose' + screen.toString() + '">' +
-            '<div class="card-header deleteOnClose" id="headingOne">' +
+            '<div class="card-header" id="headingOne">' +
               '<h5 class="mb-0 deleteOnClose">' +
                 '<button class="btn btn-link deleteOnClose" data-toggle="collapse" data-target="#' + image + screen.toString() + '" aria-expanded="true" aria-controls="' + image + screen.toString() + '">' +
                 task_name + '<br class="deleteOnClose"/>' +
@@ -95,21 +95,23 @@
           }
           $('#release1').append(newOption)
           $('#release2').append(secondOption)
-          $('#changeRelease').append(Option)
+          $('#changeRelease').append(thirdOption)
         }
 
       }
     })
     let modal = $(this)
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
-
+    console.log('does this keep re-running?')
     $('#release1').on('select2:select', function(e) {
       $('.deleteOnClose1').remove()
+      console.log("hello")
       loadAccordion(1, clusterName, $('#release1').val())
     })
 
     $('#release2').on('select2:select', function(e) {
       $('.deleteOnClose2').remove()
+      console.log("hello2")
       loadAccordion(2, clusterName, $('#release2').val())
     })
 
@@ -135,7 +137,7 @@
     let header = document.getElementById('accordionHeader2')
     header.innerHTML = "Release Number"
     $('.deleteOnClose1').remove();
-    $('.deleteOnClose2').remove()
+    $('.deleteOnClose2').remove();
     $('#release1 option').each(function() {
       $("#release1 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
       $("#release1").select2('close')
