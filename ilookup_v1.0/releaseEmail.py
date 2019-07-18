@@ -90,6 +90,7 @@ class Email:
         else:
             print ("Email sent!")
 
-# email = Email()
-#
-# email.sendEmail("hello")
+email = Email()
+
+email.sendEmail([{"Cluster": "asg-ecs-qa2-cluster", "Product": "iConductor", "Releases": ["2019-07-15 18:27:09.762688", "2019-07-15 18:27:33.138756"]},
+        {"Cluster": "asg-uat-iconductor-cluster", "Product": "iConductor", "Releases": ["2019-07-16 19:18:56.178954", "2019-07-16 19:19:09.410748"]}])
