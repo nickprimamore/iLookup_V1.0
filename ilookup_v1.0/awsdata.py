@@ -2,7 +2,7 @@ from app import db
 from app.models import Product, Client, Cluster, Component, Task_Definition, Product_Release, CPRC
 from sqlalchemy import func
 from datetime import datetime
-
+from releaseEmail import Email
 import boto3
 import json
 import pprint
@@ -202,7 +202,7 @@ class AWSData:
 				#print("================================")
 
 	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name):
-
+		
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_id = product_id[0]
@@ -227,6 +227,8 @@ class AWSData:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 				current_time = datetime.utcnow()
 				release_number = current_time
+				email = Email()
+				email.sendEmail(release_number)
 
 			else:
 				release_number = tag_release_number
@@ -241,13 +243,16 @@ class AWSData:
 					print("tag is not empty and two release numbers are equal!............")
 					current_time = datetime.utcnow()
 					release_number = current_time
+					email = Email()
+					email.sendEmail(release_number)
 				else:
 					release_number = tag_release_number
 			else:
 				print("release number aws tag is empty")
 				current_time = datetime.utcnow()
 				release_number = current_time
-
+				email = Email()
+				email.sendEmail(release_number)
 
 
 

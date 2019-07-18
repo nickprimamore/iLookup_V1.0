@@ -4,10 +4,10 @@ from app.models import Client, Product, Product_Release, Cluster, Component, Tas
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 # from awsdata import AWSData
-# from db_search_v2 import Search
-# from db_update_release import Update_Release
-# from db_dynamic_filter import DynamicFilter
-# from addUpdateDB import AddUpdateRecords
+from db_search_v3 import Search
+from db_update_release import Update_Release
+from db_dynamic_filter import DynamicFilter
+from addUpdateDB import AddUpdateRecords
 import requests
 import json
 import boto3
