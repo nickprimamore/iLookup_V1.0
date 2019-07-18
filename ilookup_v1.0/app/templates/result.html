@@ -238,12 +238,20 @@
 <table class="table table-hover table-striped">
   <thead>
     <tr>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
+      <!-- <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Product</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Release #</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Environment</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Region</th> -->
+
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Product</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Release #</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Region</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Environment</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Date Released</th>
     </tr>
   </thead>
   <tbody>
@@ -259,12 +267,20 @@
       data-releases="{{result.releases}}"
       data-release="{{result.release}}"
       data-product="{{result.product_name}}">
-      <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.client_name}}</th>
+      <!-- <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.client_name}}</th>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.product_name}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.release}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.cluster_name}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.environment}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.region}} </td> -->
+
+      <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.product_name}}</th>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.release}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.cluster_name}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.region}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.environment}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.client_name}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{temp}} </td>
     </tr>
 
     {% endfor %}
