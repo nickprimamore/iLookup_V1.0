@@ -3,7 +3,7 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-# from awsdata import AWSData
+from awsdata import AWSData
 from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
@@ -142,7 +142,7 @@ def createTag():
 			cluster_split = awsCluster.split("/")
 			if (cluster == cluster_split[1]):
 				currentTags = client.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
-				tags = currentTags["tags"] 
+				tags = currentTags["tags"]
 				for tag in tags:
 					if tag['key'] == "client1":
 						old_client_name = tag['value']
@@ -155,7 +155,7 @@ def createTag():
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
 
 				print(objectified['tagQuery']['tagValue'])
-				
+
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']
 					new_client_name = objectified['tagQuery']['tagValue']
@@ -302,7 +302,7 @@ def sendTasks():
 	for values in data:
 		objectified = json.loads(values)
 	tasks = getTaskDefinitions(objectified["clusterName"], objectified["releaseNum"])
-
+	print("Does this keep getting called?")
 	return jsonify(tasks)
 
 @app.route('/getReleaseHistory', methods=["GET", "POST"])
@@ -315,7 +315,7 @@ def sendReleases():
 	for x in releases:
 		strX = str(x)
 		releasesStrArray.append(strX[3: len(strX)-3])
-	print(releasesStrArray)
+	print('BLAMBLAM', releasesStrArray)
 	return jsonify(releasesStrArray)
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])
@@ -393,4 +393,3 @@ def getReleases(cluster_name):
 	search = Search()
 	releases = search.getReleases(cluster_name)
 	return releases
-

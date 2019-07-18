@@ -47,6 +47,8 @@
       type: 'GET',
       success: function (response) {
         //These following forloops go through the passed in arrays of each possible search query, and creates an Option tag to add to the individual select2s
+        $("#releases").prop("disabled", true);
+        $("#clusters").prop("disabled", true);
         for (let client in response.clientsQ) {
           let newOption = new Option(response.clientsQ[client], response.clientsQ[client], false, false);
           $('#clients').append(newOption);
@@ -59,14 +61,14 @@
           let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
           $('#selectProduct').append(newOption);
         }
-        for (let release in response.releasesQ) {
-          let newOption = new Option(response.releasesQ[release], response.releasesQ[release], false, false);
-          $('#releases').append(newOption);
-        }
-        for (let cluster in response.clustersQ) {
-          let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
-          $('#clusters').append(newOption);
-        }
+        // for (let release in response.releasesQ) {
+        //   let newOption = new Option(response.releasesQ[release], response.releasesQ[release], false, false);
+        //   $('#releases').append(newOption);
+        // }
+        // for (let cluster in response.clustersQ) {
+        //   let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
+        //   $('#clusters').append(newOption);
+        // }
         for (let cluster in response.clustersQ) {
           let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
           $('#addClustersSelect2').append(newOption);
@@ -101,7 +103,8 @@
 
     //initializing the select2, .dropdowns is the classname for the main search page
     $('.dropdowns').select2({
-      theme: "classic"
+      theme: "classic",
+      width: "100%"
     });
 
     //Closes dropdowns after you unselect to allow for better UI experience
@@ -109,6 +112,7 @@
       $('.dropdowns').select2('close')
     })
 
+    changedOnce = false
     //When something is selected or unselected, this function takes care of the dynamic aspect of it, as it get's the values chosen, sends it back as AJAX data
     //Once the backend generates the potential search queries, in the response, we delete the current options and reissue the new options
     $('.dropdowns').on('change.select2', function(e) {
@@ -128,6 +132,26 @@
         }),
         success: function (response) {
           //These forloops delete all the options for each dropdown
+          if(values[1].length > 0){
+            $("#releases").prop("disabled", false);
+            $("#clusters").prop("disabled", false);
+            changedOnce = false
+          }
+          else{
+            $("#releases").prop("disabled", true);
+            $("#clusters").prop("disabled", true);
+            if(changedOnce == false){
+              $('#releases').val(null).trigger('change')
+              $('#clusters').val(null).trigger('change')
+              changedOnce = true
+            }
+            // setTimeout(function() {
+            //   $('#releases').trigger('change')
+            // }, 0);
+            // setTimeout(function() {
+            //   $('#clusters').trigger('change')
+            // }, 0);
+          }
           $('#clients option').each(function() {
             $("#clients option[value=" +"'"+ $(this).val() +"'"+"]").remove()
             $('.clients').select2('close')
@@ -374,6 +398,10 @@
     color: white;
   }
 
+  .select2-search__field{
+    width: 15.95em !important;
+  }
+
 </style>
 
 <!-- This is the html for the actual search bars -->
@@ -385,12 +413,6 @@
             <div class="searchContainer">
               <div class="searchBar col-md-12">
                 <p class="iLookup" style="text-align:center;padding-top:5"> <b> Search AWS Resources </b> </p>
-              </div>
-              <div class="searchBar col-md-12">
-                <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
-                <select class="dropdowns clients" id="clients" name="clients[]" multiple="multiple">
-
-                </select>
               </div>
               <div class="searchBar col-md-12">
                 <p class="searchLabel productSelect"> <b> Products: </b> </p>
@@ -405,20 +427,26 @@
                 </select>
               </div>
               <div class="searchBar col-md-12">
-                <p class="searchLabel regionSelect"> <b> Regions: </b> </p>
-                <select class="dropdowns regions" id="regions" name="regions[]" multiple="multiple">
-
-                </select>
-              </div>
-              <div class="searchBar col-md-12">
                 <p class="searchLabel clusterSelect"> <b> Clusters: </b> </p>
                 <select class="dropdowns clusters" id="clusters" name="clusters[]" multiple="multiple">
 
                 </select>
               </div>
               <div class="searchBar col-md-12">
+                <p class="searchLabel regionSelect"> <b> Regions: </b> </p>
+                <select class="dropdowns regions" id="regions" name="regions[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
                 <p class="searchLabel environmentSelect"> <b> Environments: </b> </p>
                 <select class="dropdowns environments" id="environments"  name="environments[]" multiple="multiple">
+
+                </select>
+              </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel clientSelect"> <b> Clients: </b> </p>
+                <select class="dropdowns clients" id="clients" name="clients[]" multiple="multiple">
 
                 </select>
               </div>
@@ -623,7 +651,7 @@ let addReleaseTag = {}
       $('#selectBeforeDeleteAlert').show('fade');
       return;
     }
-    if ($('.editTag').val() == 'Product' || $('.editTag').val() == 'Release') {
+    if ($('.editTag').val() == 'Product' || $('.editTag').val() == 'Release' || $('.editTag').val() == 'Environment') {
       $('#cannotDeleteAlert').show('fade');
       return;
     }
@@ -710,7 +738,7 @@ let addReleaseTag = {}
             </div>
             <div id="cannotDeleteAlert" class="alert alert-danger collapse">
               <a id="closeCannotDeleteAlert" href="#" class="close">&times;</a>
-              <strong>Deletion of that tag is restricted.</strong>
+              <strong>Deletion of this tag is restricted.</strong>
             </div>
             <div id="deleteAlert" class="alert alert-danger collapse">
               <a id="closeDeleteAlert" href="#" class="close">&times;</a>

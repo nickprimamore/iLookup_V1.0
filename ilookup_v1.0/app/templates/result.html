@@ -71,7 +71,6 @@
     let release = trigger.data('release')
     clusterName = trigger.data('clustername')
     product = trigger.data('product')
-    console.log(product)
     $.ajax({
       url:"/getReleaseHistory",
       type: "POST",
@@ -104,21 +103,6 @@
     })
     let modal = $(this)
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
-    
-
-
-  })
-
-  $('#release1').on('select2:select', function(e) {
-    $('.deleteOnClose1').remove()
-    console.log("hello")
-    loadAccordion(1, clusterName, $('#release1').val())
-  })
-
-  $('#release2').on('select2:select', function(e) {
-    $('.deleteOnClose2').remove()
-    console.log("hello2")
-    loadAccordion(2, clusterName, $('#release2').val())
   })
 
   function updateRelease() {
@@ -132,10 +116,21 @@
         oldRelease: $('#changeRelease').val()
       }),
       success: function(response) {
-      console.log("Working Fine")
+        console.log(response)
       }
     })
   }
+
+  $('#release1').on('select2:select', function(e) {
+    $('.deleteOnClose1').remove()
+    loadAccordion(1, clusterName, $('#release1').val())
+  })
+
+  $('#release2').on('select2:select', function(e) {
+    $('.deleteOnClose2').remove()
+    loadAccordion(2, clusterName, $('#release2').val())
+  })
+
   $('#clusterDetail').on('hide.bs.modal', function (event){
     let header = document.getElementById('accordionHeader2')
     header.innerHTML = "Release Number"
@@ -150,7 +145,7 @@
       $("#release2").select2('close')
     })
     $('#changeRelease option').each(function() {
-      $("#changeRelease option[value=" + "'" + $(this).val() + "'" + "]").remove()
+      $("#changeRelease option[value=" + "'" + $(this).val()  + "'" + "]").remove()
       $("#changeRelease").select2('close')
     })
   })
@@ -243,12 +238,20 @@
 <table class="table table-hover table-striped">
   <thead>
     <tr>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
+      <!-- <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Product</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Release #</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Environment</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Region</th> -->
+
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Product</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Release #</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:18px">Region</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Environment</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
+      <th scope="col" style="font-family:Lato Light; font-size:18px">Date Released</th>
     </tr>
   </thead>
   <tbody>
@@ -264,12 +267,24 @@
       data-releases="{{result.releases}}"
       data-release="{{result.release}}"
       data-product="{{result.product_name}}">
+
       <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.client_names}}</th>
+
+      <!-- <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.client_name}}</th>
+>>>>>>> 65d0bb61df3d1fd8a9cb500da8ced7edae508622
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.product_name}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.release}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.cluster_name}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.environment}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.region}} </td> -->
+
+      <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.product_name}}</th>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.release}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.cluster_name}} </td>
       <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.region}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.environment}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.client_name}} </td>
+      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{temp}} </td>
     </tr>
 
     {% endfor %}
