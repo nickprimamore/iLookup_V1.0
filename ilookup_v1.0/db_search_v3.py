@@ -13,8 +13,11 @@ class Search:
 			newArray.append(strX[firstOccurance+1: len(strX)-3])
 		return newArray
 
-	def getSearchResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
+	def getSearchResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None, is_active=None):
 
+
+		print("in search condition")
+		print(is_active)
 		search_result = db.session.query(Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, CPRC.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
 
@@ -39,6 +42,13 @@ class Search:
 		if environment:
 			search_result = search_result.filter(Cluster.environment==environment)
 
+		if is_active!= None:
+			#print("Is active condition detected")
+			search_result = search_result.filter(CPRC.is_active==is_active)
+
+		#to date and from date
+		if (toDate and fromDate) is not None:
+			search_result = search_result.filter(and_(func.date(Product_Release.inserted_at)>=fromDate), func.date(Product_Release.inserted_at)<=toDate)
 	
 		search_result = list(set(search_result))
 		#pprint.pprint(search_result)
@@ -121,8 +131,8 @@ class Search:
 			result["inserted_at"] = res.Product_Release.inserted_at
 			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")	
 			results.append(result)
-		pprint.pprint(results)
-		print(len(results))
+		#pprint.pprint(results)
+		#print(len(results))
 		return results
 
 
@@ -141,7 +151,7 @@ class Search:
 			task["release"] = task_definition.Task_Definition.release_number
 			task["is_active"] = task_definition.Task_Definition.is_active
 			result.append(task)
-		pprint.pprint(result)
+		#pprint.pprint(result)
 		return result
 
 	def getReleases(self, cluster_name=None):
@@ -151,6 +161,13 @@ class Search:
 
 		return release_numbers
 
+
+	def getClients(self, cluster_name=None, release_number=None):
+		clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==cluster_name).filter(Product_Release.release_number==release_number).all()
+		clients = self.convertUnicodeToArray(clients)
+		print(clients)
+		return clients
+
 search_result = Search()
 # search_result.getLatestReleases()
 
@@ -158,6 +175,6 @@ search_result = Search()
 # search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
 # print("done!")
 
-search_result.getSearchResult()		
+search_result.getClients("asg-dev-iforms-cluster", "5.5.5.5")		
 #search_result.getTaskDefinitions("asg-dev-iforms-cluster", "1.2.1.4")
 #print("done!")
