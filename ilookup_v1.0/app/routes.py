@@ -3,11 +3,11 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-from awsdata import AWSData
-from db_search_v3 import Search
-from db_update_release import Update_Release
-from db_dynamic_filter import DynamicFilter
-from addUpdateDB import AddUpdateRecords
+# from awsdata import AWSData
+# from db_search_v3 import Search
+# from db_update_release import Update_Release
+# from db_dynamic_filter import DynamicFilter
+# from addUpdateDB import AddUpdateRecords
 import requests
 import json
 import boto3
@@ -372,7 +372,7 @@ def updateReleaseTable():
 
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 	search = Search()
-	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate)
+	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate, is_active=None)
 	return search_result
 
 # main function that triggers other helper functions to
