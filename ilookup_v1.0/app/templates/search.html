@@ -87,6 +87,7 @@
           let newOption = new Option(response.componentsQ[component], response.componentsQ[component], false, false);
           $('#components').append(newOption);
         }
+
       }
     })
 
@@ -104,10 +105,12 @@
       theme: "classic"
     });
 
+
     //Closes dropdowns after you unselect to allow for better UI experience
     $('.dropdowns').on('select2:unselect', function(e) {
       $('.dropdowns').select2('close')
     })
+
 
     //When something is selected or unselected, this function takes care of the dynamic aspect of it, as it get's the values chosen, sends it back as AJAX data
     //Once the backend generates the potential search queries, in the response, we delete the current options and reissue the new options

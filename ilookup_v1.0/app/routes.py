@@ -154,8 +154,6 @@ def createTag():
 						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
 
-				print(objectified['tagQuery']['tagValue'])
-
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']
 					new_client_name = objectified['tagQuery']['tagValue']
@@ -315,7 +313,6 @@ def sendReleases():
 	for x in releases:
 		strX = str(x)
 		releasesStrArray.append(strX[2: len(strX)-3])
-	print('BLAMBLAM', releasesStrArray)
 	return jsonify(releasesStrArray)
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])
