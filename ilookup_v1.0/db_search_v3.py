@@ -5,15 +5,23 @@ from sqlalchemy import and_, func, desc, cast, Date
 
 class Search:
 
+	def convertUnicodeToArray(self,unicodeArray):
+		newArray = []
+		for x in unicodeArray:
+			strX = str(x)
+			firstOccurance = strX.find("'")
+			newArray.append(strX[firstOccurance+1: len(strX)-3])
+		return newArray
+
 	def getSearchResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
 
-		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
+		search_result = db.session.query(Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, CPRC.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
 
 		results = []
 
-		if client_name:
-			search_result = search_result.filter(Client.client_name== client_name)
+		# if client_name:
+		# 	search_result = search_result.filter(Client.client_name== client_name)
 
 		if product_name:
 			search_result = search_result.filter(Product.product_name== product_name)
@@ -31,31 +39,53 @@ class Search:
 		if environment:
 			search_result = search_result.filter(Cluster.environment==environment)
 
-		task_definitions = []
-		results = []
-		for res in search_result:
-			result = {}
-			result["client_name"] = res.Client.client_name
-			result["product_name"] = res.Product.product_name
-			result["release"] = res.Product_Release.release_number
-			result["cluster_name"] = res.Cluster.cluster_name
-			result["region"] = res.Cluster.region
-			result["environment"] = res.Cluster.environment
-			result["is_active"] = res.CPRC.is_active
-			result["inserted_at"] = res.Product_Release.inserted_at
-			
-			#call cprc to fetch records based on same client, cluster
-			# get prid and the  corresponding release numbers from PRID Table
-			# shove it here
+	
+		search_result = list(set(search_result))
+		#pprint.pprint(search_result)
 
-			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.Cluster.cluster_name).all()
+		# task_definitions = []
+		# results = []
+		for res in search_result:
+			#print(res)
+			result = {}
+			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+
+			clients = self.convertUnicodeToArray(clients)
+			# if res.CPRC.cprc_id 
+
+			result["client_names"] = clients
+			result["product_name"] = res.product_name
+			result["release"] = res.release_number
+			result["cluster_name"] = res.cluster_name
+			result["region"] = res.region
+			result["environment"] = res.environment
+			result["is_active"] = res.is_active
+			result["inserted_at"] = res.inserted_at
+			
+		# 	#call cprc to fetch records based on same client, cluster
+		# 	# get prid and the  corresponding release numbers from PRID Table
+		# 	# shove it here
+
+			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
 			release_numbers = list(set(release_numbers))
 			result["releases"] = release_numbers
-			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-			#print(result)
-			#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		# # 	#print(result)
+		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			results.append(result)
+		# print(results)
+		if client_name:
+			# print(client_name)
+			client_results = []
+			for res in results:
+				# print(res["client_names"][0][0])
+				client_names = res["client_names"]
+				if client_name in client_names:
+					client_results.append(res)
+					pprint.pprint(res)
+			return client_results
 		pprint.pprint(results)
+		print(len(results))
 		return 	results
 
 	def getLatestReleases(self):
@@ -92,6 +122,7 @@ class Search:
 			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")	
 			results.append(result)
 		pprint.pprint(results)
+		print(len(results))
 		return results
 
 
@@ -120,13 +151,13 @@ class Search:
 
 		return release_numbers
 
-# search_result = Search()
+search_result = Search()
 # search_result.getLatestReleases()
 
 # print("Searching for client_name")
 # search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
 # print("done!")
 
-#search_result.getSearchResult()
+search_result.getSearchResult()		
 #search_result.getTaskDefinitions("asg-dev-iforms-cluster", "1.2.1.4")
 #print("done!")
