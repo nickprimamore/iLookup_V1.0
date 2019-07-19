@@ -393,3 +393,12 @@ def getReleases(cluster_name):
 	search = Search()
 	releases = search.getReleases(cluster_name)
 	return releases
+
+@app.route('/load', methods=['GET','POST'])
+def loadAWSData():
+	print("Loading")
+	awsdata = AWSData()
+	awsdata.newMainFunction()
+	db.session.commit()
+	print("Loaded")
+	return redirect(url_for("load"))

@@ -524,10 +524,10 @@ class AWSData:
 
 
 
-data = AWSData()
+# data = AWSData()
 
-data.newMainFunction()
+# data.newMainFunction()
 
-db.session.commit()
+# db.session.commit()
 
-print("Completed")
+# print("Completed")
