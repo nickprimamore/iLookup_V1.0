@@ -50,6 +50,13 @@ class Search:
 		if (toDate and fromDate) is not None:
 			search_result = search_result.filter(and_(func.date(Product_Release.inserted_at)>=fromDate), func.date(Product_Release.inserted_at)<=toDate)
 	
+		if (toDate and not fromDate):
+			search_result = search_result.filter((func.date(Product_Release.inserted_at)<=toDate))
+
+		if (fromDate and not toDate):
+			search_result = search_result.filter((func.date(Product_Release.inserted_at)>=fromDate))
+
+
 		search_result = list(set(search_result))
 		#pprint.pprint(search_result)
 
@@ -99,40 +106,58 @@ class Search:
 		return 	results
 
 	def getLatestReleases(self):
+		search_result = db.session.query(CPRC.product_release_id, Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, CPRC.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
+			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
 
-		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
-			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).filter(CPRC.is_active==True).distinct()
+		# search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
+		# 	Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).filter(CPRC.is_active==True).distinct()
 		maxResult = []
-		maxReleases = db.session.query(func.max(Product_Release.inserted_at).label("inserted_at"),Product_Release.product_id)
+		maxReleases = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"), CPRC.cluster_id)
 		print("before..............")
 		print(maxReleases)
-		maxReleases = maxReleases.group_by(Product_Release.product_id).all()
+		maxReleases = maxReleases.group_by(CPRC.cluster_id).all()
 		print("after..............")
 		print(maxReleases)
 		for res in maxReleases:
 			#print(res.release_number, res.product_release_id)
-			tempResult = search_result.filter(Product_Release.product_id==res.product_id).filter(Product_Release.inserted_at==res.inserted_at).all()
+			tempResult = search_result.filter(CPRC.product_release_id==res.product_release_id).all()
 			#print(tempResult)
 			maxResult = maxResult + (tempResult)
-		for res in maxResult:
-			print(res.Client.client_name, res.Product.product_name, res.Product_Release.release_number, res.Cluster.cluster_name)
-
+		# for res in maxResult:
+		# 	print(res.Client.client_name, res.Product.product_name, res.Product_Release.release_number, res.Cluster.cluster_name)
 
 		results = []
 		for res in maxResult:
+			#print(res)
 			result = {}
-			result["client_name"] = res.Client.client_name
-			result["product_name"] = res.Product.product_name
-			result["release"] = res.Product_Release.release_number
-			result["cluster_name"] = res.Cluster.cluster_name
-			result["region"] = res.Cluster.region
-			result["environment"] = res.Cluster.environment
-			result["is_active"] = res.CPRC.is_active		
-			result["inserted_at"] = res.Product_Release.inserted_at
-			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")	
+			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+
+			clients = self.convertUnicodeToArray(clients)
+			# if res.CPRC.cprc_id 
+
+			result["client_names"] = clients
+			result["product_name"] = res.product_name
+			result["release"] = res.release_number
+			result["cluster_name"] = res.cluster_name
+			result["region"] = res.region
+			result["environment"] = res.environment
+			result["is_active"] = res.is_active
+			result["inserted_at"] = res.inserted_at
+			
+		# 	#call cprc to fetch records based on same client, cluster
+		# 	# get prid and the  corresponding release numbers from PRID Table
+		# 	# shove it here
+
+			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
+			release_numbers = list(set(release_numbers))
+			result["releases"] = release_numbers
+		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		# # 	#print(result)
+		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			results.append(result)
-		#pprint.pprint(results)
-		#print(len(results))
+		pprint.pprint(results)
+		print(len(results))
+		
 		return results
 
 
@@ -168,13 +193,13 @@ class Search:
 		print(clients)
 		return clients
 
-search_result = Search()
+# search_result = Search()
 # search_result.getLatestReleases()
 
 # print("Searching for client_name")
 # search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
 # print("done!")
 
-search_result.getClients("asg-dev-iforms-cluster", "5.5.5.5")		
+#search_result.getClients("asg-dev-iforms-cluster", "5.5.5.5")		
 #search_result.getTaskDefinitions("asg-dev-iforms-cluster", "1.2.1.4")
 #print("done!")

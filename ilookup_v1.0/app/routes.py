@@ -431,3 +431,12 @@ def getClients(cluster_name, release_number):
 	search = Search()
 	clients = search.getClients(cluster_name, release_number)
 	return clients
+	
+@app.route('/load', methods=['GET','POST'])
+def loadAWSData():
+	print("Loading")
+	awsdata = AWSData()
+	awsdata.newMainFunction()
+	db.session.commit()
+	print("Loaded")
+	return redirect(url_for("load"))

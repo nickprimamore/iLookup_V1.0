@@ -3,7 +3,7 @@
 <script>
   $(document).ready(function() {
     $('.releaseReview').select2();
-    $("[data-toggle=popover]").popover();
+    $("[data-toggle=popover]").popover({ trigger: "hover" });
   })
 
   function loadAccordion(screen, cluster_name, release_number) {
@@ -282,7 +282,7 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Clients</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px"><i class="fas fa-user-friends"></i></th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Activity</th>
     </tr>
@@ -332,9 +332,33 @@
         data-release="{{result.release}}"
         data-product="{{result.product_name}}"
         data-region="{{result.region}}"> {{result.environment}} </td>
-        <td style="font-family:Lato Light; font-size:16px; padding-top:14px"> <i class="fas fa-user-friends" data-toggle="popover" title="Clients Under This Cluster" data-content="{{clients|join(', ')}}"></i> </td>
-        <td style="font-family:Lato Light; font-size:16px; padding-top:10px"> {{result.inserted_at[0:11]}} | {{result.inserted_at[11:16]}} </td>
-        <td style="font-family:Lato Light; font-size:16px; padding-top:14px"> <span class="badge badge-pill badge-success">Active</span> </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:14px" data-toggle="popover" title="Clients Under This Cluster" data-content="{{clients|join(', ')}}">
+          {% if clients|length < 2 %}
+            <i class="fas fa-user"></i>
+          {% else %}
+            <i class="fas fa-user-friends"></i>
+          {% endif %}
+        </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{result.inserted_at[0:11]}} | {{result.inserted_at[11:16]}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:14px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}">
+          {% if result.is_active %}
+            <span class="badge badge-pill badge-success" style="width: 100%"> Active </span>
+          {% else %}
+            <span class="badge badge-pill badge-danger" style="width: 100%"> Inactive </span>
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
 
