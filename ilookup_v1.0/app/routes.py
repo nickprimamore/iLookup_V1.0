@@ -149,15 +149,18 @@ def createTag():
 				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
 				tags = currentTags["tags"]
 				for tag in tags:
-					if tag['key'] == "client1":
-						old_client_name = tag['value']
 					if tag['key'] == "Release":
 						old_release_number = tag['value']
 					# get old tag value here
 					print(tag['key'],tag["value"])
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
-				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
+
+				noSpaces = objectified['tagQuery']['tagKey']
+				for x in objectified['tagQuery']['tagKey']:
+					if objectified['tagQuery']['tagKey'] == " ":
+						noSpaces = objectified['tagQuery']['tagKey'][:-1]
+				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': objectified['tagQuery']['tagValue']}])
 
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']

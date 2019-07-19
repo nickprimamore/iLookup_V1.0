@@ -283,8 +283,8 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Clients</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Inserted</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Active</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Activity</th>
     </tr>
   </thead>
   <tbody>
@@ -332,9 +332,9 @@
         data-release="{{result.release}}"
         data-product="{{result.product_name}}"
         data-region="{{result.region}}"> {{result.environment}} </td>
-        <td style="font-family:Lato Light; font-size:16px; padding-top:10px"> <i class="fas fa-user-friends" data-toggle="popover" title="Clients Under This Cluster" data-content="{{clients|join(', ')}}"></i> </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:14px"> <i class="fas fa-user-friends" data-toggle="popover" title="Clients Under This Cluster" data-content="{{clients|join(', ')}}"></i> </td>
         <td style="font-family:Lato Light; font-size:16px; padding-top:10px"> {{result.inserted_at[0:11]}} | {{result.inserted_at[11:16]}} </td>
-        <td style="font-family:Lato Light; font-size:16px; padding-top:10px"> </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:14px"> <span class="badge badge-pill badge-success">Active</span> </td>
       </tr>
     {% endfor %}
 

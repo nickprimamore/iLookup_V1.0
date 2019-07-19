@@ -404,6 +404,12 @@
     width: 15.95em !important;
   }
 
+  .table-wrapper{
+    width: 56vw;
+    max-width: 56vw;
+    overflow:auto;
+  }
+
 </style>
 
 <!-- This is the html for the actual search bars -->
@@ -538,7 +544,7 @@ let addReleaseTag = {}
          $('.tagTable').remove()
 
          //sets up the table with AWS tags to be appended in the modal
-         let tableStr = '<table class="table table-striped tagTable"><thead><tr>'
+         let tableStr = '<div class="table-wrapper"><table class="table table-striped tagTable"><thead><tr>'
          if (Object.keys(response).length != 0) {
             tableStr += '<th scope="col">Cluster</th>'
          }
@@ -555,7 +561,7 @@ let addReleaseTag = {}
            }
            tableStr += '</tr>'
          }
-         tableStr += '</tbody></table>'
+         tableStr += '</tbody></table></div>'
          $('.tags').append(tableStr)
 
          $('#editTag option').each(function() {
