@@ -20,8 +20,8 @@
   }
   p.searchLabel {
     color:white;
-    font-size:18px;
-    margin-bottom:5px;
+    font-size:16px;
+    margin-bottom:3px;
     font-family: "Lato Light";
   }
   select.dropdowns {
@@ -248,6 +248,12 @@
     var clusterVal = $('.clusters').val()
     var environmentVal = $('.environments').val()
 
+    var activeVal = $('#active').prop("checked") == true
+    var inactiveVal = $('#inactive').val()
+
+    console.log(activeVal, "active")
+    console.log(inactiveVal, "inactive")
+
     var dateFrom = document.getElementById("dateFrom").value;
     var dateUntil = document.getElementById("dateUntil").value;
 
@@ -259,6 +265,7 @@
     var clusterList = []
     var environmentList = []
     var componentList = []
+    var actOrIn = ""
     var dateList = [dateFrom, dateUntil];
 
     //Populates all the lists with the search values
@@ -280,8 +287,17 @@
     for (var env in environmentVal) {
       environmentList.push(environmentVal[env])
     }
+    if ($('#active').prop("checked") == true && ($('#inactive').prop("checked") == true)) {
+      actOrIn = "None"
+    } else if ($('#active').prop("checked") == true) {
+      actOrIn = true
+    } else if ($('#inactive').prop("checked") == true) {
+      actOrIn = false
+    } else {
+      actOrIn = "None"
+    }
 
-    return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList]
+    return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList, actOrIn]
   }
   // This function sends the selected search tags to the backend and renders it onto the result-tag html
   function sendData() {
@@ -298,7 +314,8 @@
         Clusters: values[4],
         Environments: values[5],
         Components: values[6],
-        Dates: values[7]
+        Dates: values[7],
+        Active: values[8]
       }),
       success: function (response) {
         $('#result-tag').html(response)
@@ -333,7 +350,7 @@
 
   /* Sidebar sizes when expanded and expanded */
   .sidebar-expanded {
-      width: 300px;
+      width: 18vw;
   }
 
   .sidebar-collapsed {
@@ -420,9 +437,6 @@
             <!-- /END Separator -->
             <div class="searchContainer">
               <div class="searchBar col-md-12">
-                <p class="iLookup" style="text-align:center;padding-top:5"> <b> Search AWS Resources </b> </p>
-              </div>
-              <div class="searchBar col-md-12">
                 <p class="searchLabel productSelect"> <b> Products: </b> </p>
                 <select class="dropdowns products" id="products" name="products[]" multiple="multiple">
 
@@ -458,6 +472,17 @@
 
                 </select>
               </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel activeSelect"> <b> Active Clusters: </b> </p>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="active" value="true">
+                  <label class="form-check-label" style="color: white" for="active">Active</label>
+                </div>
+                <div class="form-check form-check-inline" style="margin-left: 3.4vw">
+                  <input class="form-check-input" type="checkbox" id="inactive" value="false">
+                  <label class="form-check-label" style="color: white" for="inactive">Inactive</label>
+                </div>
+              </div>
               <div class="form-group col-md-12">
                   <p class="searchLabel"> <b> Date (From): </b> </p>
                   <input type="date" class="form-control date" id="dateFrom"name="Date (From)">
@@ -466,7 +491,6 @@
                   <p class="searchLabel"> <b> Date (To): </b> </p>
                   <input type="date" class="form-control date" id="dateUntil" name="Date (Until)">
               </div>
-
               <div class="searchBar col-md-6">
                 <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold; color:#00508F" onClick="sendData()">Search</button>
               </div>

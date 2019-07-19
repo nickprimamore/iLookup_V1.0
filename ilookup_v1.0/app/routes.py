@@ -286,7 +286,9 @@ def result():
 		environments = objectified['Environments']
 		components = objectified['Components']
 		dates = objectified['Dates']
-
+		active = objectified['Active']
+		if active == "None":
+			active = None
 		toDate = None
 		if len(clients) > 0:
 			client = clients[0]
@@ -309,7 +311,7 @@ def result():
 				toDate = None
 			if fromDate == "":
 				fromDate = None
-		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
+		result  = search(is_active=active, client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
 		results = results + (result)
 		# Within results, create an object that {cluster_name: [releases] or {Release: 1.1.1.1, Info: Etc}} and pass it into the front end, where we map it by connecting release numbers - Having it as hidden dropdowns
 
@@ -382,9 +384,9 @@ def updateReleaseTable():
 	return "Helo"
 
 
-def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
+def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None, is_active=None):
 	search = Search()
-	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate, is_active=None)
+	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate, is_active=is_active)
 	return search_result
 
 # main function that triggers other helper functions to
@@ -431,7 +433,7 @@ def getClients(cluster_name, release_number):
 	search = Search()
 	clients = search.getClients(cluster_name, release_number)
 	return clients
-	
+
 @app.route('/load', methods=['GET','POST'])
 def loadAWSData():
 	print("Loading")
