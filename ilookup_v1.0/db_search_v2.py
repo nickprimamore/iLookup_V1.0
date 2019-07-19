@@ -41,7 +41,9 @@ class Search:
 			result["cluster_name"] = res.Cluster.cluster_name
 			result["region"] = res.Cluster.region
 			result["environment"] = res.Cluster.environment
-
+			result["is_active"] = res.CPRC.is_active
+			result["inserted_at"] = res.Product_Release.inserted_at
+			
 			#call cprc to fetch records based on same client, cluster
 			# get prid and the  corresponding release numbers from PRID Table
 			# shove it here
@@ -57,8 +59,6 @@ class Search:
 		return 	results
 
 	def getLatestReleases(self):
-
-
 
 		search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).filter(CPRC.is_active==True).distinct()
@@ -88,6 +88,7 @@ class Search:
 			result["region"] = res.Cluster.region
 			result["environment"] = res.Cluster.environment
 			result["is_active"] = res.CPRC.is_active		
+			result["inserted_at"] = res.Product_Release.inserted_at
 			print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")	
 			results.append(result)
 		pprint.pprint(results)
