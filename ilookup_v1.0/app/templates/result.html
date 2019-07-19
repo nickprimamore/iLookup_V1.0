@@ -108,6 +108,28 @@
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
   })
 
+
+  function getClients(num) {
+    let cliInfo = document.querySelector("#clientInfo" + num);
+    console.log(cliInfo.dataset.cluster)
+    console.log(cliInfo.dataset.release)
+    $("#icon" + num).on("show.bs.popover", function () {
+      $.ajax({
+        url:"/getClients",
+        type:"POST",
+        data: JSON.stringify({
+          clusterName: cliInfo.dataset.cluster,
+          release: cliInfo.dataset.release
+        }),
+        success: function(response) {
+          console.log(response)
+          let info = document.querySelector('#icon' + num)
+          info.setAttribute("data-content", response.toString())
+        }
+      })
+    })
+  }
+
   function updateRelease() {
     if (!$('#changeRelease').val()) {
       alert("No Release Selected for Change")
@@ -251,65 +273,69 @@
   </div>
 </div>
 
-<table class="table table-hover table-striped">
+<table class="table table-hover table-bordered table-striped">
   <thead>
     <tr>
 
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Product</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Release #</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Cluster</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Region</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Environment</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Clients</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Date Inserted</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Product</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Release #</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Cluster</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Clients</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Inserted</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Active</th>
     </tr>
   </thead>
   <tbody>
 
 <!-- This is a for loop to render the search results  -->
-
     {% for result in results %}
-
-    <tr>
-      <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px" data-toggle="modal"
-      data-target="#clusterDetail"
-      data-clustername="{{result.cluster_name}}"
-      data-releases="{{result.releases}}"
-      data-release="{{result.release}}"
-      data-product="{{result.product_name}}"
-      data-region="{{result.region}}">{{result.product_name}}</th>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px" data-toggle="modal"
-      data-target="#clusterDetail"
-      data-clustername="{{result.cluster_name}}"
-      data-releases="{{result.releases}}"
-      data-release="{{result.release}}"
-      data-product="{{result.product_name}}"
-      data-region="{{result.region}}"> {{result.release}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px" data-toggle="modal"
-      data-target="#clusterDetail"
-      data-clustername="{{result.cluster_name}}"
-      data-releases="{{result.releases}}"
-      data-release="{{result.release}}"
-      data-product="{{result.product_name}}"
-      data-region="{{result.region}}"> {{result.cluster_name}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px" data-toggle="modal"
-      data-target="#clusterDetail"
-      data-clustername="{{result.cluster_name}}"
-      data-releases="{{result.releases}}"
-      data-release="{{result.release}}"
-      data-product="{{result.product_name}}"
-      data-region="{{result.region}}"> {{result.region}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px" data-toggle="modal"
-      data-target="#clusterDetail"
-      data-clustername="{{result.cluster_name}}"
-      data-releases="{{result.releases}}"
-      data-release="{{result.release}}"
-      data-product="{{result.product_name}}"
-      data-region="{{result.region}}"> {{result.environment}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> <i class="fas fa-user-friends" data-toggle="popover" title="Clients Under This Cluster" data-content="{{result.client_names}}"></i> </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{temp}} </td>
-    </tr>
-
+      {% set clients = result.client_names %}
+      {% set timeRelease = result.release %}
+      {% if timeRelease|length > 11 %}
+        {% set timeRelease = "Update Release" %}
+      {% endif %}
+      <tr>
+        <th scope="row" style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}">{{result.product_name}}</th>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{timeRelease}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{result.cluster_name}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{result.region}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{result.environment}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px"> <i class="fas fa-user-friends" data-toggle="popover" title="Clients Under This Cluster" data-content="{{clients|join(', ')}}"></i> </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px"> {{result.inserted_at[0:11]}} | {{result.inserted_at[11:16]}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px"> </td>
+      </tr>
     {% endfor %}
 
   </tbody>

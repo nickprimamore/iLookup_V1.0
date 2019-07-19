@@ -3,11 +3,11 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-# from awsdata import AWSData
-# from db_search_v3 import Search
-# from db_update_release import Update_Release
-# from db_dynamic_filter import DynamicFilter
-# from addUpdateDB import AddUpdateRecords
+from awsdata import AWSData
+from db_search_v3 import Search
+from db_update_release import Update_Release
+from db_dynamic_filter import DynamicFilter
+from addUpdateDB import AddUpdateRecords
 import requests
 import json
 import boto3
@@ -320,6 +320,15 @@ def sendTasks():
 	tasks = getTaskDefinitions(objectified["clusterName"], objectified["releaseNum"])
 	return jsonify(tasks)
 
+@app.route('/getClients', methods=["GET", "POST"])
+def sendClients():
+	data = request.form.keys()
+	for values in data:
+		objectified = json.loads(values)
+	clients = getClients(objectified["clusterName"], objectified["release"])
+	print(clients)
+	return jsonify(clients)
+
 @app.route('/getReleaseHistory', methods=["GET", "POST"])
 def sendReleases():
 	data = request.form.keys()
@@ -414,3 +423,8 @@ def getReleases(cluster_name):
 	search = Search()
 	releases = search.getReleases(cluster_name)
 	return releases
+
+def getClients(cluster_name, release_number):
+	search = Search()
+	clients = search.getClients(cluster_name, release_number)
+	return clients
