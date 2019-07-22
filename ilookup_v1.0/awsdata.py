@@ -45,6 +45,7 @@ class AWSData:
 			client_name = "unknown"
 			product_name = "unknown"
 			product_release_number = ""
+			environment= "unknown"
 			for key in tags:
 				if ("Client") in key:
 					client_name = tags[key]
@@ -101,6 +102,7 @@ class AWSData:
 
 		exists_cluster = db.session.query(Cluster.cluster_name).filter_by(cluster_name=cluster_name).filter_by(region=region).scalar() is not None
 		if exists_cluster:
+
 			print("nothing")
 		else:
 			cluster_value = Cluster(cluster_name=cluster_name, environment=environment,region=region,is_active=True)
@@ -524,10 +526,10 @@ class AWSData:
 
 
 
-# data = AWSData()
+data = AWSData()
 
-# data.newMainFunction()
+data.newMainFunction()
 
-# db.session.commit()
+db.session.commit()
 
-# print("Completed")
+print("Completed")

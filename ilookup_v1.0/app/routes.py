@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 # from db_update_release import Update_Release
 # from db_dynamic_filter import DynamicFilter
 # from addUpdateDB import AddUpdateRecords
+# from db_delete_v3 import DeactivateRecords
 import requests
 import json
 import boto3
@@ -31,6 +32,9 @@ def load():
 @app.route('/search', methods=['GET'])
 def search():
 	clients = Client.query.all()
+	#clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
+	#clients = clients.sort()
+	clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
 	products = Product.query.all()
 	releases = Product_Release.query.all()
 	clusters = Cluster.query.all()
@@ -144,7 +148,8 @@ def createTag():
 				currentTags = client.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
 				tags = currentTags["tags"]
 				for tag in tags:
-					if tag['key'] == "client1":
+					# if tag['key'] == "client1":
+					if "Client" in tag:
 						old_client_name = tag['value']
 					if tag['key'] == "Release":
 						old_release_number = tag['value']
@@ -155,7 +160,7 @@ def createTag():
 				client.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
 
 				print(objectified['tagQuery']['tagValue'])
-
+				# needs fixing 
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']
 					new_client_name = objectified['tagQuery']['tagValue']
@@ -196,6 +201,9 @@ def deleteTag():
 				tags = currentTags["tags"]
 				for tag in tags:
 					if tag['key'] == objectified['tagQuery']['tagKey']:
+						if "Client" in objectified['tagQuery']['tagKey']:
+							deactivateRecords = DeactivateRecords()
+							deactivateRecords.deactivateClients(client_name)
 						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 	return "Successfully deleted the tag"
 

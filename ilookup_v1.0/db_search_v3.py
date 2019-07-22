@@ -104,7 +104,7 @@ class Search:
 		pprint.pprint(results)
 		print(len(results))
 		return 	results
-
+		# get latest release
 	def getLatestReleases(self):
 		search_result = db.session.query(CPRC.product_release_id, Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, CPRC.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
