@@ -3,6 +3,7 @@
 <script>
   $(document).ready(function() {
     $('.releaseReview').select2();
+    $("[data-toggle=popover]").popover({ trigger: "hover" });
   })
 
   function loadAccordion(screen, cluster_name, release_number) {
@@ -65,12 +66,14 @@
   }
   clusterName = ""
   product = ""
+  region = ""
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
     let releases = trigger.data('releases')
     let release = trigger.data('release')
     clusterName = trigger.data('clustername')
     product = trigger.data('product')
+    region = trigger.data('region')
     $.ajax({
       url:"/getReleaseHistory",
       type: "POST",
@@ -105,7 +108,41 @@
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
   })
 
+
+  function getClients(num) {
+    let cliInfo = document.querySelector("#clientInfo" + num);
+    console.log(cliInfo.dataset.cluster)
+    console.log(cliInfo.dataset.release)
+    $("#icon" + num).on("show.bs.popover", function () {
+      $.ajax({
+        url:"/getClients",
+        type:"POST",
+        data: JSON.stringify({
+          clusterName: cliInfo.dataset.cluster,
+          release: cliInfo.dataset.release
+        }),
+        success: function(response) {
+          console.log(response)
+          let info = document.querySelector('#icon' + num)
+          info.setAttribute("data-content", response.toString())
+        }
+      })
+    })
+  }
+
   function updateRelease() {
+    if (!$('#changeRelease').val()) {
+      alert("No Release Selected for Change")
+      return;
+    }
+    if (!document.getElementById('newRelease').value) {
+      alert("Inputted New Release Value of (null).")
+      return
+    }
+    if (document.getElementById('newRelease').value.length > 11) {
+      alert("Check the format of the new Release value")
+      return;
+    }
     $.ajax({
       url:"/updateReleaseTable",
       type:"POST",
@@ -113,7 +150,8 @@
         clusterName: clusterName,
         product: product,
         newRelease: document.getElementById('newRelease').value,
-        oldRelease: $('#changeRelease').val()
+        oldRelease: $('#changeRelease').val(),
+        region: region
       }),
       success: function(response) {
         console.log(response)
@@ -235,58 +273,93 @@
   </div>
 </div>
 
-<table class="table table-hover table-striped">
+<table class="table table-hover table-bordered table-striped">
   <thead>
     <tr>
-      <!-- <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Product</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Release #</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Cluster</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Environment</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Region</th> -->
 
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Product</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Release #</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Cluster</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Region</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Environment</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Client</th>
-      <th scope="col" style="font-family:Lato Light; font-size:18px">Date Released</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Product</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Release #</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Cluster</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px"><i class="fas fa-user-friends"></i></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Activity</th>
     </tr>
   </thead>
   <tbody>
 
 <!-- This is a for loop to render the search results  -->
-
     {% for result in results %}
-
-    <tr
-      data-toggle="modal"
-      data-target="#clusterDetail"
-      data-clustername="{{result.cluster_name}}"
-      data-releases="{{result.releases}}"
-      data-release="{{result.release}}"
-      data-product="{{result.product_name}}">
-
-      <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.client_names}}</th>
-
-      <!-- <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.client_name}}</th>
->>>>>>> 65d0bb61df3d1fd8a9cb500da8ced7edae508622
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.product_name}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.release}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.cluster_name}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.environment}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.region}} </td> -->
-
-      <th scope="row" style="font-family:Lato Light; font-size:18px; padding-top:19px">{{result.product_name}}</th>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.release}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.cluster_name}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.region}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.environment}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{result.client_name}} </td>
-      <td style="font-family:Lato Light; font-size:18px; padding-top:19px"> {{temp}} </td>
-    </tr>
-
+      {% set clients = result.client_names %}
+      {% set timeRelease = result.release %}
+      {% if timeRelease|length > 11 %}
+        {% set timeRelease = "Update Release" %}
+      {% endif %}
+      <tr>
+        <th scope="row" style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}">{{result.product_name}}</th>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{timeRelease}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{result.cluster_name}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{result.region}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{result.environment}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:14px" data-toggle="popover" title="Clients Under This Cluster" data-content="{{clients|join(', ')}}">
+          {% if clients|length < 2 %}
+            <i class="fas fa-user"></i>
+          {% else %}
+            <i class="fas fa-user-friends"></i>
+          {% endif %}
+        </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}"> {{result.inserted_at[0:11]}} | {{result.inserted_at[11:16]}} </td>
+        <td style="font-family:Lato Light; font-size:16px; padding-top:14px" data-toggle="modal"
+        data-target="#clusterDetail"
+        data-clustername="{{result.cluster_name}}"
+        data-releases="{{result.releases}}"
+        data-release="{{result.release}}"
+        data-product="{{result.product_name}}"
+        data-region="{{result.region}}">
+          {% if result.is_active %}
+            <span class="badge badge-pill badge-success" style="width: 100%"> Active </span>
+          {% else %}
+            <span class="badge badge-pill badge-danger" style="width: 100%"> Inactive </span>
+          {% endif %}
+        </td>
+      </tr>
     {% endfor %}
 
   </tbody>

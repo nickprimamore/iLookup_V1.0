@@ -227,8 +227,8 @@ class AWSData:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 				current_time = datetime.utcnow()
 				release_number = current_time
-				email = Email()
-				email.sendEmail(release_number)
+				# email = Email()
+				# email.sendEmail(release_number)
 
 			else:
 				release_number = tag_release_number
@@ -243,16 +243,16 @@ class AWSData:
 					print("tag is not empty and two release numbers are equal!............")
 					current_time = datetime.utcnow()
 					release_number = current_time
-					email = Email()
-					email.sendEmail(release_number)
+					# email = Email()
+					# email.sendEmail(release_number)
 				else:
 					release_number = tag_release_number
 			else:
 				print("release number aws tag is empty")
 				current_time = datetime.utcnow()
 				release_number = current_time
-				email = Email()
-				email.sendEmail(release_number)
+				# email = Email()
+				# email.sendEmail(release_number)
 
 
 

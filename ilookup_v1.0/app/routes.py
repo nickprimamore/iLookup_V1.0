@@ -133,28 +133,34 @@ def update():
 @app.route('/newTag', methods=['GET', 'POST'])
 def createTag():
 	data = request.form.keys()
-	clusters = client.list_clusters()
-	clusterArns = clusters["clusterArns"]
 	for values in data:
 		objectified = json.loads(values)
+	if (objectified['tagQuery']['region'] == "London"):
+		region = "eu-west-2"
+	else:
+		region = "us-east-1"
+	uniClient = boto3.client("ecs", region_name=region)
+	clusters = uniClient.list_clusters()
+	clusterArns = clusters["clusterArns"]
 	for cluster in objectified["tagQuery"]["clusters"]:
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
 			if (cluster == cluster_split[1]):
-				currentTags = client.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
+				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
 				tags = currentTags["tags"]
 				for tag in tags:
-					if tag['key'] == "client1":
-						old_client_name = tag['value']
 					if tag['key'] == "Release":
 						old_release_number = tag['value']
 					# get old tag value here
 					print(tag['key'],tag["value"])
 					if tag['key'] == objectified['tagQuery']['tagKey']:
-						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
-				client.tag_resource(resourceArn=awsCluster, tags=[{'key':objectified['tagQuery']['tagKey'], 'value': objectified['tagQuery']['tagValue']}])
+						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 
-				print(objectified['tagQuery']['tagValue'])
+				noSpaces = objectified['tagQuery']['tagKey']
+				for x in objectified['tagQuery']['tagKey']:
+					if objectified['tagQuery']['tagKey'] == " ":
+						noSpaces = objectified['tagQuery']['tagKey'][:-1]
+				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': objectified['tagQuery']['tagValue']}])
 
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']
@@ -184,19 +190,25 @@ def createTag():
 @app.route('/deleteTag', methods=['GET', 'POST'])
 def deleteTag():
 	data = request.form.keys()
-	clusters = client.list_clusters()
-	clusterArns = clusters["clusterArns"]
+	region = ""
 	for values in data:
 		objectified = json.loads(values)
+	if (objectified['tagQuery']['region'] == "London"):
+		region = "eu-west-2"
+	else:
+		region = "us-east-1"
+	uniClient = boto3.client("ecs", region_name=region)
+	clusters = uniClient.list_clusters()
+	clusterArns = clusters["clusterArns"]
 	for cluster in objectified['tagQuery']['clusters']:
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split('/')
 			if (cluster == cluster_split[1]):
-				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
 				tags = currentTags["tags"]
 				for tag in tags:
 					if tag['key'] == objectified['tagQuery']['tagKey']:
-						client.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 	return "Successfully deleted the tag"
 
 #Retrieves the tags for given AWS clusters
@@ -206,17 +218,24 @@ def getTags():
 	clusterList = []
 	totalTagList = []
 	clusterTagObj = {}
+	region = ""
 	for values in data:
 		objectified = json.loads(values)
 		clusterList = objectified['clusterList']
+
 	# clusterList = convertUnicodeToArray(clusterList)
+	if (objectified['region'] == "London"):
+		region = "eu-west-2"
+	else:
+		region = "us-east-1"
+	uniClient = boto3.client("ecs", region_name=region)
 	for cluster in clusterList:
-		clusters = client.list_clusters()
+		clusters = uniClient.list_clusters()
 		clusterArns = clusters["clusterArns"]
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
 			if (cluster == cluster_split[1]):
-				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
 				if(currentTags["tags"] != []):
 					for tag in currentTags["tags"]:
 						totalTagList.append(tag["key"])
@@ -226,12 +245,12 @@ def getTags():
 	counter = -1
 	for cluster in clusterList:
 		counter = counter + 1
-		clusters = client.list_clusters()
+		clusters = uniClient.list_clusters()
 		clusterArns = clusters["clusterArns"]
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
 			if(cluster == cluster_split[1]):
-				currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
 				if (currentTags["tags"] != []):
 					for awsTag in currentTags["tags"]:
 						key = awsTag["key"]
@@ -267,7 +286,9 @@ def result():
 		environments = objectified['Environments']
 		components = objectified['Components']
 		dates = objectified['Dates']
-
+		active = objectified['Active']
+		if active == "None":
+			active = None
 		toDate = None
 		if len(clients) > 0:
 			client = clients[0]
@@ -290,7 +311,7 @@ def result():
 				toDate = None
 			if fromDate == "":
 				fromDate = None
-		result  = search(client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
+		result  = search(is_active=active, client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
 		results = results + (result)
 		# Within results, create an object that {cluster_name: [releases] or {Release: 1.1.1.1, Info: Etc}} and pass it into the front end, where we map it by connecting release numbers - Having it as hidden dropdowns
 
@@ -302,8 +323,16 @@ def sendTasks():
 	for values in data:
 		objectified = json.loads(values)
 	tasks = getTaskDefinitions(objectified["clusterName"], objectified["releaseNum"])
-	print("Does this keep getting called?")
 	return jsonify(tasks)
+
+@app.route('/getClients', methods=["GET", "POST"])
+def sendClients():
+	data = request.form.keys()
+	for values in data:
+		objectified = json.loads(values)
+	clients = getClients(objectified["clusterName"], objectified["release"])
+	print(clients)
+	return jsonify(clients)
 
 @app.route('/getReleaseHistory', methods=["GET", "POST"])
 def sendReleases():
@@ -314,19 +343,25 @@ def sendReleases():
 	releasesStrArray = []
 	for x in releases:
 		strX = str(x)
-		releasesStrArray.append(strX[3: len(strX)-3])
-	print('BLAMBLAM', releasesStrArray)
+		firstOccurance = strX.find("'")
+		releasesStrArray.append(strX[firstOccurance+1: len(strX)-3])
 	return jsonify(releasesStrArray)
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])
 def updateReleaseTable():
 	print("?????///////////////////////???????/////////////////????????/?/////////")
 	data = request.form.keys()
-	print(data)
-	clusters = client.list_clusters()
-	clusterArns = clusters["clusterArns"]
 	for values in data:
 		objectified = json.loads(values)
+	if (objectified['region'] == "London"):
+		region = "eu-west-2"
+	else:
+		region = "us-east-1"
+	uniClient = boto3.client("ecs", region_name=region)
+	print(data)
+	clusters = uniClient.list_clusters()
+	clusterArns = clusters["clusterArns"]
+
 	# this is where you will add the code to update the Task Definition and PRID table with the newRelease using objectified["newRelease"]
 	product_name = objectified["product"]
 	cluster_name = objectified["clusterName"]
@@ -339,19 +374,19 @@ def updateReleaseTable():
 	for awsCluster in clusterArns:
 		cluster_split = awsCluster.split("/")
 		if (objectified["clusterName"] == cluster_split[1]):
-			currentTags = client.list_tags_for_resource(resourceArn=awsCluster)
+			currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
 			tags = currentTags["tags"]
 			for tag in tags:
 				if tag["key"] == "Release":
 					if tag["value"] == objectified["oldRelease"]:
-						client.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
-						client.tag_resource(resourceArn=awsCluster, tags=[{'key': 'Release', 'value': objectified["newRelease"]}])
+						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
+						uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key': 'Release', 'value': objectified["newRelease"]}])
 	return "Helo"
 
 
-def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
+def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None, is_active=None):
 	search = Search()
-	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate, is_active=None)
+	search_result = search.getSearchResult(client_name=client_name, product_name=product_name, release=release, cluster_name=cluster_name, region=region, environment=environment, toDate=toDate, fromDate=fromDate, is_active=is_active)
 	return search_result
 
 # main function that triggers other helper functions to
@@ -393,6 +428,11 @@ def getReleases(cluster_name):
 	search = Search()
 	releases = search.getReleases(cluster_name)
 	return releases
+
+def getClients(cluster_name, release_number):
+	search = Search()
+	clients = search.getClients(cluster_name, release_number)
+	return clients
 
 @app.route('/load', methods=['GET','POST'])
 def loadAWSData():
