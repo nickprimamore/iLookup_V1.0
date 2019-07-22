@@ -180,6 +180,7 @@
           })
           //This for loop recreates the Options based on the selected values, allowing for a dynamic search filter
           for (let client in response.clientsUp) {
+            console.log(response.clientsUp)
             let newOption
             if (values[0].includes(response.clientsUp[client])) {
               newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, true);
@@ -327,6 +328,7 @@
   function clearSearchBars() {
     $('.dropdowns').val(null).trigger('change');
     $('.date').val('')
+    sendData()
   }
 
 </script>
