@@ -10,4 +10,5 @@ class Config(object):
 	SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Iceland@320@127.0.0.1:3306/mytestdb"
 
 
+
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
