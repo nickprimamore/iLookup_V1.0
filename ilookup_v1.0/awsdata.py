@@ -339,6 +339,12 @@ class AWSData:
 
 
 	def populateCPRC(self, cluster_name, product_release_id, client_id):
+
+		print("////////////////////////////////////////////////////////////////////////////////")
+		print("in cprc function: ", cluster_name, product_release_id, client_id)
+		print("////////////////////////////////////////////////////////////////////////////////")
+
+
 		cluster_id = db.session.query(Cluster.cluster_id).filter_by(cluster_name=cluster_name).first()
 		if cluster_id is not None:
 			cluster_id = cluster_id[0]
@@ -415,30 +421,36 @@ class AWSData:
 
 							### Update my product release if new task def is found
 
-							if (product_name!="unknown" and product_release_number!=""):
-								print(product_release_number) # tag/time
-								product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-							if (product_name=="unknown" and product_release_number!=""):
-								print("------------------------------------------calling populateproduct----------------------------------------------")
-								# product_release_number = datetime.utcnow()
-								print(product_release_number) # time
-								#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-								product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
-							if (product_name!="unknown" and product_release_number==""):
-								product_release_number = datetime.utcnow()
-								#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-								product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-							if (product_name=="unknown" and product_release_number==""):
-								product_release_number = datetime.utcnow()
-								#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-								product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
+							# if (product_name!="unknown" and product_release_number!=""):
+							# 	print(product_release_number) # tag/time
+							# 	product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
+							# if (product_name=="unknown" and product_release_number!=""):
+							# 	print("------------------------------------------calling populateproduct----------------------------------------------")
+							# 	# product_release_number = datetime.utcnow()
+							# 	print(product_release_number) # time
+							# 	#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+							# 	product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
+							# if (product_name!="unknown" and product_release_number==""):
+							# 	product_release_number = datetime.utcnow()
+							# 	#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+							# 	product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
+							# if (product_name=="unknown" and product_release_number==""):
+							# 	product_release_number = datetime.utcnow()
+							# 	#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+							# 	product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
 
+							product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
 
 							if (product_name!="" and product_release_number!="" ):
-								for client in client_names:
-									client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
-											#print(client_id)
+								if len(client_names) > 0:
+									for client in client_names:
+										client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
+												#print(client_id)
+										self.populateCPRC(cluster_name,product_release_id, client_id[0])
+								else:
+									client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
 									self.populateCPRC(cluster_name,product_release_id, client_id[0])
+
 							else:
 								if len(client_names) > 0:
 									for client in client_names:
@@ -446,7 +458,7 @@ class AWSData:
 												#print(client_id)
 										self.populateCPRC(cluster_name,product_release_id, client_id[0])
 								else:
-									client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
+									client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
 									self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 
@@ -474,30 +486,41 @@ class AWSData:
 					service = cluster_task["service"]
 					self.populateTaskDefinition(component_id,cluster,service,latest_product_release_number,region_name)
 
-				if (product_name!="unknown" and product_release_number!=""):
-					print(product_release_number) # tag/time
-					product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-				if (product_name=="unknown" and product_release_number!=""):
-					print("------------------------------------------calling populateproduct----------------------------------------------")
-							# product_release_number = datetime.utcnow()
-					print(product_release_number) # time
-							#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-					product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
-				if (product_name!="unknown" and product_release_number==""):
-					product_release_number = datetime.utcnow()
-							#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-					product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-				if (product_name=="unknown" and product_release_number==""):
-					product_release_number = datetime.utcnow()
-							#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-					product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
+				# if (product_name!="unknown" and product_release_number!=""):
+				# 	print(product_release_number) # tag/time
+				# 	product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
+				# if (product_name=="unknown" and product_release_number!=""):
+				# 	print("------------------------------------------calling populateproduct----------------------------------------------")
+				# 			# product_release_number = datetime.utcnow()
+				# 	print(product_release_number) # time
+				# 			#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+				# 	product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
+				# if (product_name!="unknown" and product_release_number==""):
+				# 	product_release_number = datetime.utcnow()
+				# 			#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+				# 	product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
+				# if (product_name=="unknown" and product_release_number==""):
+				# 	product_release_number = datetime.utcnow()
+				# 			#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
+				# 	product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
 
+				product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
 
-				if (product_name!="" and product_release_number!="" ):
-					for client in client_names:
-						client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
-										#print(client_id)
+				if product_name == "iVerify":
+					print("product_release_id: ", product_release_id)
+					print("//////////////////////8888888888888888888888888888//////////////////////////////////////////888888888888888888888888888888888")
+
+				if (product_name!="" and latest_product_release_number!="" ):
+					if len(client_names) > 0:
+						for client in client_names:
+							client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
+											#print(client_id)
+							self.populateCPRC(cluster_name,product_release_id, client_id[0])
+					else:
+						client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
 						self.populateCPRC(cluster_name,product_release_id, client_id[0])
+
+
 				else:
 					if len(client_names) > 0:
 						for client in client_names:
@@ -505,7 +528,7 @@ class AWSData:
 											#print(client_id)
 							self.populateCPRC(cluster_name,product_release_id, client_id[0])
 					else:
-						client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
+						client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
 						self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 
