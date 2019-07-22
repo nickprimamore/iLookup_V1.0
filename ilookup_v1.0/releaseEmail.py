@@ -5,6 +5,10 @@ from email.mime.text import MIMEText
 
 utility = email.utils
 class Email:
+    def saveUnknowns(self, prodObject):
+        print("THIS IS THE EMAIL FUNCTION", prodObject)
+        unknowns.append(prodObject)
+
     def sendEmail(self, clusters):
         # Replace sender@example.com with your "From" address.
         # This address must be verified.
