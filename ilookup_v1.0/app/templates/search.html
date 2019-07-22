@@ -308,6 +308,7 @@
   function clearSearchBars() {
     $('.dropdowns').val(null).trigger('change');
     $('.date').val('')
+    sendData();
   }
 
 </script>
@@ -656,15 +657,31 @@ let addReleaseTag = {}
   function newTag() {
     if(!$('.productsTag').val()[0]){
       $('#selectProductAlert').show('fade');
+      window.setTimeout(function() {
+        $("#selectProductAlert").hide('fade');
+      }, 3000);
       return;
     }
     if(!$('.regionsTag').val()[0]){
         $('#selectRegionAlert').show('fade');
+        window.setTimeout(function() {
+          $("#selectRegionAlert").hide('fade');
+        }, 3000);
         return;
     }
     if(!$('.clustersTag').val().length > 0){
         $('#selectClusterAlert').show('fade');
+        window.setTimeout(function() {
+          $("#selectClusterAlert").hide('fade');
+        }, 3000);
         return;
+    }
+    if(!$('#tagValue').val()){
+      $('#newValueAlert').show('fade');
+      window.setTimeout(function() {
+        $("#newValueAlert").hide('fade');
+      }, 3000);
+      return;
     }
     addReleaseTag['clusters'] = $('.clustersTag').val()
     let tagValue = document.getElementById('tagValue').value
@@ -679,6 +696,9 @@ let addReleaseTag = {}
       success: function(response) {
         console.log("Tag created")
         $('#successTagAlert').show('fade');
+        window.setTimeout(function() {
+          $("#successTagAlert").hide('fade');
+        }, 3000);
       }
     })
   }
@@ -686,10 +706,16 @@ let addReleaseTag = {}
   function deleteTag() {
     if (!$('.editTag').val()) {
       $('#selectBeforeDeleteAlert').show('fade');
+      window.setTimeout(function() {
+        $("#selectBeforeDeleteAlert").hide('fade');
+      }, 3000);
       return;
     }
     if ($('.editTag').val() == 'Product' || $('.editTag').val() == 'Release' || $('.editTag').val() == 'Environment') {
       $('#cannotDeleteAlert').show('fade');
+      window.setTimeout(function() {
+        $("#cannotDeleteAlert").hide('fade');
+      }, 3000);
       return;
     }
     addReleaseTag['clusters'] = $('.clustersTag').val()
@@ -704,6 +730,9 @@ let addReleaseTag = {}
         success: function(response) {
           console.log("Tag deleted")
           $('#deleteAlert').show('fade');
+          window.setTimeout(function() {
+            $("#deleteAlert").hide('fade');
+          }, 3000);
         }
       })
     }
@@ -762,9 +791,9 @@ let addReleaseTag = {}
             </div>
             <div class="col-md-8" style="padding-left:0px; padding-right:0px; display: inline-block">
               <input type="text" class="form-control" style="width:112%" id="tagValue" aria-describedby="tagFormat" placeholder="Enter new value here">
-              <!-- <small id="tagFormat" class="form-text text-muted">Example release format: 1.1.1.1</small> -->
             </div>
-            <br><br>
+            <small id="tagFormat" class="form-text text-muted" style="margin-left:195.6px">Example release format: 1.1.1.1</small>
+            <br>
             <div id="successTagAlert" class="alert alert-primary collapse">
               <a id="closeSuccessAlert" href="#" class="close">&times;</a>
               <strong>Successfully added/updated tag!</strong>
@@ -792,6 +821,10 @@ let addReleaseTag = {}
             <div id="selectClusterAlert" class="alert alert-danger collapse">
               <a id="closeSelectClusterAlert" href="#" class="close">&times;</a>
               <strong>Please select a cluster.</strong>
+            </div>
+            <div id="newValueAlert" class="alert alert-danger collapse">
+              <a id="closeNewValueAlert" href="#" class="close">&times;</a>
+              <strong>Please enter a new tag value.</strong>
             </div>
           </form>
         </div>
@@ -825,6 +858,9 @@ let addReleaseTag = {}
       });
       $('#closeSelectClusterAlert').click(function () {
         $('#selectClusterAlert').hide('fade');
+      });
+      $('#closeNewValueAlert').click(function () {
+        $('#newValueAlert').hide('fade');
       });
     });
   </script>

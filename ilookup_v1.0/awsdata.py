@@ -202,7 +202,7 @@ class AWSData:
 				#print("================================")
 
 	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name):
-		
+
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_id = product_id[0]
@@ -524,10 +524,10 @@ class AWSData:
 
 
 
-# data = AWSData()
+data = AWSData()
 
-# data.newMainFunction()
+data.newMainFunction()
 
-# db.session.commit()
+db.session.commit()
 
-# print("Completed")
+print("Completed")
