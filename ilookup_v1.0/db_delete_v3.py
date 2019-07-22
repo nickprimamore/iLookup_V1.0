@@ -4,32 +4,38 @@ import pprint, json, boto3
 
 class DeactivateRecords:
 
-	def deactiveClient(self, client_name=None):
+	def deactivateClient(self, client_name=None):
 		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
-		client_id = client_id[0]
-		print(client_id)
-		
-		cluster_count = db.session.query(CPRC.cluster_id).filter(CPRC.client_id==client_id).distinct().all()
-		#print(cluster_count)
-		if(len(cluster_count)>1):
-			#just disable the cprc record 
-			for cluster_id in cluster_count:
-				cprc_records = db.session.query(CPRC).filter(CPRC.client_id==client_id).filter(CPRC.cluster_id==cluster_id).all()
-				for cprc in cprc_records:
-					cprc.is_active = False
-	
-		else:
-			#deactivate client and cprc 
-			print("only one cluster and one client")
-			client = db.session.query(Client).filter(Client.client_id==client_id).first()
-			client.is_active = False
-			cprc_records = db.session.query(CPRC).filter(CPRC.client_id==client_id).filter(CPRC.cluster_id==cluster_count[0][0]).all()
-			#print(CPRC.is_active)
-			for cprc in cprc_records:
-				cprc.is_active = False
 
-		db.session.commit()
-	
+		if client_id:
+			client_id = client_id[0]
+			print(client_id)
+			
+
+			cluster_count = db.session.query(CPRC.cluster_id).filter(CPRC.client_id==client_id).distinct().all()
+			#print(cluster_count)
+
+			if cluster_count:
+				if(len(cluster_count)>1):
+					#just disable the cprc record 
+					for cluster_id in cluster_count:
+						cprc_records = db.session.query(CPRC).filter(CPRC.client_id==client_id).filter(CPRC.cluster_id==cluster_id).all()
+						for cprc in cprc_records:
+							cprc.is_active = False
+			
+				else:
+					#deactivate client and cprc 
+					print("only one cluster and one client")
+					client = db.session.query(Client).filter(Client.client_id==client_id).first()
+					client.is_active = False
+					cprc_records = db.session.query(CPRC).filter(CPRC.client_id==client_id).filter(CPRC.cluster_id==cluster_count[0][0]).all()
+					#print(CPRC.is_active)
+					if len(cprc_records)>0:
+						for cprc in cprc_records:
+							cprc.is_active = False
+
+				db.session.commit()
+		
 	def deactivateProduct(self, product_name=None):
 
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
@@ -112,8 +118,8 @@ class DeactivateRecords:
 
 
                                       
-update = DeactivateRecords()
-#update.deactiveClient(client_name="Aon")
-update.deactivateProduct(product_name="iVerify")
+# update = DeactivateRecords()
+# #update.deactiveClient(client_name="Aon")
+# update.deactivateProduct(product_name="iVerify")
 
 # update.fetchClusterTags("asg-uat-iconductor-cluster","eu-west-2")

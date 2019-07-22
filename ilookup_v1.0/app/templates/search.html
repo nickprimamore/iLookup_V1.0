@@ -20,8 +20,8 @@
   }
   p.searchLabel {
     color:white;
-    font-size:18px;
-    margin-bottom:5px;
+    font-size:16px;
+    margin-bottom:3px;
     font-family: "Lato Light";
   }
   select.dropdowns {
@@ -89,6 +89,7 @@
           let newOption = new Option(response.componentsQ[component], response.componentsQ[component], false, false);
           $('#components').append(newOption);
         }
+
       }
     })
 
@@ -106,6 +107,7 @@
       theme: "classic",
       width: "100%"
     });
+
 
     //Closes dropdowns after you unselect to allow for better UI experience
     $('.dropdowns').on('select2:unselect', function(e) {
@@ -178,6 +180,7 @@
           })
           //This for loop recreates the Options based on the selected values, allowing for a dynamic search filter
           for (let client in response.clientsUp) {
+            console.log(response.clientsUp)
             let newOption
             if (values[0].includes(response.clientsUp[client])) {
               newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, true);
@@ -246,6 +249,12 @@
     var clusterVal = $('.clusters').val()
     var environmentVal = $('.environments').val()
 
+    var activeVal = $('#active').prop("checked") == true
+    var inactiveVal = $('#inactive').val()
+
+    console.log(activeVal, "active")
+    console.log(inactiveVal, "inactive")
+
     var dateFrom = document.getElementById("dateFrom").value;
     var dateUntil = document.getElementById("dateUntil").value;
 
@@ -257,6 +266,7 @@
     var clusterList = []
     var environmentList = []
     var componentList = []
+    var actOrIn = ""
     var dateList = [dateFrom, dateUntil];
 
     //Populates all the lists with the search values
@@ -278,8 +288,17 @@
     for (var env in environmentVal) {
       environmentList.push(environmentVal[env])
     }
+    if ($('#active').prop("checked") == true && ($('#inactive').prop("checked") == true)) {
+      actOrIn = "None"
+    } else if ($('#active').prop("checked") == true) {
+      actOrIn = true
+    } else if ($('#inactive').prop("checked") == true) {
+      actOrIn = false
+    } else {
+      actOrIn = "None"
+    }
 
-    return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList]
+    return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList, actOrIn]
   }
   // This function sends the selected search tags to the backend and renders it onto the result-tag html
   function sendData() {
@@ -296,7 +315,8 @@
         Clusters: values[4],
         Environments: values[5],
         Components: values[6],
-        Dates: values[7]
+        Dates: values[7],
+        Active: values[8]
       }),
       success: function (response) {
         $('#result-tag').html(response)
@@ -308,6 +328,7 @@
   function clearSearchBars() {
     $('.dropdowns').val(null).trigger('change');
     $('.date').val('')
+    sendData();
   }
 
 </script>
@@ -331,7 +352,7 @@
 
   /* Sidebar sizes when expanded and expanded */
   .sidebar-expanded {
-      width: 300px;
+      width: 18vw;
   }
 
   .sidebar-collapsed {
@@ -399,7 +420,13 @@
   }
 
   .select2-search__field{
-    width: 15.95em !important;
+    width: 5em !important;
+  }
+
+  .table-wrapper{
+    width: 56vw;
+    max-width: 56vw;
+    overflow:auto;
   }
 
 </style>
@@ -411,9 +438,6 @@
     <div id="sidebar-container" class="sidebar-expanded d-none d-md-block"><!-- d-* hides the Sidebar in smaller devices. Its itens can be kept on the Navbar 'Menu' -->
             <!-- /END Separator -->
             <div class="searchContainer">
-              <div class="searchBar col-md-12">
-                <p class="iLookup" style="text-align:center;padding-top:5"> <b> Search AWS Resources </b> </p>
-              </div>
               <div class="searchBar col-md-12">
                 <p class="searchLabel productSelect"> <b> Products: </b> </p>
                 <select class="dropdowns products" id="products" name="products[]" multiple="multiple">
@@ -450,6 +474,17 @@
 
                 </select>
               </div>
+              <div class="searchBar col-md-12">
+                <p class="searchLabel activeSelect"> <b> Active Clusters: </b> </p>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="active" value="true">
+                  <label class="form-check-label" style="color: white" for="active">Active</label>
+                </div>
+                <div class="form-check form-check-inline" style="margin-left: 3.4vw">
+                  <input class="form-check-input" type="checkbox" id="inactive" value="false">
+                  <label class="form-check-label" style="color: white" for="inactive">Inactive</label>
+                </div>
+              </div>
               <div class="form-group col-md-12">
                   <p class="searchLabel"> <b> Date (From): </b> </p>
                   <input type="date" class="form-control date" id="dateFrom"name="Date (From)">
@@ -458,7 +493,6 @@
                   <p class="searchLabel"> <b> Date (To): </b> </p>
                   <input type="date" class="form-control date" id="dateUntil" name="Date (Until)">
               </div>
-
               <div class="searchBar col-md-6">
                 <button type="button" class="btn btn-light" style="width:100%; margin-bottom: 15px; font-weight:bold; color:#00508F" onClick="sendData()">Search</button>
               </div>
@@ -486,6 +520,10 @@ let addReleaseTag = {}
 
   //We seperately initialize these select2's because we want them to work independently from the rest of the search page as they require their own unique way of dynamicFiltering
   $(document).ready(function() {
+    //initially disable region and clusters in the tagging modal
+    $("#selectRegion").prop("disabled", true);
+    $("#addClustersSelect2").prop("disabled", true);
+
     $('.productsTag').select2({
       theme: "classic"
     });
@@ -529,13 +567,14 @@ let addReleaseTag = {}
        url:'/getTags',
        type:'POST',
        data: JSON.stringify({
-         clusterList: selectedCluster
+         clusterList: selectedCluster,
+         region: addReleaseTag['region']
        }),
        success: function(response) {
          $('.tagTable').remove()
 
          //sets up the table with AWS tags to be appended in the modal
-         let tableStr = '<table class="table table-striped tagTable"><thead><tr>'
+         let tableStr = '<div class="table-wrapper"><table class="table table-striped tagTable"><thead><tr>'
          if (Object.keys(response).length != 0) {
             tableStr += '<th scope="col">Cluster</th>'
          }
@@ -552,7 +591,7 @@ let addReleaseTag = {}
            }
            tableStr += '</tr>'
          }
-         tableStr += '</tbody></table>'
+         tableStr += '</tbody></table></div>'
          $('.tags').append(tableStr)
 
          $('#editTag option').each(function() {
@@ -566,7 +605,28 @@ let addReleaseTag = {}
      })
     })
 
+
     $('.updateTags').on('change.select2', function(e) {
+      //if a product is deselected, disable region and cluster
+      if(!$('.productsTag').val()[0]){
+        $("#selectRegion").prop("disabled", true);
+        $('#selectRegion').val(null);
+        $("#addClustersSelect2").prop("disabled", true);
+      }
+      //if region is deselected, disable cluster
+      if(!$('.regionsTag').val()[0]){
+        $("#addClustersSelect2").prop("disabled", true);
+        $('#addClustersSelect2').val(null).trigger('change');
+      }
+      //if product selected, enable region
+      if($('.productsTag').val()[0]){
+        $("#selectRegion").prop("disabled", false);
+      }
+      //if region selected, enable cluster
+      if($('.regionsTag').val()[0]){
+        $("#addClustersSelect2").prop("disabled", false);
+      }
+
       addReleaseTag['product'] = $('.productsTag').val()[0]
       addReleaseTag['region'] = $('.regionsTag').val()[0]
       values = getTagValues()
@@ -629,10 +689,39 @@ let addReleaseTag = {}
 
   //This function creates an object for the newTag and sends it to the backend for it to be created on AWS servers
   function newTag() {
+    if(!$('.productsTag').val()[0]){
+      $('#selectProductAlert').show('fade');
+      window.setTimeout(function() {
+        $("#selectProductAlert").hide('fade');
+      }, 3000);
+      return;
+    }
+    if(!$('.regionsTag').val()[0]){
+        $('#selectRegionAlert').show('fade');
+        window.setTimeout(function() {
+          $("#selectRegionAlert").hide('fade');
+        }, 3000);
+        return;
+    }
+    if(!$('.clustersTag').val().length > 0){
+        $('#selectClusterAlert').show('fade');
+        window.setTimeout(function() {
+          $("#selectClusterAlert").hide('fade');
+        }, 3000);
+        return;
+    }
+    if(!$('#tagValue').val()){
+      $('#newValueAlert').show('fade');
+      window.setTimeout(function() {
+        $("#newValueAlert").hide('fade');
+      }, 3000);
+      return;
+    }
     addReleaseTag['clusters'] = $('.clustersTag').val()
     let tagValue = document.getElementById('tagValue').value
     addReleaseTag['tagValue'] = tagValue
     addReleaseTag['tagKey'] = $('.editTag').val()
+
     $.ajax({
       url:'/newTag',
       type:'POST',
@@ -642,6 +731,9 @@ let addReleaseTag = {}
       success: function(response) {
         console.log("Tag created")
         $('#successTagAlert').show('fade');
+        window.setTimeout(function() {
+          $("#successTagAlert").hide('fade');
+        }, 3000);
       }
     })
   }
@@ -649,10 +741,16 @@ let addReleaseTag = {}
   function deleteTag() {
     if (!$('.editTag').val()) {
       $('#selectBeforeDeleteAlert').show('fade');
+      window.setTimeout(function() {
+        $("#selectBeforeDeleteAlert").hide('fade');
+      }, 3000);
       return;
     }
     if ($('.editTag').val() == 'Product' || $('.editTag').val() == 'Release' || $('.editTag').val() == 'Environment') {
       $('#cannotDeleteAlert').show('fade');
+      window.setTimeout(function() {
+        $("#cannotDeleteAlert").hide('fade');
+      }, 3000);
       return;
     }
     addReleaseTag['clusters'] = $('.clustersTag').val()
@@ -667,6 +765,9 @@ let addReleaseTag = {}
         success: function(response) {
           console.log("Tag deleted")
           $('#deleteAlert').show('fade');
+          window.setTimeout(function() {
+            $("#deleteAlert").hide('fade');
+          }, 3000);
         }
       })
     }
@@ -689,7 +790,7 @@ let addReleaseTag = {}
               <div class="form-group">
                 <label class="modalLabel" for="selectProduct">Product:</label>
                 <br>
-                <select class="productsTag updateTags" id="selectProduct" style="width:100%" name="selectProduct" multiple="multiple">
+                <select class="productsTag updateTags dependencies" id="selectProduct" style="width:100%" name="selectProduct" multiple="multiple">
 
                 </select>
               </div>
@@ -698,7 +799,7 @@ let addReleaseTag = {}
               <div class="form-group">
                 <label class="modalLabel" for="selectRegion">Region:</label>
                 <br>
-                <select class="regionsTag updateTags" id="selectRegion" style="width:100%" name="selectRegion" multiple="multiple">
+                <select class="regionsTag updateTags dependencies" id="selectRegion" style="width:100%" name="selectRegion" multiple="multiple">
 
                 </select>
               </div>
@@ -706,7 +807,7 @@ let addReleaseTag = {}
           <form>
             <div class="searchBar col-md-6" style="padding-left:0px; padding-right:24.8px">
               <p class="modalLabel"> <b> Cluster(s):</b> </p>
-                <select class="clustersTag" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
+                <select class="clustersTag dependencies" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
                 </select>
             </div>
           </form>
@@ -725,9 +826,9 @@ let addReleaseTag = {}
             </div>
             <div class="col-md-8" style="padding-left:0px; padding-right:0px; display: inline-block">
               <input type="text" class="form-control" style="width:112%" id="tagValue" aria-describedby="tagFormat" placeholder="Enter new value here">
-              <!-- <small id="tagFormat" class="form-text text-muted">Example release format: 1.1.1.1</small> -->
             </div>
-            <br><br>
+            <small id="tagFormat" class="form-text text-muted" style="margin-left:195.6px">Example release format: 1.1.1.1</small>
+            <br>
             <div id="successTagAlert" class="alert alert-primary collapse">
               <a id="closeSuccessAlert" href="#" class="close">&times;</a>
               <strong>Successfully added/updated tag!</strong>
@@ -743,6 +844,22 @@ let addReleaseTag = {}
             <div id="deleteAlert" class="alert alert-danger collapse">
               <a id="closeDeleteAlert" href="#" class="close">&times;</a>
               <strong>Tag deleted.</strong>
+            </div>
+            <div id="selectProductAlert" class="alert alert-danger collapse">
+              <a id="closeSelectProductAlert" href="#" class="close">&times;</a>
+              <strong>Please select a product.</strong>
+            </div>
+            <div id="selectRegionAlert" class="alert alert-danger collapse">
+              <a id="closeSelectRegionAlert" href="#" class="close">&times;</a>
+              <strong>Please select a region.</strong>
+            </div>
+            <div id="selectClusterAlert" class="alert alert-danger collapse">
+              <a id="closeSelectClusterAlert" href="#" class="close">&times;</a>
+              <strong>Please select a cluster.</strong>
+            </div>
+            <div id="newValueAlert" class="alert alert-danger collapse">
+              <a id="closeNewValueAlert" href="#" class="close">&times;</a>
+              <strong>Please enter a new tag value.</strong>
             </div>
           </form>
         </div>
@@ -765,8 +882,20 @@ let addReleaseTag = {}
       $('#closeCannotDeleteAlert').click(function () {
         $('#cannotDeleteAlert').hide('fade');
       });
-      $('#deleteAlert').click(function () {
-        $('#closeDeleteAlert').hide('fade');
+      $('#closeDeleteAlert').click(function () {
+        $('#deleteAlert').hide('fade');
+      });
+      $('#closeSelectProductAlert').click(function () {
+        $('#selectProductAlert').hide('fade');
+      });
+      $('#closeSelectRegionAlert').click(function () {
+        $('#selectRegionAlert').hide('fade');
+      });
+      $('#closeSelectClusterAlert').click(function () {
+        $('#selectClusterAlert').hide('fade');
+      });
+      $('#closeNewValueAlert').click(function () {
+        $('#newValueAlert').hide('fade');
       });
     });
   </script>

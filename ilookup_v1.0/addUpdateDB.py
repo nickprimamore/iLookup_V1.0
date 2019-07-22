@@ -8,7 +8,9 @@ class AddUpdateRecords:
 			client = Client(client_name=new_client_name, is_active=True)
 			db.session.add(client)
 			db.session.commit()
-			self.deactivateCPRC(old_client_name, product_name, cluster_name, release_number)
+			print("New client is being added!!!!!!!!")
+			if old_client_name!="":
+				self.deactivateCPRC(old_client_name, product_name, cluster_name, release_number)
 			self.addCPRC(new_client_name,product_name,cluster_name,release_number)
 		if exists_client:
 			exists_cprc  = self.checkCPRCExists(new_client_name, cluster_name, product_name, release_number)

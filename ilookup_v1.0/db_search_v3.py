@@ -18,7 +18,7 @@ class Search:
 
 		print("in search condition")
 		print(is_active)
-		search_result = db.session.query(Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, CPRC.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
+		search_result = db.session.query(Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, Cluster.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
 
 		results = []
@@ -65,7 +65,13 @@ class Search:
 		for res in search_result:
 			#print(res)
 			result = {}
-			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+
+			if is_active!= None:
+				clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==is_active).all()
+			else:
+				clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+
+
 
 			clients = self.convertUnicodeToArray(clients)
 			# if res.CPRC.cprc_id 
@@ -106,7 +112,7 @@ class Search:
 		return 	results
 		# get latest release
 	def getLatestReleases(self):
-		search_result = db.session.query(CPRC.product_release_id, Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, CPRC.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
+		search_result = db.session.query(CPRC.product_release_id, Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, Cluster.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
 
 		# search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
@@ -130,7 +136,7 @@ class Search:
 		for res in maxResult:
 			#print(res)
 			result = {}
-			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).all()
 
 			clients = self.convertUnicodeToArray(clients)
 			# if res.CPRC.cprc_id 
