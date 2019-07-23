@@ -165,6 +165,9 @@ def createTag():
 					#This checks to see if it's a Release Tag, cause it will be called afterwards in order to update SQL side
 					if tag['key'] == "Release":
 						old_release_number = tag['value']
+					if "Client" in tag['key']:
+						if objectified['tagQuery']['tagValue'] == tag['value']:
+							return "Client already exists"
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 
@@ -173,22 +176,22 @@ def createTag():
 				for x in objectified['tagQuery']['tagKey']:
 					if objectified['tagQuery']['tagKey'] == " ":
 						noSpaces = objectified['tagQuery']['tagKey'][:-1]
-				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': objectified['tagQuery']['tagValue']}])
+				value = objectified['tagQuery']['tagValue']
+				if "Environmen" in noSpaces:
+					value = value.upper()
+				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': value}])
 
 				#This checks to see if its a Client and goes to update the Client tags and active/inactive on the SQL sides
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']
 					new_client_name = objectified['tagQuery']['tagValue']
 					cluster_name = cluster_split[1]
-					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-					print("Calling fetchclient function")
-					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 					fetchClientKeyValue(new_client_key,new_client_name,cluster_name,currentTags)
 				#This checks to see if its an Environment and updates the SQL side with the new environment
 				if "Environment" in objectified['tagQuery']['tagKey']:
 					cluster_name = cluster_split[1]
 					addUpdateRecord = AddUpdateRecords()
-					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'])
+					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'].upper())
 
 				#This checks to update Release functionality and change multiple tables
 				if objectified['tagQuery']['tagKey'] == 'Release':

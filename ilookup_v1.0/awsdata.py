@@ -44,7 +44,7 @@ class AWSData:
 			client_name = "unknown"
 			product_name = "unknown"
 			product_release_number = ""
-			environment= "unknown"
+			environment= "UNKNOWN"
 			for key in tags:
 				if ("Client") in key:
 					client_name = tags[key]
