@@ -201,7 +201,7 @@ def createTag():
 
 					addUpdateRecord = AddUpdateRecords()
 					#updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
-					addUpdateRecord.updateProductRelease(product_name, old_release_number, new_release_number)
+					addUpdateRecord.updateProductRelease(product_name, cluster_name, old_release_number, new_release_number)
 					addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
 	return 'Successfully updated the cluster(s)'
 

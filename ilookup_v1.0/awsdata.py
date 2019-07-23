@@ -381,7 +381,7 @@ class AWSData:
 			#task_descriptions = client.describe_tasks(cluster=cluster, tasks= tasks)
 			#task_descriptions = task_descriptions["tasks"]
 			db_task_defs = db.session.query(Cluster.cluster_name, Component.component_name, Task_Definition.task_definition_name,Task_Definition.revision, Task_Definition.is_active).filter(Task_Definition.component_id==Component.component_id,Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.is_active==True).all()
-			
+
 			print("==================================================")
 			print("In compareTaskDefinition function", product_name, product_release_number, client_names)
 			print("==================================================")
@@ -543,7 +543,7 @@ class AWSData:
 
 data = AWSData()
 
-#data.newMainFunction()
+data.newMainFunction()
 
 db.session.commit()
 
