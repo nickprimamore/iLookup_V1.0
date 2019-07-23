@@ -89,18 +89,24 @@ class AddUpdateRecords:
 		cluster.environment = environment
 		db.session.commit()
 
-	def updateProductRelease(self, product_name, old_release_number, new_release_number):
-		print( product_name, old_release_number, new_release_number)
-		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
-		product_id = product_id[0]
-		print(new_release_number)
-		print(product_id)
-		product_release_number = db.session.query(Product_Release).filter(Product_Release.product_id==product_id).filter(Product_Release.release_number==old_release_number).first()
-		print("product_release_number before",product_release_number)
-		product_release_number.release_number = new_release_number
-		db.session.commit()
-		print("product_release_number after", product_release_number)
-		print("......................................updated Product_Release...................................")
+	def updateProductRelease(self, product_name, cluster_name, old_release_number, new_release_number):
+		exists = self.checkRelease(product_name, cluster_name, old_release_number, new_release_number)
+		if exists:
+			return True
+		else:
+			product_release_exists = True
+			print( product_name, old_release_number, new_release_number)
+			product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
+			product_id = product_id[0]
+			print(new_release_number)
+			print(product_id)
+			product_release_number = db.session.query(Product_Release).filter(Product_Release.product_id==product_id).filter(Product_Release.release_number==old_release_number).first()
+			print("product_release_number before",product_release_number)
+			product_release_number.release_number = new_release_number
+			db.session.commit()
+			print("product_release_number after", product_release_number)
+			print("......................................updated Product_Release...................................")
+			return False
 
 	def updateTaskDefinition(self, cluster_name, old_release_number, new_release_number):
 		search_result = db.session.query(Task_Definition).filter(Cluster.cluster_id==Component.cluster_id,Component.component_id==Task_Definition.component_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.release_number==old_release_number).all()
@@ -109,3 +115,21 @@ class AddUpdateRecords:
 			res.release_number = new_release_number
 		db.session.commit()
 		print("......................................updated Task_Definition...................................")
+
+
+	#### Check validation for inserting new release number
+
+	def checkRelease(self, product_name, cluster_name, old_release_number, new_release_number):
+		exists = False
+		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
+		exists_product_release = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).scalar() is not None
+
+		if exists_product_release:
+			product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
+			exists_cprc = db.session.query(CPRC.cprc_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==product_release_id[0]).filter(Cluster.cluster_name==cluster_name).scalar() is not None
+			
+			if exists_cprc:
+				exists = True
+		return exists
+
+

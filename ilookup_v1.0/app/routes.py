@@ -387,18 +387,21 @@ def updateReleaseTable():
 	old_release_number = objectified["oldRelease"]
 	new_release_number = objectified["newRelease"]
 	addUpdateRecord = AddUpdateRecords()
-	addUpdateRecord.updateProductRelease(product_name, old_release_number, new_release_number)
-	addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
-	print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-	for awsCluster in clusterArns:
-		cluster_split = awsCluster.split("/")
-		if (objectified["clusterName"] == cluster_split[1]):
-			currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
-			tags = currentTags["tags"]
-			for tag in tags:
-				if tag["key"] == "Release":
-					if tag["value"] == objectified["oldRelease"]:
-						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
+	product_release_exists = addUpdateRecord.updateProductRelease(product_name,cluster_name, old_release_number, new_release_number)
+	if product_release_exists:
+		print("Release already exists. Use some other release number")
+	else:
+		addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
+		print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+		for awsCluster in clusterArns:
+			cluster_split = awsCluster.split("/")
+			if (objectified["clusterName"] == cluster_split[1]):
+				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
+				tags = currentTags["tags"]			
+				for tag in tags:
+					if tag["key"] == "Release":
+						if tag["value"] == objectified["oldRelease"]:
+							uniClient.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
 						uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key': 'Release', 'value': objectified["newRelease"]}])
 	return "Helo"
 
