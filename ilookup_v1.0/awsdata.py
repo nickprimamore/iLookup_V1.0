@@ -540,7 +540,7 @@ class AWSData:
 
 data = AWSData()
 
-data.newMainFunction()
+#data.newMainFunction()
 
 db.session.commit()
 

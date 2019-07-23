@@ -2,12 +2,21 @@ import smtplib
 import email.utils
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from app import app, db
+from sqlalchemy import func
+from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
+
 
 utility = email.utils
 class Email:
-    def saveUnknowns(self, prodObject):
-        print("THIS IS THE EMAIL FUNCTION", prodObject)
-        unknowns.append(prodObject)
+    def getRecords(self):
+
+        print("in record function")
+        records = db.session.query(Product.product_name, Cluster.cluster_name, Cluster.environment, Product_Release.release_number, Product_Release.inserted_at).filter(CPRC.cluster_id==Cluster.cluster_id, CPRC.product_release_id==Product_Release.product_release_id, Product.product_id==Product_Release.product_id
+        ).filter(func.length(Product_Release.release_number)>11).filter(Cluster.environment!="DEV").all()
+
+        emails = Email()
+        emails.sendEmail(records)
 
     def sendEmail(self, clusters):
         # Replace sender@example.com with your "From" address.
@@ -42,24 +51,57 @@ class Email:
 
         htmlStr = """<html>
         <head>
-          <h3>The following clusters need their timestamps updated to release numbers:</h3>
+            <h3>The following clusters need their timestamps updated to release numbers:</h3>
         </head>
-        <body>"""
+        <body>
+        """
 
+        dates = []
+        strData = []
+        prodRecords = {}
         if len(clusters) > 0:
-            for object in clusters:
-                clusterName = object["Cluster"]
-                productName = object["Product"]
-                releaseList = object["Releases"]
-                htmlStr += "<h3>" + clusterName + ": " + productName + "</h3><ul>"
-                for release in releaseList:
-                    htmlStr += "<li>" + release + "</li>"
-                htmlStr += "</ul>"
+            for x in clusters:
+                strDate = ""
+                if x[4][0: 10] not in dates:
+                    if x[4][5: 7] == "01":
+                        strDate = strDate + "January"
+                    elif x[4][5: 7] == "02":
+                        strDate = strDate + "February"
+                    elif x[4][5: 7] == "03":
+                        strDate = strDate + "March"
+                    elif x[4][5: 7] == "04":
+                        strDate = strDate + "April"
+                    elif x[4][5: 7] == "05":
+                        strDate = strDate + "May"
+                    elif x[4][5: 7] == "06":
+                        strDate = strDate + "June"
+                    elif x[4][5: 7] == "07":
+                        strDate = strDate + "July"
+                    elif x[4][5: 7] == "08":
+                        strDate = strDate + "August"
+                    elif x[4][5: 7] == "09":
+                        strDate = strDate + "September"
+                    elif x[4][5: 7] == "10":
+                        strDate = strDate + "October"
+                    elif x[4][5: 7] == "11":
+                        strDate = strDate + "November"
+                    else:
+                        strDate = strDate + "December"
+                    strDate = strDate + " " + x[4][8: 10] + ", " + x[4][0: 4]
+                    strData.append(strDate)
+                    dates.append(x[4][0: 10])
+                    prodRecords[x[4][0:10]] = []
+            for x in clusters:
+                prodRecords[x[4][0:10]].append([x[0], x[1], x[2], x[3], x[4]])
 
-        htmlStr += """<p>This email was sent with Amazon SES using the
-            <a href='https://www.python.org/'>Python</a>
-            <a href='https://docs.python.org/3/library/smtplib.html'>
-            smtplib</a> library.</p></body></html>"""
+        for x in dates:
+            htmlStr += """<h3>""" + strData[0] + """</h3>""" + """<ul>"""
+            for x in prodRecords[x[0: 10]]:
+                htmlStr += """<li>""" + x[0] + """, """ + x[1] + """, """ + x[2] + """, """ + x[3] + """</li>"""
+            htmlStr += """</ul>"""
+
+
+        htmlStr += """<p>Have a nice day!</p></body></html>"""
 
         # The HTML body of the email.
         BODY_HTML = htmlStr
@@ -95,6 +137,4 @@ class Email:
             print ("Email sent!")
 
 email = Email()
-
-email.sendEmail([{"Cluster": "asg-ecs-qa2-cluster", "Product": "iConductor", "Releases": ["2019-07-15 18:27:09.762688", "2019-07-15 18:27:33.138756"]},
-        {"Cluster": "asg-uat-iconductor-cluster", "Product": "iConductor", "Releases": ["2019-07-16 19:18:56.178954", "2019-07-16 19:19:09.410748"]}])
+email.getRecords()

@@ -217,9 +217,25 @@ def deleteTag():
 			if (cluster == cluster_split[1]):
 				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
 				tags = currentTags["tags"]
+				clientCounter = -1
+				clientNumber = 1
 				for tag in tags:
+					print(tag)
+					if "Client" in tag['key']:
+						clientCounter = clientCounter + 1
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+				updatedTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
+				tagzs = updatedTags["tags"]
+				print(tagzs)
+				for tagz in tagzs:
+					if "Client" in tagz['key']:
+						if clientNumber <= clientCounter:
+							value = tagz['value']
+							key = "Client" + str(clientNumber)
+							clientNumber = clientNumber + 1
+							uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[tagz['key']])
+							uniClient.tag_resource(resourceArn=awsCluster, tags=[{"key": key, 'value': value}])
 	return "Successfully deleted the tag"
 
 #Retrieves the tags for given AWS clusters
@@ -325,14 +341,15 @@ def result():
 		result  = search(is_active=active, client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
 		results = results + (result)
 		# Within results, create an object that {cluster_name: [releases] or {Release: 1.1.1.1, Info: Etc}} and pass it into the front end, where we map it by connecting release numbers - Having it as hidden dropdowns
-
 	return render_template('result.html', results=results)
 
 @app.route('/getTasks', methods=["GET", "POST"])
 def sendTasks():
 	data = request.form.keys()
+
 	for values in data:
 		objectified = json.loads(values)
+	print(objectified["releaseNum"])
 	tasks = getTaskDefinitions(objectified["clusterName"], objectified["releaseNum"])
 	return jsonify(tasks)
 
@@ -342,7 +359,6 @@ def sendClients():
 	for values in data:
 		objectified = json.loads(values)
 	clients = getClients(objectified["clusterName"], objectified["release"])
-	print(clients)
 	return jsonify(clients)
 
 @app.route('/getReleaseHistory', methods=["GET", "POST"])
@@ -418,7 +434,6 @@ def getTaskDefinitions(cluster_name, release_number):
 	return task_definitions
 
 def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTags):
-	print(currentTags)
 	currentTags = currentTags['tags']
 	for tag in currentTags:
 		if tag['key'] == new_client_key:

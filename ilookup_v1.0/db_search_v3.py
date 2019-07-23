@@ -49,7 +49,7 @@ class Search:
 		#to date and from date
 		if (toDate and fromDate) is not None:
 			search_result = search_result.filter(and_(func.date(Product_Release.inserted_at)>=fromDate), func.date(Product_Release.inserted_at)<=toDate)
-	
+
 		if (toDate and not fromDate):
 			search_result = search_result.filter((func.date(Product_Release.inserted_at)<=toDate))
 
@@ -68,7 +68,7 @@ class Search:
 			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
 
 			clients = self.convertUnicodeToArray(clients)
-			# if res.CPRC.cprc_id 
+			# if res.CPRC.cprc_id
 
 			result["client_names"] = clients
 			result["product_name"] = res.product_name
@@ -78,7 +78,7 @@ class Search:
 			result["environment"] = res.environment
 			result["is_active"] = res.is_active
 			result["inserted_at"] = res.inserted_at
-			
+
 		# 	#call cprc to fetch records based on same client, cluster
 		# 	# get prid and the  corresponding release numbers from PRID Table
 		# 	# shove it here
@@ -133,7 +133,7 @@ class Search:
 			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
 
 			clients = self.convertUnicodeToArray(clients)
-			# if res.CPRC.cprc_id 
+			# if res.CPRC.cprc_id
 
 			result["client_names"] = clients
 			result["product_name"] = res.product_name
@@ -143,7 +143,7 @@ class Search:
 			result["environment"] = res.environment
 			result["is_active"] = res.is_active
 			result["inserted_at"] = res.inserted_at
-			
+
 		# 	#call cprc to fetch records based on same client, cluster
 		# 	# get prid and the  corresponding release numbers from PRID Table
 		# 	# shove it here
@@ -157,7 +157,7 @@ class Search:
 			results.append(result)
 		pprint.pprint(results)
 		print(len(results))
-		
+
 		return results
 
 
@@ -176,7 +176,6 @@ class Search:
 			task["release"] = task_definition.Task_Definition.release_number
 			task["is_active"] = task_definition.Task_Definition.is_active
 			result.append(task)
-		#pprint.pprint(result)
 		return result
 
 	def getReleases(self, cluster_name=None):
@@ -200,6 +199,6 @@ class Search:
 # search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
 # print("done!")
 
-#search_result.getClients("asg-dev-iforms-cluster", "5.5.5.5")		
+#search_result.getClients("asg-dev-iforms-cluster", "5.5.5.5")
 #search_result.getTaskDefinitions("asg-dev-iforms-cluster", "1.2.1.4")
 #print("done!")

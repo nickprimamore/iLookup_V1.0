@@ -684,7 +684,10 @@
         tagQuery: addReleaseTag
       }),
       success: function(response) {
-        console.log("Tag created")
+        //This rerenders the table
+        $('.clustersTag').trigger({
+          type: 'change.select2',
+        })
         $('#successTagAlert').show('fade');
         window.setTimeout(function() {
           $("#successTagAlert").hide('fade');
@@ -719,7 +722,10 @@
           tagQuery: addReleaseTag
         }),
         success: function(response) {
-          console.log("Tag deleted")
+          //This causes the table to update dynamically to see changes made to AWS
+          $('.clustersTag').trigger({
+            type: 'change.select2',
+          })
           $('#deleteAlert').show('fade');
           window.setTimeout(function() {
             $("#deleteAlert").hide('fade');
@@ -855,6 +861,7 @@
       $('#selectRegion').val(null).trigger('change');
       $('#selectProduct').val(null).trigger('change')
       $('#tagValue').val(null).trigger('change')
+      sendData()
     });
   </script>
 </body>
