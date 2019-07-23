@@ -3,11 +3,12 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-from awsdata import AWSData
+# from awsdata import AWSData
 from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
 from addUpdateDB import AddUpdateRecords
+from db_delete_v3 import DeactivateRecords
 import requests
 import json
 import boto3
@@ -31,6 +32,9 @@ def load():
 @app.route('/search', methods=['GET'])
 def search():
 	clients = Client.query.all()
+	#clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
+	#clients = clients.sort()
+	clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
 	products = Product.query.all()
 	releases = Product_Release.query.all()
 	clusters = Cluster.query.all()
@@ -166,6 +170,9 @@ def createTag():
 					new_client_key = objectified['tagQuery']['tagKey']
 					new_client_name = objectified['tagQuery']['tagValue']
 					cluster_name = cluster_split[1]
+					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+					print("Calling fetchclient function")
+					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 					fetchClientKeyValue(new_client_key,new_client_name,cluster_name,currentTags)
 				if "Environment" in objectified['tagQuery']['tagKey']:
 					cluster_name = cluster_split[1]
@@ -208,6 +215,17 @@ def deleteTag():
 				tags = currentTags["tags"]
 				for tag in tags:
 					if tag['key'] == objectified['tagQuery']['tagKey']:
+						# ADDED NEW CODE
+						print(objectified['tagQuery']['tagKey'])
+						if "Client" in tag['key']:
+							print(objectified['tagQuery'])
+							client_name = tag['value']
+							print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+							print("Trying to delete a client", )
+							print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+							deactivateRecords = DeactivateRecords()
+							deactivateRecords.deactivateClient(client_name)
+						# END OF NEW CODE
 						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 	return "Successfully deleted the tag"
 
@@ -224,6 +242,7 @@ def getTags():
 		clusterList = objectified['clusterList']
 
 	# clusterList = convertUnicodeToArray(clusterList)
+	print(objectified)
 	if (objectified['region'] == "London"):
 		region = "eu-west-2"
 	else:
@@ -368,18 +387,21 @@ def updateReleaseTable():
 	old_release_number = objectified["oldRelease"]
 	new_release_number = objectified["newRelease"]
 	addUpdateRecord = AddUpdateRecords()
-	addUpdateRecord.updateProductRelease(product_name, old_release_number, new_release_number)
-	addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
-	print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-	for awsCluster in clusterArns:
-		cluster_split = awsCluster.split("/")
-		if (objectified["clusterName"] == cluster_split[1]):
-			currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
-			tags = currentTags["tags"]
-			for tag in tags:
-				if tag["key"] == "Release":
-					if tag["value"] == objectified["oldRelease"]:
-						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
+	product_release_exists = addUpdateRecord.updateProductRelease(product_name,cluster_name, old_release_number, new_release_number)
+	if product_release_exists:
+		print("Release already exists. Use some other release number")
+	else:
+		addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
+		print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+		for awsCluster in clusterArns:
+			cluster_split = awsCluster.split("/")
+			if (objectified["clusterName"] == cluster_split[1]):
+				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
+				tags = currentTags["tags"]			
+				for tag in tags:
+					if tag["key"] == "Release":
+						if tag["value"] == objectified["oldRelease"]:
+							uniClient.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
 						uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key': 'Release', 'value': objectified["newRelease"]}])
 	return "Helo"
 
@@ -408,6 +430,7 @@ def getTaskDefinitions(cluster_name, release_number):
 
 def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTags):
 	print(currentTags)
+	old_client_name = ""
 	currentTags = currentTags['tags']
 	for tag in currentTags:
 		if tag['key'] == new_client_key:
