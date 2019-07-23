@@ -14,8 +14,10 @@ import json
 import boto3
 import pprint
 
+#This is to initial AWS client to the N. Virginia region  -- You need to have it so theres another client for the other regions
 client = boto3.client('ecs')
 
+#This function is to convert the unicode arrays that you get from SQL and change them into a normal array -- THE DECODE IS NECESSARY OTHERWISE BYTECODE ISSUES
 def convertUnicodeToArray(unicodeArray):
 	newArray = []
 	counter = 0
@@ -30,6 +32,7 @@ def load():
 	return render_template('search.html')
 
 @app.route('/search', methods=['GET'])
+#This search function populats all the search bars with every potential search query from our SQL database
 def search():
 	clients = Client.query.all()
 	#clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
@@ -40,6 +43,7 @@ def search():
 	clusters = Cluster.query.all()
 	components = Component.query.all()
 
+	#creates empty arrays to return back to the front end
 	clientsQ = []
 	productsQ = []
 	releasesQ = []
@@ -50,6 +54,7 @@ def search():
 	productsTagQ = []
 	clustersTagQ = []
 
+	#this takes the individual search results and puts them into the arrays
 	for client in clients:
 		clientsQ.append(client.client_name)
 	for product in products:
@@ -64,9 +69,8 @@ def search():
 	 		environmentsQ.append(cluster.environment)
 		if cluster.region not in regionsQ:
 			regionsQ.append(cluster.region)
-	for component in components:
-		componentsQ.append(component.component_name)
 
+	#This converts the unicode array generated from those forloops and changes them into an Array
 	clientsQ = convertUnicodeToArray(clientsQ)
 	productsQ = convertUnicodeToArray(productsQ)
 	releasesQ = convertUnicodeToArray(releasesQ)
@@ -74,13 +78,14 @@ def search():
 	clustersTagQ = convertUnicodeToArray(clustersTagQ)
 	environmentsQ = convertUnicodeToArray(environmentsQ)
 	regionsQ = convertUnicodeToArray(regionsQ)
-	componentsQ = convertUnicodeToArray(componentsQ)
 	productsTagQ = convertUnicodeToArray(productsTagQ)
 
-	return jsonify(clientsQ=clientsQ, productsQ=productsQ, releasesQ=releasesQ, clustersQ=clustersQ, environmentsQ=environmentsQ, regionsQ=regionsQ, componentsQ=componentsQ, productsTagQ=productsTagQ, clustersTagQ=clustersTagQ)
+	return jsonify(clientsQ=clientsQ, productsQ=productsQ, releasesQ=releasesQ, clustersQ=clustersQ, environmentsQ=environmentsQ, regionsQ=regionsQ, productsTagQ=productsTagQ, clustersTagQ=clustersTagQ)
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
+	#This update function takes the selected queries from the frontend and then generates the new search bar queries based on that filter
+	#request.form.keys() gets the data that send request.form
 	data = request.form.keys()
 	for values in data:
 		stringified = values
@@ -105,6 +110,7 @@ def update():
 		if len(objectified["Environments"]) > 0:
 			environment = objectified["Environments"][0]
 
+	#This calls the function of DynamicFilter where it gets the actual results
 	dynamicFilter = DynamicFilter()
 	result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment)
 	clients = []
@@ -113,8 +119,8 @@ def update():
 	environments = []
 	regions = []
 	clusters = []
-	components = []
 
+	#This for loop takes the results from the DynamicFilter() and pushes them into the necessary arrays
 	for res in result:
 		clients.append(res.Client.client_name)
 		products.append(res.Product.product_name)
@@ -123,6 +129,7 @@ def update():
 		environments.append(res.Cluster.environment)
 		regions.append(res.Cluster.region)
 
+	#This once again takes care of changing Unicode into normal Arrays
 	clients = convertUnicodeToArray(list(set(clients)))
 	products = convertUnicodeToArray(list(set(products)))
 	clusters = convertUnicodeToArray(list(set(clusters)))
@@ -139,6 +146,7 @@ def createTag():
 	data = request.form.keys()
 	for values in data:
 		objectified = json.loads(values)
+	#This is put in all the functions to take care of both the London and N.Virginia region
 	if (objectified['tagQuery']['region'] == "London"):
 		region = "eu-west-2"
 	else:
@@ -146,6 +154,7 @@ def createTag():
 	uniClient = boto3.client("ecs", region_name=region)
 	clusters = uniClient.list_clusters()
 	clusterArns = clusters["clusterArns"]
+	#This forloop goes through the clusters selected, then the one below goes through each Cluster in the AWS data, and then we parse through that and then find the selected cluster on AWS updating that cluster's tag
 	for cluster in objectified["tagQuery"]["clusters"]:
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
@@ -153,19 +162,20 @@ def createTag():
 				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
 				tags = currentTags["tags"]
 				for tag in tags:
+					#This checks to see if it's a Release Tag, cause it will be called afterwards in order to update SQL side
 					if tag['key'] == "Release":
 						old_release_number = tag['value']
-					# get old tag value here
-					print(tag['key'],tag["value"])
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 
+				#This makes sure that there are no empty spaces, getting rid of empty spaces at the end
 				noSpaces = objectified['tagQuery']['tagKey']
 				for x in objectified['tagQuery']['tagKey']:
 					if objectified['tagQuery']['tagKey'] == " ":
 						noSpaces = objectified['tagQuery']['tagKey'][:-1]
 				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': objectified['tagQuery']['tagValue']}])
 
+				#This checks to see if its a Client and goes to update the Client tags and active/inactive on the SQL sides
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']
 					new_client_name = objectified['tagQuery']['tagValue']
@@ -174,11 +184,13 @@ def createTag():
 					print("Calling fetchclient function")
 					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 					fetchClientKeyValue(new_client_key,new_client_name,cluster_name,currentTags)
+				#This checks to see if its an Environment and updates the SQL side with the new environment
 				if "Environment" in objectified['tagQuery']['tagKey']:
 					cluster_name = cluster_split[1]
 					addUpdateRecord = AddUpdateRecords()
 					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'])
 
+				#This checks to update Release functionality and change multiple tables
 				if objectified['tagQuery']['tagKey'] == 'Release':
 					cluster_name = cluster_split[1]
 					if objectified['tagQuery']["product"]:
@@ -186,8 +198,7 @@ def createTag():
 					else:
 						product_name = "unknown"
 					new_release_number = objectified['tagQuery']['tagValue']
-					# get old release tag
-					# get new release tag
+
 					addUpdateRecord = AddUpdateRecords()
 					#updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
 					addUpdateRecord.updateProductRelease(product_name, old_release_number, new_release_number)
@@ -213,7 +224,12 @@ def deleteTag():
 			if (cluster == cluster_split[1]):
 				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
 				tags = currentTags["tags"]
+				clientCounter = -1
+				clientNumber = 1
 				for tag in tags:
+					print(tag)
+					if "Client" in tag['key']:
+						clientCounter = clientCounter + 1
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						# ADDED NEW CODE
 						print(objectified['tagQuery']['tagKey'])
@@ -227,6 +243,17 @@ def deleteTag():
 							deactivateRecords.deactivateClient(client_name)
 						# END OF NEW CODE
 						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+				updatedTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
+				tagzs = updatedTags["tags"]
+				print(tagzs)
+				for tagz in tagzs:
+					if "Client" in tagz['key']:
+						if clientNumber <= clientCounter:
+							value = tagz['value']
+							key = "Client" + str(clientNumber)
+							clientNumber = clientNumber + 1
+							uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[tagz['key']])
+							uniClient.tag_resource(resourceArn=awsCluster, tags=[{"key": key, 'value': value}])
 	return "Successfully deleted the tag"
 
 #Retrieves the tags for given AWS clusters
@@ -333,14 +360,15 @@ def result():
 		result  = search(is_active=active, client_name=client, product_name=product,release=release, cluster_name=cluster,region=region,environment=environment, toDate=toDate, fromDate=fromDate)
 		results = results + (result)
 		# Within results, create an object that {cluster_name: [releases] or {Release: 1.1.1.1, Info: Etc}} and pass it into the front end, where we map it by connecting release numbers - Having it as hidden dropdowns
-
 	return render_template('result.html', results=results)
 
 @app.route('/getTasks', methods=["GET", "POST"])
 def sendTasks():
 	data = request.form.keys()
+
 	for values in data:
 		objectified = json.loads(values)
+	print(objectified["releaseNum"])
 	tasks = getTaskDefinitions(objectified["clusterName"], objectified["releaseNum"])
 	return jsonify(tasks)
 
@@ -350,7 +378,6 @@ def sendClients():
 	for values in data:
 		objectified = json.loads(values)
 	clients = getClients(objectified["clusterName"], objectified["release"])
-	print(clients)
 	return jsonify(clients)
 
 @app.route('/getReleaseHistory', methods=["GET", "POST"])

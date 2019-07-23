@@ -1,11 +1,13 @@
 
 <!-- This script is the one that takes the entry clicked on and relays the information into the modal -->
 <script>
+  //This deals with the popovers and the cluster modal for releases
   $(document).ready(function() {
     $('.releaseReview').select2();
     $("[data-toggle=popover]").popover({ trigger: "hover" });
   })
 
+  //This function is to load the releaseHistory of a certain release number selected, the screen variable checks to see which screen to put that accordion in
   function loadAccordion(screen, cluster_name, release_number) {
     $.ajax({
       url:"/getTasks",
@@ -22,7 +24,6 @@
           let cpu = task.cpu
           let revision = task.revision
           let task_name = task.task_definition_name
-
           let header = document.getElementById('accordionHeader' + screen.toString())
           header.innerHTML = release_number
           $( "#accordion" + screen.toString() ).append('<div class="card deleteOnClose' + screen.toString() + '">' +
@@ -67,6 +68,7 @@
   clusterName = ""
   product = ""
   region = ""
+  //This is the modal functionality and putting the options within the different release bars
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
     let releases = trigger.data('releases')
@@ -108,11 +110,9 @@
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
   })
 
-
+  //This function gets the client information to a certain cluster and puts it into the popover
   function getClients(num) {
     let cliInfo = document.querySelector("#clientInfo" + num);
-    console.log(cliInfo.dataset.cluster)
-    console.log(cliInfo.dataset.release)
     $("#icon" + num).on("show.bs.popover", function () {
       $.ajax({
         url:"/getClients",
@@ -122,7 +122,6 @@
           release: cliInfo.dataset.release
         }),
         success: function(response) {
-          console.log(response)
           let info = document.querySelector('#icon' + num)
           info.setAttribute("data-content", response.toString())
         }
@@ -130,6 +129,7 @@
     })
   }
 
+  //This updateRelease function checks to make sure the input is as accurate as possible
   function updateRelease() {
     if (!$('#changeRelease').val()) {
       $('#noReleaseSelectedAlert').show('fade');
@@ -162,6 +162,7 @@
       }, 3500);
       return;
     }
+    //This calls to the backend and goes to change things on the backend
     $.ajax({
       url:"/updateReleaseTable",
       type:"POST",
@@ -348,11 +349,12 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px"><i class="fas fa-user-friends"></i></th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Activity</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Edit</th>
     </tr>
   </thead>
   <tbody>
 
-<!-- This is a for loop to render the search results  -->
+<!-- This is a for loop to render the search results, and in each th theres a modal, target, clustername etc to show the cluster modal with necessary information regarding the unique row  -->
     {% for result in results %}
       {% set clients = result.client_names %}
       {% set timeRelease = result.release %}
@@ -421,6 +423,9 @@
           {% else %}
             <span class="badge badge-pill badge-danger" style="width: 100%"> Inactive </span>
           {% endif %}
+        </td>
+        <td style="font-family:Lato Light; font-size: 16px; padding-top:14px">
+          <i class="fas fa-pencil-alt"></i>
         </td>
       </tr>
     {% endfor %}
