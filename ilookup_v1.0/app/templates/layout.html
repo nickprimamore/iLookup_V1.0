@@ -10,9 +10,10 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 
-	<title>Layout</title>
+<title>Layout</title>
 </head>
 	<body>
+		<!-- Styling for the navbar -->
 		<style>
 			.navbar-brand{
 	 			margin: auto;
@@ -45,7 +46,6 @@
   			color: #CCCC00;
 			}
 
-
 			.vl {
 			  border-left: 1px solid #007ACC;
 			  height: 30px;
@@ -71,32 +71,49 @@
 			  background: #555;
 			}
 
-
 		</style>
+
+		<!-- This function appends the loading spinner and fetching data text when the refresh AWS data button is clicked -->
+		<script type="text/javascript">
+			function loading(){
+				spinnerHTML = '<div class="spinner-border text-primary"></div>';
+				$('.spinner').append(spinnerHTML);
+				$('.update').hide();
+				$('.refresh').hide();
+				$('.vl').hide();
+				fetchingHTML = '<p style="color:#00508F; font-family:Lato Light; font-size:17; margin-right:13">Fetching AWS Data...</p>';
+				$('.fetching').append(fetchingHTML);
+			}
+		</script>
+
+		<!-- Navbar: ASG logo, iLookup logo, update tags button, refresh button, and loading spinner -->
 		<div class="wrapper">
 			<nav class="navbar navbar-expand-lg navbar-light" id="topNav" role="navigation" style="background-color: white; color:#2867b1">
-        <a href="https://www.acordsolutions.com/" target="_blank"><img src="https://www.acordsolutions.com/images/librariesprovider2/template/acord-logo.png?sfvrsn=795d84a9_2" alt="logo" height="50" style="margin-left:19"></a>
-				<img src="/static/blank.png" style="margin-right:475">
+        <a href="https://www.acordsolutions.com/" target="_blank"><img src="https://www.acordsolutions.com/images/librariesprovider2/template/acord-logo.png?sfvrsn=795d84a9_2" alt="logo" height="50" style="margin-left:14"></a>
+				<img src="/static/blank.png" style="margin-right:478">
 				<a class="navbar-brand" style="color:#00508F" href="/"> iLookup </a>
 			  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
 			    <span class="navbar-toggler-icon"></span>
 			  </button>
 			  <div class="collapse navbar-collapse" id="navbarText">
 			    <ul class="navbar-nav ml-auto">
-			      <li class="nav-item">
+			      <li class="nav-item update">
 							<a href="/" data-toggle="modal" data-target="#addTagModal" style="color:#00508F; font-family:Lato Light; font-size:17">
 								Update Cluster Tags
 							</a>
 			      </li>
 						<div class="vl"></div>
-						<li class="nav-item">
-			        <a href="/load" style="color:#00508F; font-family:Lato Light; font-size:17; margin-right:13">
+						<li class="nav-item refresh">
+			        <a href="/load" onclick="loading()" style="color:#00508F; font-family:Lato Light; font-size:17; margin-right:13">
 								Refresh
 							</a>
 			      </li>
-						<!-- <li>
-								<div class="spinner-border text-primary"></div>
-						</li> -->
+						<li class="fetching">
+							<!-- "fetching data" text is appended when refresh button is clicked -->
+						</li>
+						<li class="spinner">
+							<!-- loading spinner is appended when refresh button is clicked -->
+						</li>
 			    </ul>
 			  </div>
 			</nav>
