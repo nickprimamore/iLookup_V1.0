@@ -3,7 +3,7 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-# from awsdata import AWSData
+from awsdata import AWSData
 from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
@@ -397,7 +397,7 @@ def updateReleaseTable():
 			cluster_split = awsCluster.split("/")
 			if (objectified["clusterName"] == cluster_split[1]):
 				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
-				tags = currentTags["tags"]			
+				tags = currentTags["tags"]
 				for tag in tags:
 					if tag["key"] == "Release":
 						if tag["value"] == objectified["oldRelease"]:
