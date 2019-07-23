@@ -44,6 +44,7 @@ class AWSData:
 			client_name = "unknown"
 			product_name = "unknown"
 			product_release_number = ""
+			environment= "unknown"
 			for key in tags:
 				if ("Client") in key:
 					client_name = tags[key]
@@ -100,6 +101,7 @@ class AWSData:
 
 		exists_cluster = db.session.query(Cluster.cluster_name).filter_by(cluster_name=cluster_name).filter_by(region=region).scalar() is not None
 		if exists_cluster:
+
 			print("nothing")
 		else:
 			cluster_value = Cluster(cluster_name=cluster_name, environment=environment,region=region,is_active=True)
@@ -379,6 +381,7 @@ class AWSData:
 			#task_descriptions = client.describe_tasks(cluster=cluster, tasks= tasks)
 			#task_descriptions = task_descriptions["tasks"]
 			db_task_defs = db.session.query(Cluster.cluster_name, Component.component_name, Task_Definition.task_definition_name,Task_Definition.revision, Task_Definition.is_active).filter(Task_Definition.component_id==Component.component_id,Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.is_active==True).all()
+			
 			print("==================================================")
 			print("In compareTaskDefinition function", product_name, product_release_number, client_names)
 			print("==================================================")
