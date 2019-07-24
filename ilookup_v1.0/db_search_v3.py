@@ -18,10 +18,13 @@ class Search:
 
 		print("in search condition")
 		print(is_active)
-		search_result = db.session.query(Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, Cluster.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
+		search_result = db.session.query(CPRC.product_release_id, Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, Cluster.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
 			Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
 
-		results = []
+		# search_result = db.session.query(Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, Cluster.is_active).filter( CPRC.product_release_id == Product_Release.product_release_id,
+		# 	Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
+		# #search_result = db.session.query(Cluster.cluster_name, Product.product_name, Product_Release.release_number,Cluster.region, Cluster.environment, Product_Release.inserted_at, Cluster.is_active).filter(CPRC.cluster_id == Cluster.cluster_id).filter(Product.product_id==Product_Release.product_id).distinct()
+
 
 		# if client_name:
 		# 	search_result = search_result.filter(Client.client_name== client_name)
@@ -29,8 +32,8 @@ class Search:
 		if product_name:
 			search_result = search_result.filter(Product.product_name== product_name)
 
-		if release:
-			search_result = search_result.filter(Product_Release.release_number==release)
+		# if release:
+		# 	search_result = search_result.filter(Product_Release.release_number==release)
 
 		if cluster_name:
 			search_result = search_result.filter(Cluster.cluster_name==cluster_name)
@@ -57,11 +60,27 @@ class Search:
 			search_result = search_result.filter((func.date(Product_Release.inserted_at)>=fromDate))
 
 
+		maxReleases = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"), CPRC.cluster_id)
+	
+		maxReleases = maxReleases.group_by(CPRC.cluster_id).all()
+		
+		maxResult = []
+		for res in maxReleases:
+			#print(res.release_number, res.product_release_id)
+			tempResult = search_result.filter(CPRC.product_release_id==res.product_release_id).all()
+			#print(tempResult)
+			maxResult = maxResult + (tempResult)
+		
+
+		
+
+		search_result = maxResult
 		search_result = list(set(search_result))
+		print(search_result)
 		#pprint.pprint(search_result)
 
 		# task_definitions = []
-		# results = []
+		results = []
 		for res in search_result:
 			#print(res)
 			result = {}
@@ -91,12 +110,32 @@ class Search:
 
 			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
 			release_numbers = list(set(release_numbers))
-			result["releases"] = release_numbers
+			result["releases"] = self.convertUnicodeToArray(release_numbers)
 		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		# # 	#print(result)
 		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+
+			# maxReleases = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"), CPRC.cluster_id)
+			# maxReleases = maxReleases.group_by(CPRC.cluster_id).all()
+
 			results.append(result)
 		# print(results)
+		if release:
+			print("in release condition...................")
+			release_results = []
+			for res in results:
+				#print(res["releases"])
+				releases= res["releases"]
+				#print(set(release))
+				if release in releases:
+					print("got the result")
+					release_results.append(res)
+			pprint.pprint(res)
+			print(len(release_results))
+			return release_results
+
+
 		if client_name:
 			# print(client_name)
 			client_results = []
@@ -199,11 +238,8 @@ class Search:
 		print(clients)
 		return clients
 
-# search_result = Search()
-# search_result.getLatestReleases()
-
-# print("Searching for client_name")
-# search_result.getSearchResult(product_name="iConductor",client_name="Willis", environment="dev", cluster_name="test", region="N. Virginia")
+search_result = Search()
+search_result.getSearchResult(product_name="iConductor",release="2019-07-22 13:46:50.454468")
 # print("done!")
 
 #search_result.getClients("asg-dev-iforms-cluster", "5.5.5.5")		

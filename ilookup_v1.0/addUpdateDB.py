@@ -70,6 +70,7 @@ class AddUpdateRecords:
 		print(cluster_id)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		print(product_id)
+		print(release_number)
 		product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==release_number).first()
 		print(product_release_id)
 		print("<<<<<<<<<<<<<<<<<<<<<<<<<<<")
@@ -77,18 +78,19 @@ class AddUpdateRecords:
 		# db.session.add(cprc)
 		# db.session.commit()
 		# return "Added CPRC record"
-
-		cprc_value = CPRC(client_id=client_id[0], cluster_id=cluster_id[0], product_release_id=product_release_id[0])
-		db.session.add(cprc_value)
-			#print('inserted new record in product_release table')
-		db.session.commit()
-		print("Added new record in CPRC")
+		if (client_id and cluster_id and product_release_id):
+			cprc_value = CPRC(client_id=client_id[0], cluster_id=cluster_id[0], product_release_id=product_release_id[0])
+			db.session.add(cprc_value)
+				#print('inserted new record in product_release table')
+			db.session.commit()
+			print("Added new record in CPRC")
 
 	def updateEnvironment(self,cluster_name,environment):
 		cluster = db.session.query(Cluster).filter(Cluster.cluster_name==cluster_name).first()
 		cluster.environment = environment
 		db.session.commit()
 
+		# need to update this function
 	def updateProductRelease(self, product_name, cluster_name, old_release_number, new_release_number):
 		exists = self.checkRelease(product_name, cluster_name, old_release_number, new_release_number)
 		if exists:

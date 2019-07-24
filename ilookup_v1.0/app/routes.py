@@ -3,12 +3,12 @@ from app import app, db
 from app.models import Client, Product, Product_Release, Cluster, Component, Task_Definition, CPRC
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
-# from awsdata import AWSData
+from awsdata import AWSData
 from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
 from addUpdateDB import AddUpdateRecords
-from db_delete_v3 import DeactivateRecords
+# from db_delete_v3 import DeactivateRecords
 import requests
 import json
 import boto3
@@ -31,13 +31,12 @@ def load():
 
 @app.route('/search', methods=['GET'])
 def search():
-	clients = Client.query.all()
-	#clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
-	#clients = clients.sort()
+	
 	clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
-	products = Product.query.all()
-	releases = Product_Release.query.all()
-	clusters = Cluster.query.all()
+	products = db.session.query(Product).order_by(Product.is_active.desc(), Product.product_name).all()
+	releases = db.session.query(Product_Release).order_by(Product_Release.inserted_at).all()
+	#releases = Product_Release.query.all()
+	clusters = db.session.query(Cluster).order_by(Cluster.cluster_name).all()
 	components = Component.query.all()
 
 	clientsQ = []
@@ -76,6 +75,15 @@ def search():
 	regionsQ = convertUnicodeToArray(regionsQ)
 	componentsQ = convertUnicodeToArray(componentsQ)
 	productsTagQ = convertUnicodeToArray(productsTagQ)
+
+	
+
+	clientsQ = sorted(clientsQ)
+	clustersQ = sorted(clustersQ)
+	productsQ = sorted(productsQ)
+	releasesQ = sorted(releasesQ) 
+	regionsQ = sorted(regionsQ)
+	environmentsQ = sorted(environmentsQ)
 
 	return jsonify(clientsQ=clientsQ, productsQ=productsQ, releasesQ=releasesQ, clustersQ=clustersQ, environmentsQ=environmentsQ, regionsQ=regionsQ, componentsQ=componentsQ, productsTagQ=productsTagQ, clustersTagQ=clustersTagQ)
 
@@ -122,6 +130,15 @@ def update():
 		releases.append(res.Product_Release.release_number)
 		environments.append(res.Cluster.environment)
 		regions.append(res.Cluster.region)
+
+
+	clients = sorted(clients)
+	products = sorted(products)
+	clusters = sorted(clusters)
+	releases = sorted(releases)
+	environments = sorted(environments)
+	regions = sorted(regions)
+
 
 	clients = convertUnicodeToArray(list(set(clients)))
 	products = convertUnicodeToArray(list(set(products)))
@@ -190,7 +207,7 @@ def createTag():
 					# get new release tag
 					addUpdateRecord = AddUpdateRecords()
 					#updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
-					addUpdateRecord.updateProductRelease(product_name, old_release_number, new_release_number)
+					addUpdateRecord.updateProductRelease(product_name, cluster_name, old_release_number, new_release_number)
 					addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
 	return 'Successfully updated the cluster(s)'
 
@@ -365,6 +382,7 @@ def sendReleases():
 		firstOccurance = strX.find("'")
 		releasesStrArray.append(strX[firstOccurance+1: len(strX)-3])
 	return jsonify(releasesStrArray)
+
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])
 def updateReleaseTable():

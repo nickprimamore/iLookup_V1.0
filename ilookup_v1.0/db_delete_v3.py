@@ -78,9 +78,70 @@ class DeactivateRecords:
 			#print(CPRC.is_active)
 		for cprc in cprc_records:
 			cprc.is_active = False
-
+		self.deactivateTaskDef(cluster_name)
 		db.session.commit()
 
+
+	def deactivateTaskDef(self, cluster_name):
+		components = db.session.query(Component).filter(Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==cluster_name).all()
+		if len(components)>0:
+			for component in components:
+				component.is_active = False
+				task_definitions = db.sessiomn.query(Task_Definition).filter(Task_Definition.component_id==component.component_id).all()
+				for task_definition in task_definitions:
+					task_definition.is_active = False
+			db.session.commit()
+
+
+	def activateTaskDef(self, service_arn, cluster_arn, uniClient):
+		tasks = uniClient.list_tasks(cluster = cluster_arn, serviceName = service_arn)
+		tasks = tasks["taskArns"]
+		size = len(tasks)
+		if size > 0:
+			task_descriptions = uniClient.describe_tasks(cluster = cluster_arn, tasks = tasks)
+			task_descriptions = task_descriptions["tasks"]
+			##iterate through all the tasks in the component
+			for tasks_description in task_descriptions:
+				lastStatus=tasks_description["lastStatus"]
+				task_def_description = tasks_description["taskDefinitionArn"]
+				newsplit = task_def_description.split("/")
+				task_def = newsplit[1]
+				task_definition = uniClient.describe_task_definition(taskDefinition = task_def_description)
+				image = str(task_definition["taskDefinition"]["containerDefinitions"][0]["image"])
+				revision = str(task_definition["taskDefinition"]["revision"])
+
+				td_exists = db.session.query(Task_Definition).filter(Task_Definition.task_definition_name==task_def).filter(Task_Definition.image_tag==image).filter(Task_Definition.revision==revision).filter(Task_Definition.is_active==False).first()
+
+				if td_exists:
+					td_exists.is_active = True
+
+			db.session.commit()
+
+
+	def activateComponent(self, cluster_id, cluster_arn, uniClient):
+		db_components = db.session.query(Component).filter(Component.cluster_id==cluster_id).all()
+
+		services = uniClient.list_services(cluster = cluster_arn)
+		services = services["serviceArns"]
+		cluster_task_list = []
+		aws_components = []
+		##iterate through each service in the cluster and store it in the database
+		for service in services:
+			print(service)
+			self.activateTaskDef(service,cluster_arn,uniClient)
+			# get task def objects here here
+			mysplit= service.split("/")
+			service_name = mysplit[-1]
+			aws_components.append(service_name)
+		
+		if len(db_components) > 0:
+			if len(aws_components) > 0:
+				for component in db_components:
+					component_name = component.component_name
+					if component_name in aws_components:
+						component.is_active= True
+
+				db.session.commit()								
 
 
 	#def updateProductisActiveStatus(self, product_name,):

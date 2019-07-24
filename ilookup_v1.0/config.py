@@ -8,7 +8,7 @@ class Config(object):
 
 	#SQLALCHEMY_DATABASE_URI = "mysql+pymysql://ilookupdb:ilookupdb@ilookupdb.cqoaspdapbvm.us-east-1.rds.amazonaws.com:3306/ilookup_copy"
 
-	SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Sj93299347!@127.0.0.1:3306/mylocaldb"
+	SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Sj93299347!@127.0.0.1:3306/td-def-table"
 
 
 
