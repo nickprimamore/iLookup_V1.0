@@ -490,6 +490,7 @@
 <script>
   //This object is to record the tag query
   let addReleaseTag = {}
+  changeMade = false
   //We seperately initialize these select2's because we want them to work independently from the rest of the search page as they require their own unique way of dynamicFiltering
   $(document).ready(function() {
     //initially disable region and clusters in the tagging modal
@@ -719,6 +720,7 @@
           window.setTimeout(function() {
             $("#successTagAlert").hide('fade');
           }, 3000);
+          changeMade = true
         }
       }
     })
@@ -751,6 +753,7 @@
         }),
         success: function(response) {
           //This causes the table to update dynamically to see changes made to AWS
+          changeMade = true
           $('.clustersTag').trigger({
             type: 'change.select2',
           })
@@ -905,7 +908,10 @@
       $('#selectRegion').val(null).trigger('change');
       $('#selectProduct').val(null).trigger('change')
       $('#tagValue').val(null).trigger('change')
-      sendData()
+      if (changeMade) {
+        sendData()
+        changeMade = false
+      }
     });
   </script>
 </body>

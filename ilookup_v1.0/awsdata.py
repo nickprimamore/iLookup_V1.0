@@ -203,7 +203,9 @@ class AWSData:
 
 				#print("================================")
 
+
 	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name, cluster_name):
+
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_id = product_id[0]
