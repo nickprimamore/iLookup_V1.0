@@ -8,7 +8,7 @@ import pprint
 import re
 
 
-# client = boto3.client("ecs")
+client = boto3.client("ecs")
 
 class AWSData:
 	def newMainFunction(self):

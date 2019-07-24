@@ -187,7 +187,7 @@
 
     //initializing the select2 for side search bar, .dropdowns is the classname for the main search page
     $('.dropdowns').select2({
-      theme: "classic",
+      theme: 'classic',
       width: "100%"
     });
 
@@ -648,6 +648,23 @@
   //This function creates an object for the newTag and sends it to the backend for it to be created on AWS servers
   function newTag() {
     //These ensure form validation
+    if ($('.editTag').val() == 'Release'){
+      let newRel = $('#tagValue').val();
+      let dotCount = 0;
+      let index;
+      for(index = 0; index < newRel.length; index++){
+        if(newRel.charAt(index) === '.'){
+          dotCount++;
+        }
+      }
+      if(newRel.length > 11 || newRel.length < 7 || dotCount != 3){
+        $('#releaseFormatAlert').show('fade');
+        window.setTimeout(function() {
+          $("#releaseFormatAlert").hide('fade');
+        }, 3500);
+        return;
+      }
+    }
     if(!$('.productsTag').val()[0]){
       $('#selectProductAlert').show('fade');
       window.setTimeout(function() {
@@ -756,7 +773,7 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addTagLabel" style="font-family:Lato Light; font-weight:bold">Add/Update an AWS Cluster Tag</h5>
+          <h4 class="modal-title" id="addTagLabel" style="font-family:Lato Light; font-weight:bold">Add/Update an AWS Cluster Tag</h4>
           <br><br>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
@@ -838,6 +855,10 @@
               <a id="closeNewValueAlert" href="#" class="close">&times;</a>
               <strong>Please enter a new tag value.</strong>
             </div>
+            <div id="releaseFormatAlert" class="alert alert-danger collapse">
+              <a id="closeReleaseFormatAlert" href="#" class="close">&times;</a>
+              <strong>Please check the release number format.</strong>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
@@ -874,6 +895,9 @@
       });
       $('#closeNewValueAlert').click(function () {
         $('#newValueAlert').hide('fade');
+      });
+      $('#closeReleaseFormatAlert').click(function () {
+        $('#releaseFormatAlert').hide('fade');
       });
       $('#closeDuplicateTagAlert').click(function () {
         $('#duplicateTagAlert').hide('fade');
