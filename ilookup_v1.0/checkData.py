@@ -13,9 +13,9 @@ class CheckAWSData:
 		client = boto3.client("ecs")
 
 
-	def checkClusters(self, region_name):
-		client = boto3.client("ecs", region_name=region_name)
-		clusters = client.list_clusters()
+	def checkClusters(self, region, region_name):
+		uniClient = boto3.client("ecs", region_name=region_name)
+		clusters = uniClient.list_clusters()
 		clusters = clusters["clusterArns"]
 		aws_clusters = []
 		for cluster in clusters:
@@ -23,14 +23,29 @@ class CheckAWSData:
 			mysplit= cluster.split("/")
 			cluster_name=mysplit[1]
 			aws_clusters.append(cluster_name)
+			db_cluster_exists = db.session.query(Cluster).filter(Cluster.cluster_name==cluster_name).filter(Cluster.region==region).first()
 
-		db_clusters = db.session.query(Cluster.cluster_name).all()
+			if db_cluster_exists:
+				print(db_cluster_exists)
+				if db_cluster_exists.is_active==False:
+					db_cluster_exists.is_active=True
+					db.session.commit()
+					deactivateRecords = DeactivateRecords()
+					deactivateRecords.activateComponent(db_cluster_exists.cluster_id, cluster, uniClient)
+					print("activating cluster and component")
+				
+		db_clusters = db.session.query(Cluster).filter(Cluster.region==region).all()
 
-		for cluster_name in db_clusters:
+		for cluster in db_clusters:
+			cluster_name = cluster.cluster_name
 			if cluster_name not in aws_clusters:
 				deactivateRecords = DeactivateRecords()
-				deactivateRecords.deactivateClusters(cluster_name)
-	
+				deactivateRecords.deactivateCluster(cluster_name)
+				print("Deactivating cluster", cluster_name)
+			
+		# 		# Deactive CPRC
+		# 		# Deactivate Task Def
+
 	def checkProducts(self,region_name): 	
 		client = boto3.client("ecs", region_name=region_name)
 		clusters = client.list_clusters()
@@ -62,10 +77,14 @@ class CheckAWSData:
 					
 		db_clients = db.session.query(Client.client_name).all()
 
-		for client_name in db_clientss:
+		for client_name in db_clients:
 			if client_name not in aws_clients:
 				deactivateRecords = DeactivateRecords()
 				deactivateRecords.deactivateClients(client_name)
+		for aws_client in aws_clients:
+			if aws_client not in db_clients:
+				# call populate client function
+
 
 
 
@@ -74,7 +93,16 @@ class CheckAWSData:
 	def fetchClusterTags(self,clusterArn,region_name):
 		client = boto3.client("ecs", region_name=region_name)
 		res = client.list_tags_for_resource(resourceArn = clusterArn)
+		
+		mysplit= clusterArn.split("/")
+		cluster_name=mysplit[1]
+		
+		print(cluster_name)
 		tagsDict =  {}
 		for tag in res["tags"]:
 			tagsDict[tag["key"]] = tag["value"]
 		return tagsDict
+
+
+# checkData = CheckAWSData()
+# checkData.checkClusters("London", "eu-west-2")
