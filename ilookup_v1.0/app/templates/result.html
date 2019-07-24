@@ -3,7 +3,7 @@
 <script>
   //This deals with the popovers and the cluster modal for releases
   $(document).ready(function() {
-    $('.releaseReview').select2();
+    $('.releaseReview').select2({theme:"classic"});
     $("[data-toggle=popover]").popover({ trigger: "hover" });
   })
 
@@ -238,7 +238,7 @@
   }
   .insideModal {
     display: flex;
-    flex-direction: column
+    flex-direction: column;
   }
 }
 
@@ -249,20 +249,20 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="cluster-title" id="clusterLabel"></h4>
+        <h4 class="cluster-title" id="clusterLabel" style="font-weight:bold"></h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="insideModal">
-        <div id="release_form" style="width:100%; display: block; border:1px solid #00508F">
-          <label class="modalLabel" for="changeRelease">Change Release Number:</label>
+        <div id="release_form" style="width:100%; display:block">
+          <label class="modalLabel" for="changeRelease" style="margin-left: 8px; margin-top:10px; margin-bottom:2px">Update Release Number:</label>
           <br>
-          <select class="releaseReview" id="changeRelease" style="width:45%">
+          <select class="releaseReview" id="changeRelease" style="width:40.8%; height:500px">
             <!-- <option disabled selected value>Select a release</option> -->
           </select>
-          <input type="text" style="width:36%" id="newRelease" aria-describedby="newRelease" placeholder="Enter new release">
-          <button type="button" class="btn btn-primary" style="background-color:#007ACC" onclick="updateRelease()">Update Release</button>
+          <input type="text" class="form-control" style="width:40.8%; margin-bottom:15px; display:inline; height:37px" id="newRelease" aria-describedby="newRelease" placeholder="Enter new release">
+          <button type="button" class="btn btn-primary" style="background-color:#00508F; height:42px" onclick="updateRelease()">Update Release</button>
         </div>
         <div id="updatedReleaseAlert" class="alert alert-primary collapse">
           <a id="closeUpdatedReleaseAlert" href="#" class="close">&times;</a>
@@ -281,11 +281,11 @@
           <strong>Please check the release number format.</strong>
         </div>
         <div class="comparisons">
-          <div id="Screen1" style="width:50%">
+          <div id="Screen1" style="width:48%">
             <div class="modalWrapper">
-              <h5 style="width:50%"><div id="accordionHeader1">Release Number</div></h5>
+              <h5 style="width:50%; margin-left:8px"><div id="accordionHeader1">Release Number</div></h5>
               <div style="width:50%">
-              <select class="releaseReview" id="release1" name="releases[]" style="width: 100%">
+              <select class="releaseReview" id="release1" name="releases[]" style="width: 97%">
 
               </select>
               </div>
@@ -295,14 +295,14 @@
 
             </div>
           </div>
-          <div id="divider" style="width: 0.5%; background-color: #00508F">
+          <div id="divider" style="width:1px; background-color:#00508F">
 
           </div>
-          <div id="Screen2" style="width:50%">
+          <div id="Screen2" style="width:51.7%">
             <div class="modalWrapper">
-              <h5 style="width:50%"><div id="accordionHeader2"> Release Number </div></h5>
+              <h5 style="width:50%; margin-left:8px"><div id="accordionHeader2"> Release Number </div></h5>
               <div style="width:50%">
-                <select class="releaseReview" id="release2" name="releases[]" style="width: 100%">
+                <select class="releaseReview" id="release2" name="releases[]" style="width: 97%">
 
                 </select>
               </div>
@@ -348,7 +348,7 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px"><i class="fas fa-user-friends"></i></th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Activity</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Status</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Edit</th>
     </tr>
   </thead>
