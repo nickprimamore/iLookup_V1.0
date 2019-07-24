@@ -276,8 +276,6 @@ class AWSData:
 
 		return release_number
 
-`
-
 	def fetchClusterTags(self,clusterArn, cluster_name,region_name):
 		client = boto3.client("ecs", region_name=region_name)
 		res = client.list_tags_for_resource(resourceArn = clusterArn)
