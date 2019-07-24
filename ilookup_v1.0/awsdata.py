@@ -8,7 +8,7 @@ import pprint
 import re
 
 
-# client = boto3.client("ecs")
+client = boto3.client("ecs")
 
 class AWSData:
 	def newMainFunction(self):
@@ -44,7 +44,7 @@ class AWSData:
 			client_name = "unknown"
 			product_name = "unknown"
 			product_release_number = ""
-			environment= "unknown"
+			environment= "UNKNOWN"
 			for key in tags:
 				if ("Client") in key:
 					client_name = tags[key]
@@ -197,19 +197,25 @@ class AWSData:
 					inserted_at = datetime.utcnow()
 					task_defi = Task_Definition(task_definition_name=task_def, image_tag= image, revision= revision, date=date, cpu=cpu, memory=memory, component_id=component_id[0], release_number= release_number, is_active=True,inserted_at=inserted_at)
 					db.session.add(task_defi)
+					db.session.commit()
 					#print("Added task_definition to database: " + task_def)
 
 
 				#print("================================")
 
-	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name):
+	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name, cluster_name):
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_id = product_id[0]
 		#print(product_id)
-		latestTime = db.session.query(func.max(Product_Release.inserted_at).label("inserted_at"), Product_Release.release_number, Product_Release.product_id)
-		#print(latestTime)
-		latestTime = latestTime.group_by(Product_Release.product_id).filter(Product_Release.product_id==product_id).first()
+		# latestTime = db.session.query(func.max(Product_Release.inserted_at).label("inserted_at"), Product_Release.release_number, Product_Release.product_id)
+		# #print(latestTime)
+		# latestTime = latestTime.group_by(Product_Release.product_id).filter(Product_Release.product_id==product_id).first()
+
+		latestTime = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name)
+
+		latestTime = latestTime.group_by(CPRC.cluster_id).all()
+		#print(latestRelease)
 		print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		print(latestTime)
 		# print(tag_release_number)
@@ -230,13 +236,13 @@ class AWSData:
 			else:
 				release_number = tag_release_number
 				print("im in loop 1")
-		elif latestTime[1]:
+		elif latestTime[0][2]:
 			if tag_release_number:
 				print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-				print("latest time, tag_release_number", latestTime[0], tag_release_number)
+				print("latest time release number, tag_release_number", latestTime[0][2], tag_release_number)
 				print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
-				if latestTime[1] == tag_release_number:
+				if latestTime[0][2] == tag_release_number:
 					print("tag is not empty and two release numbers are equal!............")
 					current_time = datetime.utcnow()
 					release_number = current_time
@@ -270,7 +276,7 @@ class AWSData:
 
 		return release_number
 
-
+`
 
 	def fetchClusterTags(self,clusterArn, cluster_name,region_name):
 		client = boto3.client("ecs", region_name=region_name)
@@ -381,7 +387,7 @@ class AWSData:
 			#task_descriptions = client.describe_tasks(cluster=cluster, tasks= tasks)
 			#task_descriptions = task_descriptions["tasks"]
 			db_task_defs = db.session.query(Cluster.cluster_name, Component.component_name, Task_Definition.task_definition_name,Task_Definition.revision, Task_Definition.is_active).filter(Task_Definition.component_id==Component.component_id,Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.is_active==True).all()
-			
+
 			print("==================================================")
 			print("In compareTaskDefinition function", product_name, product_release_number, client_names)
 			print("==================================================")
@@ -415,32 +421,12 @@ class AWSData:
 							print(db_task_def_names)
 							print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 							#is_active = True
-							latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number, cluster, region_name)
+							latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number, cluster, region_name, cluster_name)
 
 							for cluster_task in cluster_task_list:
 								component_id = cluster_task["component_id"]
 								service = cluster_task["service"]
 								self.populateTaskDefinition(component_id,cluster,service,latest_product_release_number,region_name)
-
-							### Update my product release if new task def is found
-
-							# if (product_name!="unknown" and product_release_number!=""):
-							# 	print(product_release_number) # tag/time
-							# 	product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-							# if (product_name=="unknown" and product_release_number!=""):
-							# 	print("------------------------------------------calling populateproduct----------------------------------------------")
-							# 	# product_release_number = datetime.utcnow()
-							# 	print(product_release_number) # time
-							# 	#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-							# 	product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
-							# if (product_name!="unknown" and product_release_number==""):
-							# 	product_release_number = datetime.utcnow()
-							# 	#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-							# 	product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
-							# if (product_name=="unknown" and product_release_number==""):
-							# 	product_release_number = datetime.utcnow()
-							# 	#latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number)
-							# 	product_release_id = self.populateProductRelease("unknown",latest_product_release_number)
 
 							product_release_id = self.populateProductRelease(product_name,latest_product_release_number)
 
@@ -479,7 +465,7 @@ class AWSData:
 				#is_active = True
 				#self.populateTaskDefinition(component_id,cluster,service,release_number,region_name, is_active)
 
-				latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number,cluster, region_name)
+				latest_product_release_number = self.checkForLatestRelease(product_name,product_release_number,cluster, region_name, cluster_name)
 				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 				print("latest release:",latest_product_release_number)
 				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -543,8 +529,14 @@ class AWSData:
 
 data = AWSData()
 
-#data.newMainFunction()
+data.newMainFunction()
 
 db.session.commit()
 
 print("Completed")
+
+latestRelease = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name=="asg-dev-iconductor-cluster")
+
+latestRelease = latestRelease.group_by(CPRC.cluster_id).all()
+
+print(latestRelease[0][2])

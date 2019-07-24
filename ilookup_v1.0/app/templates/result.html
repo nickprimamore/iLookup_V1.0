@@ -68,10 +68,11 @@
   clusterName = ""
   product = ""
   region = ""
+  releases = []
   //This is the modal functionality and putting the options within the different release bars
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
-    let releases = trigger.data('releases')
+    releases = trigger.data('releases')
     let release = trigger.data('release')
     clusterName = trigger.data('clustername')
     product = trigger.data('product')
@@ -103,7 +104,6 @@
           $('#release2').append(secondOption)
           $('#changeRelease').append(thirdOption)
         }
-
       }
     })
     let modal = $(this)
@@ -162,6 +162,16 @@
       }, 3500);
       return;
     }
+
+    //If we can't automate the rollback issue, we can implement manual rollback through this.
+    if (releases.includes(newRel)) {
+      $('#existingReleaseAlert').show('fade');
+      window.setTimeout(function() {
+        $("#existingReleaseAlert").hide('fade');
+      }, 3500);
+      return;
+    }
+
     //This calls to the backend and goes to change things on the backend
     $.ajax({
       url:"/updateReleaseTable",
@@ -174,13 +184,72 @@
         region: region
       }),
       success: function(response) {
-        console.log(response)
         $('#updatedReleaseAlert').show('fade');
         window.setTimeout(function() {
           $("#updatedReleaseAlert").hide('fade');
         }, 3500);
+        changedScreens = []
+        if ($('#release1').val() == $('#changeRelease').val()) {
+          $('.deleteOnClose1').remove()
+          changedScreens.push("1")
+        }
+        if ($('#release2').val() == $('#changeRelease').val()) {
+          $('.deleteOnClose2').remove()
+          changedScreens.push("2")
+        }
+        $('#release1 option').each(function() {
+          $("#release1 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
+          $("#release1").select2('close')
+        })
+        $('#release2 option').each(function() {
+          $("#release2 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
+          $("#release2").select2('close')
+        })
+        $('#changeRelease option').each(function() {
+          $("#changeRelease option[value=" + "'" + $(this).val()  + "'" + "]").remove()
+          $("#changeRelease").select2('close')
+        })
+        $.ajax({
+          url:"/getReleaseHistory",
+          type: "POST",
+          data: JSON.stringify({
+            clusterName: clusterName
+          }),
+          success: function(response) {
+            blankOption = new Option("", "", true, false)
+            $('#release2').append(blankOption)
+            for (let rel in response) {
+              let newOption
+              let secondOption
+              let thirdOption
+              if (newRel == response[rel]) {
+                if (changedScreens.includes("1")) {
+                  newOption = new Option(response[rel], response[rel], true, true);
+                  loadAccordion(1, clusterName, newRel)
+                } else {
+                  newOption = new Option(response[rel], response[rel], true, false)
+                }
+                if (changedScreens.includes("2")) {
+                  secondOption = new Option(response[rel], response[rel], true, true)
+                  loadAccordion(2, clusterName, newRel)
+                } else {
+                  secondOption = new Option(response[rel], response[rel], true, false)
+                }
+                thirdOption = new Option(response[rel], response[rel], true, false)
+              } else {
+                newOption = new Option(response[rel], response[rel], true, false);
+                secondOption = new Option(response[rel], response[rel], true, false)
+                thirdOption = new Option(response[rel], response[rel], true, false)
+              }
+              $('#release1').append(newOption)
+              $('#release2').append(secondOption)
+              $('#changeRelease').append(thirdOption)
+            }
+          }
+        })
       }
     })
+
   }
 
   $('#release1').on('select2:select', function(e) {
@@ -214,6 +283,7 @@
     //Clears the change release dropdown and text field when cluster modal is closed
     $('#changeRelease').val(null).trigger('change');
     $('#newRelease').val(null).trigger('change');
+    sendData()
   })
 
 </script>
@@ -280,6 +350,10 @@
           <a id="closeReleaseFormatIncorrectAlert" href="#" class="close">&times;</a>
           <strong>Please check the release number format.</strong>
         </div>
+        <div id="existingReleaseAlert" class="alert alert-danger collapse">
+          <a id="existingReleaseAlert" href="#" class="close">&times;</a>
+          <strong>This release number already exists</strong>
+        </div>
         <div class="comparisons">
           <div id="Screen1" style="width:48%">
             <div class="modalWrapper">
@@ -333,7 +407,25 @@
     $('#closeReleaseFormatIncorrectAlert').click(function () {
       $('#releaseFormatIncorrectAlert').hide('fade');
     });
+    $('#closeExistingReleaseAlert').click(function () {
+      $('#existingReleaseAlert').hide('fade');
+    });
   });
+
+  $('#addTagModal').on('show.bs.modal', function(event) {
+    let trigger = $(event.relatedTarget)
+    let region = trigger.data('region')
+    let product = trigger.data('product')
+    let clusterName = trigger.data('clustername')
+    if (clusterName) {
+      $('.productsTag').val(product).trigger('change')
+      $('.regionsTag').val(region).trigger('change')
+      window.setTimeout(function() {
+        $('.clustersTag').val(clusterName).trigger('change')
+      }, 1000)
+
+    }
+  })
 
 </script>
 
@@ -425,10 +517,13 @@
           {% endif %}
         </td>
         <td style="font-family:Lato Light; font-size: 16px; padding-top:14px">
-          <i class="fas fa-pencil-alt"></i>
+          <i data-toggle="modal"
+          data-target="#addTagModal"
+          data-clustername="{{result.cluster_name}}"
+          data-product="{{result.product_name}}"
+          data-region="{{result.region}}" class="fas fa-pencil-alt"></i>
         </td>
       </tr>
     {% endfor %}
-
   </tbody>
 </table>

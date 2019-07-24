@@ -34,13 +34,12 @@ def load():
 @app.route('/search', methods=['GET'])
 #This search function populats all the search bars with every potential search query from our SQL database
 def search():
-	clients = Client.query.all()
-	#clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
-	#clients = clients.sort()
+
 	clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
-	products = Product.query.all()
-	releases = Product_Release.query.all()
-	clusters = Cluster.query.all()
+	products = db.session.query(Product).order_by(Product.is_active.desc(), Product.product_name).all()
+	releases = db.session.query(Product_Release).order_by(Product_Release.inserted_at).all()
+	#releases = Product_Release.query.all()
+	clusters = db.session.query(Cluster).order_by(Cluster.cluster_name).all()
 	components = Component.query.all()
 
 	#creates empty arrays to return back to the front end
@@ -80,7 +79,15 @@ def search():
 	regionsQ = convertUnicodeToArray(regionsQ)
 	productsTagQ = convertUnicodeToArray(productsTagQ)
 
+	clientsQ = sorted(clientsQ)
+	clustersQ = sorted(clustersQ)
+	productsQ = sorted(productsQ)
+	releasesQ = sorted(releasesQ)
+	regionsQ = sorted(regionsQ)
+	environmentsQ = sorted(environmentsQ)
+
 	return jsonify(clientsQ=clientsQ, productsQ=productsQ, releasesQ=releasesQ, clustersQ=clustersQ, environmentsQ=environmentsQ, regionsQ=regionsQ, productsTagQ=productsTagQ, clustersTagQ=clustersTagQ)
+
 
 @app.route('/update', methods=['GET', 'POST'])
 def update():
@@ -129,7 +136,16 @@ def update():
 		environments.append(res.Cluster.environment)
 		regions.append(res.Cluster.region)
 
+
+	clients = sorted(clients)
+	products = sorted(products)
+	clusters = sorted(clusters)
+	releases = sorted(releases)
+	environments = sorted(environments)
+	regions = sorted(regions)
+
 	#This once again takes care of changing Unicode into normal Arrays
+
 	clients = convertUnicodeToArray(list(set(clients)))
 	products = convertUnicodeToArray(list(set(products)))
 	clusters = convertUnicodeToArray(list(set(clusters)))
@@ -165,6 +181,9 @@ def createTag():
 					#This checks to see if it's a Release Tag, cause it will be called afterwards in order to update SQL side
 					if tag['key'] == "Release":
 						old_release_number = tag['value']
+					if "Client" in tag['key']:
+						if objectified['tagQuery']['tagValue'] == tag['value']:
+							return "Client already exists"
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
 
@@ -173,22 +192,22 @@ def createTag():
 				for x in objectified['tagQuery']['tagKey']:
 					if objectified['tagQuery']['tagKey'] == " ":
 						noSpaces = objectified['tagQuery']['tagKey'][:-1]
-				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': objectified['tagQuery']['tagValue']}])
+				value = objectified['tagQuery']['tagValue']
+				if "Environmen" in noSpaces:
+					value = value.upper()
+				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': value}])
 
 				#This checks to see if its a Client and goes to update the Client tags and active/inactive on the SQL sides
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']
 					new_client_name = objectified['tagQuery']['tagValue']
 					cluster_name = cluster_split[1]
-					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-					print("Calling fetchclient function")
-					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 					fetchClientKeyValue(new_client_key,new_client_name,cluster_name,currentTags)
 				#This checks to see if its an Environment and updates the SQL side with the new environment
 				if "Environment" in objectified['tagQuery']['tagKey']:
 					cluster_name = cluster_split[1]
 					addUpdateRecord = AddUpdateRecords()
-					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'])
+					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'].upper())
 
 				#This checks to update Release functionality and change multiple tables
 				if objectified['tagQuery']['tagKey'] == 'Release':
@@ -201,7 +220,7 @@ def createTag():
 
 					addUpdateRecord = AddUpdateRecords()
 					#updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
-					addUpdateRecord.updateProductRelease(product_name, old_release_number, new_release_number)
+					addUpdateRecord.updateProductRelease(product_name, cluster_name, old_release_number, new_release_number)
 					addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
 	return 'Successfully updated the cluster(s)'
 
@@ -392,6 +411,7 @@ def sendReleases():
 		firstOccurance = strX.find("'")
 		releasesStrArray.append(strX[firstOccurance+1: len(strX)-3])
 	return jsonify(releasesStrArray)
+
 
 @app.route('/updateReleaseTable', methods=["GET", "POST"])
 def updateReleaseTable():

@@ -123,8 +123,8 @@
   }
 
   .table-wrapper{
-    width: 56vw;
-    max-width: 56vw;
+    width: 100%;
+
     overflow:auto;
   }
 </style>
@@ -226,6 +226,7 @@
             $("#releases").prop("disabled", true);
             $("#clusters").prop("disabled", true);
             if(changedOnce == false){
+              console.log("hits here?")
               $('#releases').val(null).trigger('change')
               $('#clusters').val(null).trigger('change')
               changedOnce = true
@@ -397,6 +398,8 @@
   function clearSearchBars() {
     $('.dropdowns').val(null).trigger('change');
     $('.date').val('')
+    $("#active").prop("checked", false);
+    $("#inactive").prop("checked", false);
     sendData();
   }
 
@@ -702,13 +705,21 @@
       }),
       success: function(response) {
         //This rerenders the table
-        $('.clustersTag').trigger({
-          type: 'change.select2',
-        })
-        $('#successTagAlert').show('fade');
-        window.setTimeout(function() {
-          $("#successTagAlert").hide('fade');
-        }, 3000);
+        if (response == "Client already exists") {
+          $('#duplicateTagAlert').show('fade');
+          window.setTimeout(function() {
+            $("#duplicateTagAlert").hide('fade');
+          }, 3000);
+        }
+        else {
+          $('.clustersTag').trigger({
+            type: 'change.select2',
+          })
+          $('#successTagAlert').show('fade');
+          window.setTimeout(function() {
+            $("#successTagAlert").hide('fade');
+          }, 3000);
+        }
       }
     })
   }
@@ -751,6 +762,8 @@
       })
     }
   }
+
+
 </script>
   <!-- modal for adding/updating an AWS cluster tag -->
   <div class="modal fade no-reload" id="addTagModal" tabindex="-1" role="dialog" aria-labelledby="addTagLabel" aria-hidden="true">
@@ -810,6 +823,10 @@
             <div id="selectBeforeDeleteAlert" class="alert alert-danger collapse">
               <a id="closeSelectBeforeDeleteAlert" href="#" class="close">&times;</a>
               <strong>Select a tag in order to delete it.</strong>
+            </div>
+            <div id="duplicateTagAlert" class="alert alert-danger collapse">
+              <a id="closeDuplicateTagAlert" href="#" class="close">&times;</a>
+              <strong>This client already exists as a tag</strong>
             </div>
             <div id="cannotDeleteAlert" class="alert alert-danger collapse">
               <a id="closeCannotDeleteAlert" href="#" class="close">&times;</a>
@@ -878,6 +895,9 @@
       });
       $('#closeReleaseFormatAlert').click(function () {
         $('#releaseFormatAlert').hide('fade');
+      });
+      $('#closeDuplicateTagAlert').click(function () {
+        $('#duplicateTagAlert').hide('fade');
       });
     });
     $('#addTagModal').on('hidden.bs.modal', function (e) {
