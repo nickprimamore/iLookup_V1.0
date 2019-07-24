@@ -8,7 +8,7 @@ from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
 from addUpdateDB import AddUpdateRecords
-# from db_delete_v3 import DeactivateRecords
+from db_delete_v3 import DeactivateRecords
 import requests
 import json
 import boto3
@@ -34,7 +34,7 @@ def load():
 @app.route('/search', methods=['GET'])
 #This search function populats all the search bars with every potential search query from our SQL database
 def search():
-	
+
 	clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
 	products = db.session.query(Product).order_by(Product.is_active.desc(), Product.product_name).all()
 	releases = db.session.query(Product_Release).order_by(Product_Release.inserted_at).all()
@@ -82,7 +82,7 @@ def search():
 	clientsQ = sorted(clientsQ)
 	clustersQ = sorted(clustersQ)
 	productsQ = sorted(productsQ)
-	releasesQ = sorted(releasesQ) 
+	releasesQ = sorted(releasesQ)
 	regionsQ = sorted(regionsQ)
 	environmentsQ = sorted(environmentsQ)
 

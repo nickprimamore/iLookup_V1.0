@@ -203,12 +203,9 @@ class AWSData:
 
 				#print("================================")
 
-<<<<<<< HEAD
+
 	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name, cluster_name):
 
-=======
-	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name):
->>>>>>> 9d3d59b21a803e8897eae6c4317196d204b90387
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_id = product_id[0]
@@ -281,7 +278,6 @@ class AWSData:
 
 		return release_number
 
-`
 
 	def fetchClusterTags(self,clusterArn, cluster_name,region_name):
 		client = boto3.client("ecs", region_name=region_name)
@@ -532,16 +528,16 @@ class AWSData:
 
 
 
-# data = AWSData()
+data = AWSData()
 
-# data.newMainFunction()
+data.newMainFunction()
 
-# db.session.commit()
+db.session.commit()
 
-# print("Completed")
+print("Completed")
 
-# latestRelease = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name=="asg-dev-iconductor-cluster")
+latestRelease = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name=="asg-dev-iconductor-cluster")
 
-# latestRelease = latestRelease.group_by(CPRC.cluster_id).all()
+latestRelease = latestRelease.group_by(CPRC.cluster_id).all()
 
-# print(latestRelease[0][2])
+print(latestRelease[0][2])

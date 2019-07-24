@@ -422,11 +422,15 @@
     let product = trigger.data('product')
     let clusterName = trigger.data('clustername')
     if (clusterName) {
-      $('.productsTag').val(product).trigger('change')
-      $('.regionsTag').val(region).trigger('change')
+      window.setTimeout(function() {
+        $('.productsTag').val(product).trigger('change')
+      }, 500)
+      window.setTimeout(function() {
+        $('.regionsTag').val(region).trigger('change')
+      }, 1000)
       window.setTimeout(function() {
         $('.clustersTag').val(clusterName).trigger('change')
-      }, 1000)
+      }, 1500)
 
     }
   })
