@@ -6,7 +6,7 @@
     $('.releaseReview').select2();
     $("[data-toggle=popover]").popover({ trigger: "hover" });
   })
-
+  changesMade = false
   //This function is to load the releaseHistory of a certain release number selected, the screen variable checks to see which screen to put that accordion in
   function loadAccordion(screen, cluster_name, release_number) {
     $.ajax({
@@ -188,6 +188,7 @@
         window.setTimeout(function() {
           $("#updatedReleaseAlert").hide('fade');
         }, 3500);
+        changesMade = true
         changedScreens = []
         if ($('#release1').val() == $('#changeRelease').val()) {
           $('.deleteOnClose1').remove()
@@ -283,7 +284,10 @@
     //Clears the change release dropdown and text field when cluster modal is closed
     $('#changeRelease').val(null).trigger('change');
     $('#newRelease').val(null).trigger('change');
-    sendData()
+    if (changesMade) {
+      sendData()
+      changesMade = false
+    }
   })
 
 </script>
