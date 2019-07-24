@@ -2,7 +2,6 @@ from app import db
 from app.models import Product, Client, Cluster, Component, Task_Definition, Product_Release, CPRC
 from sqlalchemy import func
 from datetime import datetime
-from releaseEmail import Email
 import boto3
 import json
 import pprint
@@ -45,7 +44,7 @@ class AWSData:
 			client_name = "unknown"
 			product_name = "unknown"
 			product_release_number = ""
-			environment= "unknown"
+			environment= "UNKNOWN"
 			for key in tags:
 				if ("Client") in key:
 					client_name = tags[key]
@@ -204,8 +203,12 @@ class AWSData:
 
 				#print("================================")
 
+<<<<<<< HEAD
 	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name, cluster_name):
 
+=======
+	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name):
+>>>>>>> 9d3d59b21a803e8897eae6c4317196d204b90387
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_id = product_id[0]
@@ -235,9 +238,6 @@ class AWSData:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 				current_time = datetime.utcnow()
 				release_number = current_time
-				# email = Email()
-				# email.sendEmail(release_number)
-
 			else:
 				release_number = tag_release_number
 				print("im in loop 1")
@@ -251,16 +251,12 @@ class AWSData:
 					print("tag is not empty and two release numbers are equal!............")
 					current_time = datetime.utcnow()
 					release_number = current_time
-					# email = Email()
-					# email.sendEmail(release_number)
 				else:
 					release_number = tag_release_number
 			else:
 				print("release number aws tag is empty")
 				current_time = datetime.utcnow()
 				release_number = current_time
-				# email = Email()
-				# email.sendEmail(release_number)
 
 
 
@@ -396,7 +392,7 @@ class AWSData:
 			#task_descriptions = client.describe_tasks(cluster=cluster, tasks= tasks)
 			#task_descriptions = task_descriptions["tasks"]
 			db_task_defs = db.session.query(Cluster.cluster_name, Component.component_name, Task_Definition.task_definition_name,Task_Definition.revision, Task_Definition.is_active).filter(Task_Definition.component_id==Component.component_id,Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.is_active==True).all()
-			
+
 			print("==================================================")
 			print("In compareTaskDefinition function", product_name, product_release_number, client_names)
 			print("==================================================")

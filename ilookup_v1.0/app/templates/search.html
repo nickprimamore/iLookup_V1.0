@@ -33,307 +33,6 @@
     font-weight:bold;
     font-family: "Lato Light"
   }
-  /* .modal-header{
-     border-bottom: 1px solid white;
-  } */
-</style>
-<!-- This is the first script which deals with the front end AJAX call to implement dynamic searching with /search and /update -->
-<script>
-  //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
-  //This /search is called the moment you load the page, creating the various options
-  $(document).ready(function() {
-    $.ajax({
-      url: '/search',
-      type: 'GET',
-      success: function (response) {
-        //These following forloops go through the passed in arrays of each possible search query, and creates an Option tag to add to the individual select2s
-        $("#releases").prop("disabled", true);
-        $("#clusters").prop("disabled", true);
-        for (let client in response.clientsQ) {
-          let newOption = new Option(response.clientsQ[client], response.clientsQ[client], false, false);
-          $('#clients').append(newOption);
-        }
-        for (let product in response.productsQ) {
-          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
-          $('#products').append(newOption);
-        }
-        for (let product in response.productsQ) {
-          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
-          $('#selectProduct').append(newOption);
-        }
-        // for (let release in response.releasesQ) {
-        //   let newOption = new Option(response.releasesQ[release], response.releasesQ[release], false, false);
-        //   $('#releases').append(newOption);
-        // }
-        // for (let cluster in response.clustersQ) {
-        //   let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
-        //   $('#clusters').append(newOption);
-        // }
-        for (let cluster in response.clustersQ) {
-          let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
-          $('#addClustersSelect2').append(newOption);
-        }
-        for (let region in response.regionsQ) {
-          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
-          $('#regions').append(newOption);
-        }
-        for (let region in response.regionsQ) {
-          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
-          $('#selectRegion').append(newOption);
-        }
-        for (let environment in response.environmentsQ) {
-          let newOption = new Option(response.environmentsQ[environment], response.environmentsQ[environment], false, false);
-          $('#environments').append(newOption);
-        }
-        for (let component in response.componentsQ) {
-          let newOption = new Option(response.componentsQ[component], response.componentsQ[component], false, false);
-          $('#components').append(newOption);
-        }
-
-      }
-    })
-
-    //Pre-loads result table with initial information
-    $.ajax({
-      url:'/result',
-      type: 'GET',
-      success: function(response) {
-        $('#result-tag').html(response)
-      }
-    })
-
-    //initializing the select2, .dropdowns is the classname for the main search page
-    $('.dropdowns').select2({
-      theme: "classic",
-      width: "100%"
-    });
-
-
-    //Closes dropdowns after you unselect to allow for better UI experience
-    $('.dropdowns').on('select2:unselect', function(e) {
-      $('.dropdowns').select2('close')
-    })
-
-    changedOnce = false
-    //When something is selected or unselected, this function takes care of the dynamic aspect of it, as it get's the values chosen, sends it back as AJAX data
-    //Once the backend generates the potential search queries, in the response, we delete the current options and reissue the new options
-    $('.dropdowns').on('change.select2', function(e) {
-      let values = getValues()
-      $.ajax({
-        url: '/update',
-        type: 'POST',
-        data: JSON.stringify({
-          Clients: values[0],
-          Products: values[1],
-          Releases: values[2],
-          Regions: values[3],
-          Clusters: values[4],
-          Environments: values[5],
-          Components: values[6],
-          Dates: values[7]
-        }),
-        success: function (response) {
-          //These forloops delete all the options for each dropdown
-          if(values[1].length > 0){
-            $("#releases").prop("disabled", false);
-            $("#clusters").prop("disabled", false);
-            changedOnce = false
-          }
-          else{
-            $("#releases").prop("disabled", true);
-            $("#clusters").prop("disabled", true);
-            if(changedOnce == false){
-              $('#releases').val(null).trigger('change')
-              $('#clusters').val(null).trigger('change')
-              changedOnce = true
-            }
-            // setTimeout(function() {
-            //   $('#releases').trigger('change')
-            // }, 0);
-            // setTimeout(function() {
-            //   $('#clusters').trigger('change')
-            // }, 0);
-          }
-          $('#clients option').each(function() {
-            $("#clients option[value=" +"'"+ $(this).val() +"'"+"]").remove()
-            $('.clients').select2('close')
-          })
-          $('#products option').each(function() {
-            $("#products option[value=" + $(this).val() +"]").remove()
-            $('.products').select2('close')
-          })
-          $('#releases option').each(function() {
-            $("#releases option[value=" + "'" + $(this).val() + "'" +"]").remove()
-            $('.releases').select2('close')
-          })
-          $('#regions option').each(function() {
-            $("#regions option[value=" + "'" + $(this).val() + "'" +"]").remove()
-            $('.regions').select2('close')
-          })
-          $('#clusters option').each(function() {
-            $("#clusters option[value=" + $(this).val() +"]").remove()
-            $('.clusters').select2('close')
-          })
-          $('#environments option').each(function() {
-            $("#environments option[value=" + $(this).val() +"]").remove()
-            $('.components').select2('close')
-          })
-          //This for loop recreates the Options based on the selected values, allowing for a dynamic search filter
-          for (let client in response.clientsUp) {
-            console.log(response.clientsUp)
-            let newOption
-            if (values[0].includes(response.clientsUp[client])) {
-              newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, true);
-            } else {
-              newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, false);
-            }
-            $('#clients').append(newOption);
-          }
-          for (let product in response.productsUp) {
-            let newOption
-            if (values[1].includes(response.productsUp[product])) {
-              newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
-            } else {
-              newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
-            }
-            $('#products').append(newOption);
-          }
-          for (let releases in response.releasesUp) {
-            let newOption
-            if (values[2].includes(response.releasesUp[releases])) {
-              newOption = new Option(response.releasesUp[releases], response.releasesUp[releases], true, true);
-            } else {
-              newOption = new Option(response.releasesUp[releases], response.releasesUp[releases], true, false);
-            }
-            $('#releases').append(newOption);
-          }
-          for (let cluster in response.clustersUp) {
-            let newOption
-            if (values[4].includes(response.clustersUp[cluster])) {
-              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
-            } else {
-              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, false);
-            }
-            $('#clusters').append(newOption);
-          }
-          for (let env in response.environmentsUp) {
-            let newOption
-            if (values[5].includes(response.environmentsUp[env])) {
-              newOption = new Option(response.environmentsUp[env], response.environmentsUp[env], true, true);
-            } else {
-              newOption = new Option(response.environmentsUp[env], response.environmentsUp[env], true, false);
-            }
-            $('#environments').append(newOption);
-          }
-          for (let region in response.regionsUp) {
-            let newOption
-            if (values[3].includes(response.regionsUp[region])) {
-              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
-            } else {
-              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
-            }
-            $('#regions').append(newOption);
-          }
-        }
-      })
-    })
-  });
-
-//This function is used in multiple calls, and it just grabs all selected values throughout the search page.
-  function getValues() {
-    //The format of $('._____').val() gives the results from the select2 Tables
-    var clientVal = $('.clients').val()
-    var productVal = $('.products').val()
-    var releaseVal = $('.releases').val()
-    var regionVal = $('.regions').val()
-    var clusterVal = $('.clusters').val()
-    var environmentVal = $('.environments').val()
-
-    var activeVal = $('#active').prop("checked") == true
-    var inactiveVal = $('#inactive').val()
-
-    console.log(activeVal, "active")
-    console.log(inactiveVal, "inactive")
-
-    var dateFrom = document.getElementById("dateFrom").value;
-    var dateUntil = document.getElementById("dateUntil").value;
-
-    //Generated empty arrays, and filled them with the values from above to send to the backend as an array.
-    var clientList = []
-    var productList = []
-    var releaseList = []
-    var regionList = []
-    var clusterList = []
-    var environmentList = []
-    var componentList = []
-    var actOrIn = ""
-    var dateList = [dateFrom, dateUntil];
-
-    //Populates all the lists with the search values
-    for (var cli in clientVal) {
-      clientList.push(clientVal[cli])
-    }
-    for (var pro in productVal) {
-      productList.push(productVal[pro])
-    }
-    for (var rel in releaseVal) {
-      releaseList.push(releaseVal[rel])
-    }
-    for (var reg in regionVal) {
-      regionList.push(regionVal[reg])
-    }
-    for (var clu in clusterVal) {
-      clusterList.push(clusterVal[clu])
-    }
-    for (var env in environmentVal) {
-      environmentList.push(environmentVal[env])
-    }
-    if ($('#active').prop("checked") == true && ($('#inactive').prop("checked") == true)) {
-      actOrIn = "None"
-    } else if ($('#active').prop("checked") == true) {
-      actOrIn = true
-    } else if ($('#inactive').prop("checked") == true) {
-      actOrIn = false
-    } else {
-      actOrIn = "None"
-    }
-
-    return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList, actOrIn]
-  }
-  // This function sends the selected search tags to the backend and renders it onto the result-tag html
-  function sendData() {
-    let values = getValues()
-    //send back and Ajax Request with the following information.
-      $.ajax({
-      url: '/result',
-      type: 'POST',
-      data: JSON.stringify({
-        Clients: values[0],
-        Products: values[1],
-        Releases: values[2],
-        Regions: values[3],
-        Clusters: values[4],
-        Environments: values[5],
-        Components: values[6],
-        Dates: values[7],
-        Active: values[8]
-      }),
-      success: function (response) {
-        $('#result-tag').html(response)
-      }
-    })
-  }
-
-  //This function clears all Search Bars and the trigger('change') makes for a reupdate on options
-  function clearSearchBars() {
-    $('.dropdowns').val(null).trigger('change');
-    $('.date').val('')
-    sendData();
-  }
-
-</script>
-
-<style>
   #body-row {
       margin-left:0;
       margin-right:0;
@@ -424,14 +123,288 @@
   }
 
   .table-wrapper{
-    width: 56vw;
-    max-width: 56vw;
+    width: 100%;
+
     overflow:auto;
   }
-
 </style>
+<!-- This is the first script which deals with the front end AJAX call to implement dynamic searching with /search and /update -->
+<script>
+  //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
+  //This /search is called the moment you load the page, creating the various options
+  $(document).ready(function() {
+    $.ajax({
+      url: '/search',
+      type: 'GET',
+      success: function (response) {
+        //These following forloops go through the passed in arrays of each possible search query, and creates an Option tag to add to the individual select2s
+        $("#releases").prop("disabled", true);
+        $("#clusters").prop("disabled", true);
+        for (let client in response.clientsQ) {
+          let newOption = new Option(response.clientsQ[client], response.clientsQ[client], false, false);
+          $('#clients').append(newOption);
+        }
+        for (let product in response.productsQ) {
+          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
+          $('#products').append(newOption);
+        }
+        for (let product in response.productsQ) {
+          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
+          $('#selectProduct').append(newOption);
+        }
+        for (let cluster in response.clustersQ) {
+          let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
+          $('#addClustersSelect2').append(newOption);
+        }
+        for (let region in response.regionsQ) {
+          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
+          $('#regions').append(newOption);
+        }
+        for (let region in response.regionsQ) {
+          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
+          $('#selectRegion').append(newOption);
+        }
+        for (let environment in response.environmentsQ) {
+          let newOption = new Option(response.environmentsQ[environment], response.environmentsQ[environment], false, false);
+          $('#environments').append(newOption);
+        }
+        for (let component in response.componentsQ) {
+          let newOption = new Option(response.componentsQ[component], response.componentsQ[component], false, false);
+          $('#components').append(newOption);
+        }
 
-<!-- This is the html for the actual search bars -->
+      }
+    })
+
+    //Pre-loads result table with initial information
+    $.ajax({
+      url:'/result',
+      type: 'GET',
+      success: function(response) {
+        $('#result-tag').html(response)
+      }
+    })
+
+    //initializing the select2 for side search bar, .dropdowns is the classname for the main search page
+    $('.dropdowns').select2({
+      theme: "classic",
+      width: "100%"
+    });
+
+    //Closes dropdowns after you unselect to avoid selection errors
+    $('.dropdowns').on('select2:unselect', function(e) {
+      $('.dropdowns').select2('close')
+    })
+
+    //When something is selected or unselected, this function takes care of the dynamic aspect of it, as it get's the values chosen, sends it back as AJAX data
+    //Once the backend generates the potential search queries, in the response, we delete the current options and reissue the new options
+    //changedOnce is used to administer the disabled functionality so you have to choose a Product in order to select Release and Clusters
+    changedOnce = false
+    $('.dropdowns').on('change.select2', function(e) {
+      let values = getValues()
+      $.ajax({
+        url: '/update',
+        type: 'POST',
+        data: JSON.stringify({
+          Clients: values[0],
+          Products: values[1],
+          Releases: values[2],
+          Regions: values[3],
+          Clusters: values[4],
+          Environments: values[5],
+          Components: values[6],
+          Dates: values[7]
+        }),
+        success: function (response) {
+          //This if else is for determining whether the release or cluster search bar should be disabled or not
+          if(values[1].length > 0){
+            $("#releases").prop("disabled", false);
+            $("#clusters").prop("disabled", false);
+            changedOnce = false
+          }
+          else{
+            $("#releases").prop("disabled", true);
+            $("#clusters").prop("disabled", true);
+            if(changedOnce == false){
+              console.log("hits here?")
+              $('#releases').val(null).trigger('change')
+              $('#clusters').val(null).trigger('change')
+              changedOnce = true
+            }
+          }
+          //these for loops are to delete all the current options in the client dropdowns
+          $('#clients option').each(function() {
+            $("#clients option[value=" +"'"+ $(this).val() +"'"+"]").remove()
+            $('.clients').select2('close')
+          })
+          $('#products option').each(function() {
+            $("#products option[value=" + $(this).val() +"]").remove()
+            $('.products').select2('close')
+          })
+          $('#releases option').each(function() {
+            $("#releases option[value=" + "'" + $(this).val() + "'" +"]").remove()
+            $('.releases').select2('close')
+          })
+          $('#regions option').each(function() {
+            $("#regions option[value=" + "'" + $(this).val() + "'" +"]").remove()
+            $('.regions').select2('close')
+          })
+          $('#clusters option').each(function() {
+            $("#clusters option[value=" + $(this).val() +"]").remove()
+            $('.clusters').select2('close')
+          })
+          $('#environments option').each(function() {
+            $("#environments option[value=" + $(this).val() +"]").remove()
+            $('.components').select2('close')
+          })
+          //This for loop recreates the Options based on the selected values, allowing for a dynamic search filter
+          let newOption
+          for (let client in response.clientsUp) {
+            if (values[0].includes(response.clientsUp[client])) {
+              newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, true);
+            } else {
+              newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, false);
+            }
+            $('#clients').append(newOption);
+          }
+          for (let product in response.productsUp) {
+            if (values[1].includes(response.productsUp[product])) {
+              newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
+            } else {
+              newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
+            }
+            $('#products').append(newOption);
+          }
+          for (let releases in response.releasesUp) {
+            if (values[2].includes(response.releasesUp[releases])) {
+              newOption = new Option(response.releasesUp[releases], response.releasesUp[releases], true, true);
+            } else {
+              newOption = new Option(response.releasesUp[releases], response.releasesUp[releases], true, false);
+            }
+            $('#releases').append(newOption);
+          }
+          for (let cluster in response.clustersUp) {
+            if (values[4].includes(response.clustersUp[cluster])) {
+              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
+            } else {
+              newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, false);
+            }
+            $('#clusters').append(newOption);
+          }
+          for (let env in response.environmentsUp) {
+            if (values[5].includes(response.environmentsUp[env])) {
+              newOption = new Option(response.environmentsUp[env], response.environmentsUp[env], true, true);
+            } else {
+              newOption = new Option(response.environmentsUp[env], response.environmentsUp[env], true, false);
+            }
+            $('#environments').append(newOption);
+          }
+          for (let region in response.regionsUp) {
+            if (values[3].includes(response.regionsUp[region])) {
+              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
+            } else {
+              newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
+            }
+            $('#regions').append(newOption);
+          }
+        }
+      })
+    })
+  });
+
+  //This function is used in multiple calls, and it just grabs all selected values throughout the search page, when searching
+  function getValues() {
+    //The format of $('._____').val() gives the results from the select2 Tables, for active and inactive we just check what's ticked
+    var clientVal = $('.clients').val()
+    var productVal = $('.products').val()
+    var releaseVal = $('.releases').val()
+    var regionVal = $('.regions').val()
+    var clusterVal = $('.clusters').val()
+    var environmentVal = $('.environments').val()
+    var activeVal = $('#active').prop("checked") == true
+    var inactiveVal = $('#inactive').val()
+    var dateFrom = document.getElementById("dateFrom").value;
+    var dateUntil = document.getElementById("dateUntil").value;
+
+    //Generated empty arrays, and filled them with the values from above to send to the backend as an array.
+    var clientList = []
+    var productList = []
+    var releaseList = []
+    var regionList = []
+    var clusterList = []
+    var environmentList = []
+    var componentList = []
+    var actOrIn = ""
+    var dateList = [dateFrom, dateUntil];
+
+    //Populates all the lists with the search values
+    for (var cli in clientVal) {
+      clientList.push(clientVal[cli])
+    }
+    for (var pro in productVal) {
+      productList.push(productVal[pro])
+    }
+    for (var rel in releaseVal) {
+      releaseList.push(releaseVal[rel])
+    }
+    for (var reg in regionVal) {
+      regionList.push(regionVal[reg])
+    }
+    for (var clu in clusterVal) {
+      clusterList.push(clusterVal[clu])
+    }
+    for (var env in environmentVal) {
+      environmentList.push(environmentVal[env])
+    }
+
+    //This is to determine the potential search query of having all, just the active, or just inactive
+    if ($('#active').prop("checked") == true && ($('#inactive').prop("checked") == true)) {
+      actOrIn = "None"
+    } else if ($('#active').prop("checked") == true) {
+      actOrIn = true
+    } else if ($('#inactive').prop("checked") == true) {
+      actOrIn = false
+    } else {
+      actOrIn = "None"
+    }
+    return [clientList, productList, releaseList, regionList, clusterList, environmentList, componentList, dateList, actOrIn]
+  }
+
+  // This function sends the selected search tags to the backend and renders it onto the result-tag html
+  function sendData() {
+    let values = getValues()
+    //send back and Ajax Request with the following information.
+      $.ajax({
+      url: '/result',
+      type: 'POST',
+      data: JSON.stringify({
+        Clients: values[0],
+        Products: values[1],
+        Releases: values[2],
+        Regions: values[3],
+        Clusters: values[4],
+        Environments: values[5],
+        Components: values[6],
+        Dates: values[7],
+        Active: values[8]
+      }),
+      success: function (response) {
+        $('#result-tag').html(response)
+      }
+    })
+  }
+
+  //This function clears all Search Bars and the trigger('change') makes for a reupdate on options
+  function clearSearchBars() {
+    $('.dropdowns').val(null).trigger('change');
+    $('.date').val('')
+    $("#active").prop("checked", false);
+    $("#inactive").prop("checked", false);
+    sendData();
+  }
+
+</script>
+<!-- This is the html for the side searchbar menu-->
 <!-- Bootstrap row -->
 <div class="row" id="body-row">
     <!-- Sidebar -->
@@ -513,34 +486,24 @@
 </div><!-- body-row END -->
 
 
-<!-- This script tag is to deal with the creation and receiving information of cluster tags -->
+<!-- Everything below this line deals with the tag modal, we split everything, but the styling up so it becomes easier to navigate -->
 <script>
-
-let addReleaseTag = {}
-
+  //This object is to record the tag query
+  let addReleaseTag = {}
   //We seperately initialize these select2's because we want them to work independently from the rest of the search page as they require their own unique way of dynamicFiltering
   $(document).ready(function() {
     //initially disable region and clusters in the tagging modal
     $("#selectRegion").prop("disabled", true);
     $("#addClustersSelect2").prop("disabled", true);
-
-    $('.productsTag').select2({
+    $('.dependencies').select2({
       theme: "classic"
     });
-
-    $('.regionsTag').select2({
-      theme: "classic"
-    });
-
-    $('.clustersTag').select2({
-      theme: "classic"
-    });
-
     $('.editTag').select2({
       theme: "classic",
       tags: true
     });
 
+    //This function gets the values of what is needed to create a new Tag on AWS and returns a list of the results to pass back to the backend
     function getTagValues() {
       var productTag = $('#selectProduct').val()
       var regionTag = $('#selectRegion').val()
@@ -560,7 +523,7 @@ let addReleaseTag = {}
       return [productList, regionList, clusterList]
     }
 
-    //The following event handlers keep track of the several clusters chosen
+    //The following event handlers keep track of the several clusters chosen, and renders the table to show the several tags onto a cluster
     $('.clustersTag').on('change.select2', function(e) {
       let selectedCluster = $('.clustersTag').val()
       $.ajax({
@@ -572,17 +535,14 @@ let addReleaseTag = {}
        }),
        success: function(response) {
          $('.tagTable').remove()
-
-         //sets up the table with AWS tags to be appended in the modal
+         //This part sets up the table with AWS tags to be appended in the modal, the styling up above allows this to be scrollable so don't have to worry about having too many tags.
          let tableStr = '<div class="table-wrapper"><table class="table table-striped tagTable"><thead><tr>'
          if (Object.keys(response).length != 0) {
             tableStr += '<th scope="col">Cluster</th>'
          }
-
          for (resp in response) {
            tableStr += '<th scope="col">' + resp + '</th>'
          }
-
          tableStr += '</tr></thead><tbody>'
          for (i = 0; i < selectedCluster.length; i++) {
            tableStr += '<tr><th scope="row">' + selectedCluster[i] + '</th>'
@@ -593,7 +553,6 @@ let addReleaseTag = {}
          }
          tableStr += '</tbody></table></div>'
          $('.tags').append(tableStr)
-
          $('#editTag option').each(function() {
            $("#editTag option[value=" + $(this).val() +"]").remove()
          })
@@ -605,7 +564,7 @@ let addReleaseTag = {}
      })
     })
 
-
+    //This function checks to see if products is selected, in order to determine whether selectRegion and addClustersSelect2
     $('.updateTags').on('change.select2', function(e) {
       //if a product is deselected, disable region and cluster
       if(!$('.productsTag').val()[0]){
@@ -626,10 +585,10 @@ let addReleaseTag = {}
       if($('.regionsTag').val()[0]){
         $("#addClustersSelect2").prop("disabled", false);
       }
-
       addReleaseTag['product'] = $('.productsTag').val()[0]
       addReleaseTag['region'] = $('.regionsTag').val()[0]
       values = getTagValues()
+      //After getting the tag values, we send it into the update function to have a dynamic filter
       $.ajax({
         url:'/update',
         type: 'POST',
@@ -655,8 +614,8 @@ let addReleaseTag = {}
             $("#addClustersSelect2 option[value=" + $(this).val() + "]").remove()
             $("#addClustersSelect2").select2('close')
           })
+          let newOption
           for (let product in response.productsUp) {
-            let newOption
             if (values[0].includes(response.productsUp[product])) {
               newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
             } else {
@@ -665,7 +624,6 @@ let addReleaseTag = {}
             $('#selectProduct').append(newOption);
           }
           for (let region in response.regionsUp) {
-            let newOption
             if (values[1].includes(response.regionsUp[region])) {
               newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
             } else {
@@ -674,7 +632,6 @@ let addReleaseTag = {}
             $('#selectRegion').append(newOption);
           }
           for (let cluster in response.clustersUp) {
-            let newOption
             if (values[2].includes(response.clustersUp[cluster])) {
               newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, true);
             } else {
@@ -689,6 +646,7 @@ let addReleaseTag = {}
 
   //This function creates an object for the newTag and sends it to the backend for it to be created on AWS servers
   function newTag() {
+    //These ensure form validation
     if(!$('.productsTag').val()[0]){
       $('#selectProductAlert').show('fade');
       window.setTimeout(function() {
@@ -721,7 +679,7 @@ let addReleaseTag = {}
     let tagValue = document.getElementById('tagValue').value
     addReleaseTag['tagValue'] = tagValue
     addReleaseTag['tagKey'] = $('.editTag').val()
-
+    //This function calls the backend to create a new tag onto a certain cluster which is found through addReleaseTag
     $.ajax({
       url:'/newTag',
       type:'POST',
@@ -729,15 +687,27 @@ let addReleaseTag = {}
         tagQuery: addReleaseTag
       }),
       success: function(response) {
-        console.log("Tag created")
-        $('#successTagAlert').show('fade');
-        window.setTimeout(function() {
-          $("#successTagAlert").hide('fade');
-        }, 3000);
+        //This rerenders the table
+        if (response == "Client already exists") {
+          $('#duplicateTagAlert').show('fade');
+          window.setTimeout(function() {
+            $("#duplicateTagAlert").hide('fade');
+          }, 3000);
+        }
+        else {
+          $('.clustersTag').trigger({
+            type: 'change.select2',
+          })
+          $('#successTagAlert').show('fade');
+          window.setTimeout(function() {
+            $("#successTagAlert").hide('fade');
+          }, 3000);
+        }
       }
     })
   }
 
+  //This function deletes a tag
   function deleteTag() {
     if (!$('.editTag').val()) {
       $('#selectBeforeDeleteAlert').show('fade');
@@ -763,7 +733,10 @@ let addReleaseTag = {}
           tagQuery: addReleaseTag
         }),
         success: function(response) {
-          console.log("Tag deleted")
+          //This causes the table to update dynamically to see changes made to AWS
+          $('.clustersTag').trigger({
+            type: 'change.select2',
+          })
           $('#deleteAlert').show('fade');
           window.setTimeout(function() {
             $("#deleteAlert").hide('fade');
@@ -772,8 +745,9 @@ let addReleaseTag = {}
       })
     }
   }
-</script>
 
+
+</script>
   <!-- modal for adding/updating an AWS cluster tag -->
   <div class="modal fade no-reload" id="addTagModal" tabindex="-1" role="dialog" aria-labelledby="addTagLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -791,7 +765,6 @@ let addReleaseTag = {}
                 <label class="modalLabel" for="selectProduct">Product:</label>
                 <br>
                 <select class="productsTag updateTags dependencies" id="selectProduct" style="width:100%" name="selectProduct" multiple="multiple">
-
                 </select>
               </div>
           </form>
@@ -800,7 +773,6 @@ let addReleaseTag = {}
                 <label class="modalLabel" for="selectRegion">Region:</label>
                 <br>
                 <select class="regionsTag updateTags dependencies" id="selectRegion" style="width:100%" name="selectRegion" multiple="multiple">
-
                 </select>
               </div>
           </form>
@@ -813,7 +785,6 @@ let addReleaseTag = {}
           </form>
           <div class="tags">
             <table class="table table-striped tagTable">
-
             </table>
           </div>
           <form>
@@ -821,7 +792,6 @@ let addReleaseTag = {}
               <label class="modalLabel" for="selectTag">Tag:</label>
               <br>
               <select class="editTag" id="editTag" placeholder="Select tag" style="width:100%" name="editTag">
-
               </select>
             </div>
             <div class="col-md-8" style="padding-left:0px; padding-right:0px; display: inline-block">
@@ -836,6 +806,10 @@ let addReleaseTag = {}
             <div id="selectBeforeDeleteAlert" class="alert alert-danger collapse">
               <a id="closeSelectBeforeDeleteAlert" href="#" class="close">&times;</a>
               <strong>Select a tag in order to delete it.</strong>
+            </div>
+            <div id="duplicateTagAlert" class="alert alert-danger collapse">
+              <a id="closeDuplicateTagAlert" href="#" class="close">&times;</a>
+              <strong>This client already exists as a tag</strong>
             </div>
             <div id="cannotDeleteAlert" class="alert alert-danger collapse">
               <a id="closeCannotDeleteAlert" href="#" class="close">&times;</a>
@@ -872,6 +846,7 @@ let addReleaseTag = {}
   </div>
 
   <script type="text/javascript">
+    //This script tag takes care of the various alert functionalities and clearing the modal once you x out of it
     $(document).ready(function () {
       $('#closeSuccessAlert').click(function () {
         $('#successTagAlert').hide('fade');
@@ -897,19 +872,18 @@ let addReleaseTag = {}
       $('#closeNewValueAlert').click(function () {
         $('#newValueAlert').hide('fade');
       });
+      $('#closeDuplicateTagAlert').click(function () {
+        $('#duplicateTagAlert').hide('fade');
+      });
+    });
+    $('#addTagModal').on('hidden.bs.modal', function (e) {
+      $('#addClustersSelect2').val(null).trigger('change');
+      $('#selectRegion').val(null).trigger('change');
+      $('#selectProduct').val(null).trigger('change')
+      $('#tagValue').val(null).trigger('change')
+      sendData()
     });
   </script>
-
-<!-- This clears the tagging modal once you close it-->
-<script>
-  $('#addTagModal').on('hidden.bs.modal', function (e) {
-    $('#addClustersSelect2').val(null).trigger('change');
-    $('#selectRegion').val(null).trigger('change');
-    $('#selectProduct').val(null).trigger('change')
-    $('#tagValue').val(null).trigger('change')
-  });
-</script>
-
 </body>
 </html>
 
