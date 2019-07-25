@@ -434,7 +434,7 @@
 <script type="text/javascript">
   //Closes the alerts if the "x" button is clicked
   $(document).ready(function () {
-    console.log($('#customControlInline').prop('checked')); // true
+    $("#inactiveClients").hide();
     $('#closeUpdatedReleaseAlert').click(function () {
       $('#updatedReleaseAlert').hide('fade');
     });
@@ -471,8 +471,15 @@
     }
   })
 
-</script>
+  function showInactive() {
+    if(document.getElementById('customControlInline').checked) {
+        $("#inactiveClients").show();
+    } else {
+        $("#inactiveClients").hide();
+    }
+  }
 
+</script>
 <table class="table table-hover table-bordered table-striped">
   <thead>
     <tr>
@@ -484,7 +491,7 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">
             <div class="custom-control custom-checkbox my-1 mr-sm-2" data-toggle="popover" title="Clients" data-content="By default you see only active clients, by checking this box, you also see inactive clients">
-              <input type="checkbox" class="custom-control-input" id="customControlInline" class="seeInactiveClients">
+              <input type="checkbox" class="custom-control-input" id="customControlInline" onclick="showInactive()" class="seeInactiveClients">
               <label class="custom-control-label" for="customControlInline">Clients</label>
             </div>
       </th>
@@ -497,7 +504,8 @@
 
 <!-- This is a for loop to render the search results, and in each th theres a modal, target, clustername etc to show the cluster modal with necessary information regarding the unique row  -->
     {% for result in results %}
-      {% set clients = result.client_names %}
+      {% set clients = result.active_clients %}
+      {% set inactiveClients = result.inactive_clients %}
       {% set timeRelease = result.release %}
       {% if timeRelease|length > 11 %}
         {% set timeRelease = "Update Release" %}
@@ -538,11 +546,18 @@
         data-release="{{result.release}}"
         data-product="{{result.product_name}}"
         data-region="{{result.region}}"> {{result.environment}} </td>
-        <td style="font-family:Lato Light; font-size:16px; padding-top:14px" data-toggle="popover" title="Clients Under This Cluster" data-content="{{clients|join(', ')}}">
+        <td style="font-family:Lato Light; font-size:16px; padding-top:14px">
           {% if clients|length < 2 %}
-            <i class="fas fa-user"></i>
+            <span style="color: green"><i class="fas fa-user" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% else %}
-            <i class="fas fa-user-friends"></i>
+            <span style="color: green"><i class="fas fa-user-friends" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
+          {% endif %}
+          {% if inactiveClients|length > 0 %}
+            {% if inactiveClients|length < 2 %}
+              <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+            {% else %}
+              <span id="inactiveClients" style="color: red; float: right"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+            {% endif %}
           {% endif %}
         </td>
         <td style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
