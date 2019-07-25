@@ -131,6 +131,7 @@
 
   //This updateRelease function checks to make sure the input is as accurate as possible
   function updateRelease() {
+    //Alert for if no release number was selected in the dropdown
     if (!$('#changeRelease').val()) {
       $('#noReleaseSelectedAlert').show('fade');
       window.setTimeout(function() {
@@ -140,6 +141,7 @@
     }
 
     let newRel = document.getElementById('newRelease').value;
+    //Alert for if no release number was entered
     if (!newRel) {
       $('#enterReleaseAlert').show('fade');
       window.setTimeout(function() {
@@ -148,13 +150,26 @@
       return;
     }
 
+    //Creates a set to eventually check if the release number only has numbers and no letters
+    const numberSet = new Set(['0','1','2','3','4','5','6','7','8','9']);
+
+    //Counts the amount of dots in the release number (should be 3)
     let dotCount = 0;
     let index;
     for(index = 0; index < newRel.length; index++){
       if(newRel.charAt(index) === '.'){
         dotCount++;
       }
+      else if(numberSet.has(newRel.charAt(index)) == false){
+        $('#letterAlert').show('fade');
+        window.setTimeout(function() {
+          $("#letterAlert").hide('fade');
+        }, 3500);
+        return;
+      }
     }
+
+    //Checking for incorrect format of the release number entered
     if (newRel.length > 11 || newRel.length < 7 || dotCount != 3) {
       $('#releaseFormatIncorrectAlert').show('fade');
       window.setTimeout(function() {
@@ -164,6 +179,7 @@
     }
 
     //If we can't automate the rollback issue, we can implement manual rollback through this.
+    //Release number already exists
     if (releases.includes(newRel)) {
       $('#existingReleaseAlert').show('fade');
       window.setTimeout(function() {
@@ -355,8 +371,12 @@
           <strong>Please check the release number format.</strong>
         </div>
         <div id="existingReleaseAlert" class="alert alert-danger collapse">
-          <a id="existingReleaseAlert" href="#" class="close">&times;</a>
-          <strong>This release number already exists</strong>
+          <a id="closeExistingReleaseAlert" href="#" class="close">&times;</a>
+          <strong>This release number already exists.</strong>
+        </div>
+        <div id="letterAlert" class="alert alert-danger collapse">
+          <a id="closeLetterAlert" href="#" class="close">&times;</a>
+          <strong>Release number cannot contain any letters/symbols.</strong>
         </div>
         <div class="comparisons">
           <div id="Screen1" style="width:48%">
@@ -414,6 +434,9 @@
     $('#closeExistingReleaseAlert').click(function () {
       $('#existingReleaseAlert').hide('fade');
     });
+    $('#closeLetterAlert').click(function () {
+      $('#letterAlert').hide('fade');
+    });
   });
 
   $('#addTagModal').on('show.bs.modal', function(event) {
@@ -446,7 +469,7 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px"><i class="fas fa-user-friends"></i></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Clients</i></th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Status</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Edit</th>
