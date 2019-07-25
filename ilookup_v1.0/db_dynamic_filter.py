@@ -8,7 +8,7 @@ class DynamicFilter:
 
 			search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
 				Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
-			
+
 
 			products = []
 			releases = []
@@ -21,7 +21,7 @@ class DynamicFilter:
 
 			if product_name:
 				search_result = search_result.filter(Product.product_name== product_name)
-		
+
 			if release:
 				search_result = search_result.filter(Product_Release.release_number==release)
 
@@ -38,4 +38,3 @@ class DynamicFilter:
 				search_result = search_result.filter(Cluster.is_active==is_active)
 
 			return search_result
-

@@ -139,6 +139,8 @@
       width: "100%"
     });
 
+    $("#active").prop("checked", true);
+
     $.ajax({
       url: '/update',
       type: 'POST',
@@ -151,13 +153,12 @@
         Environments: [],
         Components: [],
         Dates: [],
-        Active: []
+        Active: true
       }),
       success: function (response) {
         //This if else is for determining whether the release or cluster search bar should be disabled or not
-
-        $("#releases").prop("disabled", false);
-        $("#clusters").prop("disabled", false);
+        $("#releases").prop("disabled", true);
+        $("#clusters").prop("disabled", true);
 
         //This for loop recreates the Options based on the selected values, allowing for a dynamic search filter
         let newOption
@@ -421,6 +422,10 @@
     sendData();
   }
 
+  function triggerUpdate() {
+    $('.dropdowns').trigger('change.select2')
+  }
+
 </script>
 <!-- This is the html for the side searchbar menu-->
 <!-- Bootstrap row -->
@@ -468,11 +473,11 @@
               <div class="searchBar col-md-12">
                 <p class="searchLabel activeSelect"> <b> Active Clusters: </b> </p>
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="checkbox" id="active" value="true">
+                  <input class="form-check-input" type="checkbox" id="active" onclick="triggerUpdate()" value="true">
                   <label class="form-check-label" style="color: white" for="active">Active</label>
                 </div>
                 <div class="form-check form-check-inline" style="margin-left: 3.4vw">
-                  <input class="form-check-input" type="checkbox" id="inactive" value="false">
+                  <input class="form-check-input" type="checkbox" id="inactive" onclick="triggerUpdate()" value="false">
                   <label class="form-check-label" style="color: white" for="inactive">Inactive</label>
                 </div>
               </div>
