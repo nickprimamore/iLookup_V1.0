@@ -135,7 +135,7 @@ class Search:
 				if release in releases:
 					print("got the result")
 					release_results.append(res)
-			pprint.pprint(res)
+			#pprint.pprint(res)
 			print(len(release_results))
 			return release_results
 
@@ -213,7 +213,7 @@ class Search:
 		# # 	#print(result)
 		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			results.append(result)
-		pprint.pprint(results)
+		#pprint.pprint(results)
 		print(len(results))
 
 		return results
