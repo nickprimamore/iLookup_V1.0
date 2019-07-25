@@ -34,7 +34,7 @@ class DynamicFilter:
 			if environment:
 				search_result = search_result.filter(Cluster.environment==environment)
 
-			if (is_active is not None):
-				search_result = search_result.filter(Cluster.is_active==is_active)
+			# if (is_active is not None):
+			# 	search_result = search_result.filter(Cluster.is_active==is_active)
 
 			return search_result

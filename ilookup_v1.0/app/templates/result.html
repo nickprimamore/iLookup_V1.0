@@ -139,6 +139,7 @@
 
   //This updateRelease function checks to make sure the input is as accurate as possible
   function updateRelease() {
+    //Alert for if no release number was selected in the dropdown
     if (!$('#changeRelease').val()) {
       $('#noReleaseSelectedAlert').show('fade');
       window.setTimeout(function() {
@@ -148,6 +149,7 @@
     }
 
     let newRel = document.getElementById('newRelease').value;
+    //Alert for if no release number was entered
     if (!newRel) {
       $('#enterReleaseAlert').show('fade');
       window.setTimeout(function() {
@@ -156,13 +158,26 @@
       return;
     }
 
+    //Creates a set to eventually check if the release number only has numbers and no letters
+    const numberSet = new Set(['0','1','2','3','4','5','6','7','8','9']);
+
+    //Counts the amount of dots in the release number (should be 3)
     let dotCount = 0;
     let index;
     for(index = 0; index < newRel.length; index++){
       if(newRel.charAt(index) === '.'){
         dotCount++;
       }
+      else if(numberSet.has(newRel.charAt(index)) == false){
+        $('#letterAlert').show('fade');
+        window.setTimeout(function() {
+          $("#letterAlert").hide('fade');
+        }, 3500);
+        return;
+      }
     }
+
+    //Checking for incorrect format of the release number entered
     if (newRel.length > 11 || newRel.length < 7 || dotCount != 3) {
       $('#releaseFormatIncorrectAlert').show('fade');
       window.setTimeout(function() {
@@ -172,6 +187,7 @@
     }
 
     //If we can't automate the rollback issue, we can implement manual rollback through this.
+    //Release number already exists
     if (releases.includes(newRel)) {
       $('#existingReleaseAlert').show('fade');
       window.setTimeout(function() {
@@ -390,8 +406,12 @@
           <strong>Please check the release number format.</strong>
         </div>
         <div id="existingReleaseAlert" class="alert alert-danger collapse">
-          <a id="existingReleaseAlert" href="#" class="close">&times;</a>
-          <strong>This release number already exists</strong>
+          <a id="closeExistingReleaseAlert" href="#" class="close">&times;</a>
+          <strong>This release number already exists.</strong>
+        </div>
+        <div id="letterAlert" class="alert alert-danger collapse">
+          <a id="closeLetterAlert" href="#" class="close">&times;</a>
+          <strong>Release number cannot contain any letters/symbols.</strong>
         </div>
         <div class="comparisons">
           <div id="Screen1" style="width:48%">
@@ -414,8 +434,8 @@
           <div id="Screen2" style="width:51.7%">
             <div class="modalWrapper">
               <h5 style="width:50%; margin-left:8px"><div id="accordionHeader2"> Release Number </div></h5>
-              <div style="width:50%">
-                <select class="releaseReview" id="release2" name="releases[]" style="width: 97%">
+              <div style="width:52.5%; margin-right:-200px">
+                <select class="releaseReview" id="release2" name="releases[]" style="width: 89%">
 
                 </select>
               </div>
@@ -449,6 +469,9 @@
     });
     $('#closeExistingReleaseAlert').click(function () {
       $('#existingReleaseAlert').hide('fade');
+    });
+    $('#closeLetterAlert').click(function () {
+      $('#letterAlert').hide('fade');
     });
   });
 
