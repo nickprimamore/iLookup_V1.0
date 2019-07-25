@@ -8,7 +8,7 @@
   })
   changesMade = false
   //This function is to load the releaseHistory of a certain release number selected, the screen variable checks to see which screen to put that accordion in
-  function loadAccordion(screen, cluster_name, release_number) {
+  function loadAccordion(screen, cluster_name, release_number, current) {
     $.ajax({
       url:"/getTasks",
       type: "POST",
@@ -25,7 +25,14 @@
           let revision = task.revision
           let task_name = task.task_definition_name
           let header = document.getElementById('accordionHeader' + screen.toString())
-          header.innerHTML = release_number
+          console.log(current)
+          if (current) {
+            console.log("Yuhhh")
+            header.innerHTML = release_number + '<span style="color: #00FF00;"><i class="fas fa-check"></i></span>'
+          } else {
+            console.log("Huhhh")
+            header.innerHTML = release_number
+          }
           $( "#accordion" + screen.toString() ).append('<div class="card deleteOnClose' + screen.toString() + '">' +
             '<div class="card-header" id="headingOne">' +
               '<h5 class="mb-0 deleteOnClose">' +
@@ -47,7 +54,7 @@
                   '</tr>' +
                   '<tr>' +
                     '<th scope="row">' + "Date Started" + '</th>' +
-                    '<td>' + date  + '</td>' +
+                    '<td>' + date.substring(0, 11) + '| ' + date.substring(11, 16)  + '</td>' +
                   '</tr>' +
                   '<tr>' +
                     '<th scope="row">' + "Memory" + '</th>' +
@@ -69,11 +76,12 @@
   product = ""
   region = ""
   releases = []
+  release = ""
   //This is the modal functionality and putting the options within the different release bars
   $('#clusterDetail').on('show.bs.modal', function (event) {
     let trigger = $(event.relatedTarget)
     releases = trigger.data('releases')
-    let release = trigger.data('release')
+    release = trigger.data('release')
     clusterName = trigger.data('clustername')
     product = trigger.data('product')
     region = trigger.data('region')
@@ -92,7 +100,7 @@
           let thirdOption
           if (release == response[rel]) {
             newOption = new Option(response[rel], response[rel], true, true);
-            loadAccordion(1, clusterName, release)
+            loadAccordion(1, clusterName, release, true)
             secondOption = new Option(response[rel], response[rel], true, false)
             thirdOption = new Option(response[rel], response[rel], true, false)
           } else {
@@ -190,14 +198,23 @@
         }, 3500);
         changesMade = true
         changedScreens = []
+        currRel1 = false
+        currRel2 = false
         if ($('#release1').val() == $('#changeRelease').val()) {
           $('.deleteOnClose1').remove()
           changedScreens.push("1")
+          if ($('#changeRelease').val() == release) {
+            currRel1 = true
+          }
         }
         if ($('#release2').val() == $('#changeRelease').val()) {
           $('.deleteOnClose2').remove()
           changedScreens.push("2")
+          if ($('#changeRelease').val() == release) {
+            currRel2 = true
+          }
         }
+        release = newRel
         $('#release1 option').each(function() {
           $("#release1 option[value=" + "'" + $(this).val()  + "'" + "]").remove()
           $("#release1").select2('close')
@@ -226,13 +243,13 @@
               if (newRel == response[rel]) {
                 if (changedScreens.includes("1")) {
                   newOption = new Option(response[rel], response[rel], true, true);
-                  loadAccordion(1, clusterName, newRel)
+                  loadAccordion(1, clusterName, newRel, currRel1)
                 } else {
                   newOption = new Option(response[rel], response[rel], true, false)
                 }
                 if (changedScreens.includes("2")) {
                   secondOption = new Option(response[rel], response[rel], true, true)
-                  loadAccordion(2, clusterName, newRel)
+                  loadAccordion(2, clusterName, newRel, currRel2)
                 } else {
                   secondOption = new Option(response[rel], response[rel], true, false)
                 }
@@ -255,12 +272,20 @@
 
   $('#release1').on('select2:select', function(e) {
     $('.deleteOnClose1').remove()
-    loadAccordion(1, clusterName, $('#release1').val())
+    currRelease = false
+    if (release == $('#release1').val()) {
+      currRelease = true
+    }
+    loadAccordion(1, clusterName, $('#release1').val(), currRelease)
   })
 
   $('#release2').on('select2:select', function(e) {
     $('.deleteOnClose2').remove()
-    loadAccordion(2, clusterName, $('#release2').val())
+    currRelease = false
+    if (release == $('#release2').val()) {
+      currRelease = true
+    }
+    loadAccordion(2, clusterName, $('#release2').val(), currRelease)
   })
 
   $('#clusterDetail').on('hide.bs.modal', function (event){
@@ -313,6 +338,16 @@
   .insideModal {
     display: flex;
     flex-direction: column;
+  }
+  .mr-sm-2, .mx-sm-2 {
+    margin-right: 0px !important
+  }
+  .mb-1, .my-1 {
+    margin-bottom: 0px !important;
+    margin-top: 0px !important
+  }
+  .custom-control {
+    min-height: 0px !important
   }
 }
 
@@ -430,7 +465,7 @@
       }, 1000)
       window.setTimeout(function() {
         $('.clustersTag').val(clusterName).trigger('change')
-      }, 1500)
+      }, 1750)
 
     }
   })
@@ -446,10 +481,15 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px"><i class="fas fa-user-friends"></i></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">
+            <div class="custom-control custom-checkbox my-1 mr-sm-2" data-toggle="popover" title="Clients" data-content="By default you see only active clients, by checking this box, you also see inactive clients">
+              <input type="checkbox" class="custom-control-input" id="customControlInline inactiveCli">
+              <label class="custom-control-label" for="customControlInline">Clients</label>
+            </div>
+      </th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Status</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Edit</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Status <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="The status indicates whether or not the cluster has active tasks definitions"></i></span></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Edit <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Edit" data-content="Click on the pencil icon in order to edit a particular cluster's tags"></i><span></th>
     </tr>
   </thead>
   <tbody>
@@ -525,11 +565,13 @@
           {% endif %}
         </td>
         <td style="font-family:Lato Light; font-size: 16px; padding-top:14px">
+          <span style="color: #00508F">
           <i data-toggle="modal"
           data-target="#addTagModal"
           data-clustername="{{result.cluster_name}}"
           data-product="{{result.product_name}}"
           data-region="{{result.region}}" class="fas fa-pencil-alt"></i>
+          </span>
         </td>
       </tr>
     {% endfor %}
