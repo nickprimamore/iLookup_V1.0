@@ -133,48 +133,64 @@
   //Select2 is an add-on package that allows you to have pill boxes with multiple inputs.
   //This /search is called the moment you load the page, creating the various options
   $(document).ready(function() {
+    //initializing the select2 for side search bar, .dropdowns is the classname for the main search page
+    $('.dropdowns').select2({
+      theme: 'classic',
+      width: "100%"
+    });
+
+    $("#active").prop("checked", true);
+
     $.ajax({
-      url: '/search',
-      type: 'GET',
+      url: '/update',
+      type: 'POST',
+      data: JSON.stringify({
+        Clients: [],
+        Products: [],
+        Releases: [],
+        Regions: [],
+        Clusters: [],
+        Environments: [],
+        Components: [],
+        Dates: [],
+        Active: true
+      }),
       success: function (response) {
-        //These following forloops go through the passed in arrays of each possible search query, and creates an Option tag to add to the individual select2s
+        //This if else is for determining whether the release or cluster search bar should be disabled or not
         $("#releases").prop("disabled", true);
         $("#clusters").prop("disabled", true);
-        for (let client in response.clientsQ) {
-          let newOption = new Option(response.clientsQ[client], response.clientsQ[client], false, false);
+
+        //This for loop recreates the Options based on the selected values, allowing for a dynamic search filter
+        let newOption
+        for (let client in response.clientsUp) {
+          newOption = new Option(response.clientsUp[client], response.clientsUp[client], true, false);
           $('#clients').append(newOption);
         }
-        for (let product in response.productsQ) {
-          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
+        for (let product in response.productsUp) {
+          newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
           $('#products').append(newOption);
         }
-        for (let product in response.productsQ) {
-          let newOption = new Option(response.productsQ[product], response.productsQ[product], false, false);
-          $('#selectProduct').append(newOption);
+        for (let releases in response.releasesUp) {
+          newOption = new Option(response.releasesUp[releases], response.releasesUp[releases], true, false);
+          $('#releases').append(newOption);
         }
-        for (let cluster in response.clustersQ) {
-          let newOption = new Option(response.clustersQ[cluster], response.clustersQ[cluster], false, false);
-          $('#addClustersSelect2').append(newOption);
+        for (let cluster in response.clustersUp) {
+          newOption = new Option(response.clustersUp[cluster], response.clustersUp[cluster], true, false);
+          $('#clusters').append(newOption);
         }
-        for (let region in response.regionsQ) {
-          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
-          $('#regions').append(newOption);
-        }
-        for (let region in response.regionsQ) {
-          let newOption = new Option(response.regionsQ[region], response.regionsQ[region], false, false);
-          $('#selectRegion').append(newOption);
-        }
-        for (let environment in response.environmentsQ) {
-          let newOption = new Option(response.environmentsQ[environment], response.environmentsQ[environment], false, false);
+        for (let env in response.environmentsUp) {
+          newOption = new Option(response.environmentsUp[env], response.environmentsUp[env], true, false);
           $('#environments').append(newOption);
         }
-        for (let component in response.componentsQ) {
-          let newOption = new Option(response.componentsQ[component], response.componentsQ[component], false, false);
-          $('#components').append(newOption);
+        for (let region in response.regionsUp) {
+          newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
+          $('#regions').append(newOption);
         }
-
       }
     })
+
+
+
 
     //Pre-loads result table with initial information
     $.ajax({
@@ -201,8 +217,8 @@
     //changedOnce is used to administer the disabled functionality so you have to choose a Product in order to select Release and Clusters
     changedOnce = false
     $('.dropdowns').on('change.select2', function(e) {
+      console.log("Helllo")
       let values = getValues()
-      console.log(values)
       $.ajax({
         url: '/update',
         type: 'POST',
@@ -216,7 +232,6 @@
           Components: values[6],
           Dates: values[7],
           Active: values[8]
-
         }),
         success: function (response) {
           //This if else is for determining whether the release or cluster search bar should be disabled or not
@@ -406,6 +421,10 @@
     sendData();
   }
 
+  function triggerUpdate() {
+    $('.dropdowns').trigger('change.select2')
+  }
+
 </script>
 <!-- This is the html for the side searchbar menu-->
 <!-- Bootstrap row -->
@@ -453,11 +472,11 @@
               <div class="searchBar col-md-12">
                 <p class="searchLabel activeSelect"> <b> Active Clusters: </b> </p>
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="checkbox" id="active" value="true">
+                  <input class="form-check-input" type="checkbox" id="active" onclick="triggerUpdate()" value="true">
                   <label class="form-check-label" style="color: white" for="active">Active</label>
                 </div>
                 <div class="form-check form-check-inline" style="margin-left: 3.4vw">
-                  <input class="form-check-input" type="checkbox" id="inactive" value="false">
+                  <input class="form-check-input" type="checkbox" id="inactive" onclick="triggerUpdate()" value="false">
                   <label class="form-check-label" style="color: white" for="inactive">Inactive</label>
                 </div>
               </div>
@@ -804,6 +823,7 @@
               <p class="modalLabel"> <b> Cluster(s):</b> </p>
                 <select class="clustersTag dependencies" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
                 </select>
+                <small id="multipleClusters" class="form-text text-muted" style="">*Note: multiple clusters can be selected</small>
             </div>
           </form>
           <div class="tags">
