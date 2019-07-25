@@ -224,7 +224,7 @@ class AWSData:
 		# print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		#release_number = latestTime[0]
 
-		if latestTime is None:
+		if (latestTime is None) or (len(latestTime)<1):
 			tag_release_number = tag_release_number.lstrip()
 			tag_release_number = tag_release_number.rstrip()
 			#if tag_release_number == "" or tag_release_number=="unknown":
@@ -528,15 +528,15 @@ class AWSData:
 
 
 # data = AWSData()
-#
+
 # data.newMainFunction()
-#
+
 # db.session.commit()
-#
+
 # print("Completed")
-#
+
 # latestRelease = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name=="asg-dev-iconductor-cluster")
-#
+
 # latestRelease = latestRelease.group_by(CPRC.cluster_id).all()
-#
+
 # print(latestRelease[0][2])
