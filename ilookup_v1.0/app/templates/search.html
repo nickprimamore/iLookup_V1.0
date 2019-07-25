@@ -202,6 +202,7 @@
     changedOnce = false
     $('.dropdowns').on('change.select2', function(e) {
       let values = getValues()
+      console.log(values)
       $.ajax({
         url: '/update',
         type: 'POST',
@@ -213,7 +214,9 @@
           Clusters: values[4],
           Environments: values[5],
           Components: values[6],
-          Dates: values[7]
+          Dates: values[7],
+          Active: values[8]
+
         }),
         success: function (response) {
           //This if else is for determining whether the release or cluster search bar should be disabled or not

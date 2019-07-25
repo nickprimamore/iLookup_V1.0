@@ -8,7 +8,7 @@ from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
 from addUpdateDB import AddUpdateRecords
-# from db_delete_v3 import DeactivateRecords
+from db_delete_v3 import DeactivateRecords
 import requests
 import json
 import boto3
@@ -36,7 +36,7 @@ def load():
 def search():
 	
 	clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
-	products = db.session.query(Product).order_by(Product.is_active.desc(), Product.product_name).all()
+	products = db.session.query(Product).order_by(Product.is_active.desc(), Product.product_name).filter(Product.is_active==True).all()
 	releases = db.session.query(Product_Release).order_by(Product_Release.inserted_at).all()
 	#releases = Product_Release.query.all()
 	clusters = db.session.query(Cluster).order_by(Cluster.cluster_name).all()
@@ -97,12 +97,14 @@ def update():
 	for values in data:
 		stringified = values
 		objectified = json.loads(values)
+		print(objectified)
 		client=""
 		product=""
 		release=""
 		region=""
 		cluster=""
 		environment=""
+
 
 		if len(objectified["Clients"]) > 0:
 			client = objectified["Clients"][0]
@@ -116,10 +118,15 @@ def update():
 			cluster = objectified["Clusters"][0]
 		if len(objectified["Environments"]) > 0:
 			environment = objectified["Environments"][0]
+		if "Active" in objectified:
+			is_active = objectified["Active"]
+		else:
+			is_active = None
+		print(is_active)
 
 	#This calls the function of DynamicFilter where it gets the actual results
 	dynamicFilter = DynamicFilter()
-	result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment)
+	result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment, is_active=is_active)
 	clients = []
 	products = []
 	releases = []
@@ -170,6 +177,9 @@ def createTag():
 	uniClient = boto3.client("ecs", region_name=region)
 	clusters = uniClient.list_clusters()
 	clusterArns = clusters["clusterArns"]
+	client_names = []
+	old_product_name = "unknown"
+	
 	#This forloop goes through the clusters selected, then the one below goes through each Cluster in the AWS data, and then we parse through that and then find the selected cluster on AWS updating that cluster's tag
 	for cluster in objectified["tagQuery"]["clusters"]:
 		for awsCluster in clusterArns:
@@ -178,10 +188,13 @@ def createTag():
 				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
 				tags = currentTags["tags"]
 				for tag in tags:
+					if tag["key"] == "Product":
+						old_product_name = tag["value"]
 					#This checks to see if it's a Release Tag, cause it will be called afterwards in order to update SQL side
 					if tag['key'] == "Release":
 						old_release_number = tag['value']
 					if "Client" in tag['key']:
+						client_names.append(tag['value'])
 						if objectified['tagQuery']['tagValue'] == tag['value']:
 							return "Client already exists"
 					if tag['key'] == objectified['tagQuery']['tagKey']:
@@ -197,6 +210,12 @@ def createTag():
 					value = value.upper()
 				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': value}])
 
+				#This checks to see if its a Product and goes to update the Product tags and active/inactive on the SQL sides
+				if "Product" in objectified['tagQuery']['tagKey']:
+					new_product_name = objectified['tagQuery']['tagValue']
+					cluster_name = cluster_split[1]
+					addUpdateRecord = AddUpdateRecords()
+					addUpdateRecord.addUpdateProduct(old_product_name,new_product_name,client_names,cluster_name,old_release_number)
 				#This checks to see if its a Client and goes to update the Client tags and active/inactive on the SQL sides
 				if "Client" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']

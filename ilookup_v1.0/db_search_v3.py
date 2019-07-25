@@ -108,7 +108,7 @@ class Search:
 		# 	# get prid and the  corresponding release numbers from PRID Table
 		# 	# shove it here
 
-			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
+			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).order_by(Product_Release.inserted_at.desc()).all()
 			release_numbers = list(set(release_numbers))
 			result["releases"] = self.convertUnicodeToArray(release_numbers)
 		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -193,7 +193,7 @@ class Search:
 		# 	# get prid and the  corresponding release numbers from PRID Table
 		# 	# shove it here
 
-			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
+			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).order_by(Product_Release.inserted_at.desc()).all()
 			release_numbers = list(set(release_numbers))
 			result["releases"] = release_numbers
 		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
