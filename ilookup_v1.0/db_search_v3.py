@@ -85,16 +85,21 @@ class Search:
 			#print(res)
 			result = {}
 
+			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+
+			clients = self.convertUnicodeToArray(clients)
+
 			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).all()
-			all_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
 
 
 			active_clients = self.convertUnicodeToArray(active_clients)
-			all_clients = self.convertUnicodeToArray(all_clients)
+			inactive_clients = self.convertUnicodeToArray(inactive_clients)
 			# if res.CPRC.cprc_id
 
+			result["client_names"] = clients
 			result["active_clients"] = active_clients
-			result["all_clients"] = all_clients
+			result["inactive_clients"] = inactive_clients
 			result["product_name"] = res.product_name
 			result["release"] = res.release_number
 			result["cluster_name"] = res.cluster_name
@@ -174,12 +179,21 @@ class Search:
 		for res in maxResult:
 			#print(res)
 			result = {}
-			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).all()
+			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
 
 			clients = self.convertUnicodeToArray(clients)
 			# if res.CPRC.cprc_id
 
+			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).all()
+			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==False).all()
+
+
+			active_clients = self.convertUnicodeToArray(active_clients)
+			inactive_clients = self.convertUnicodeToArray(inactive_clients)
+
 			result["client_names"] = clients
+			result["active_clients"] = active_clients
+			result["inactive_clients"] = inactive_clients
 			result["product_name"] = res.product_name
 			result["release"] = res.release_number
 			result["cluster_name"] = res.cluster_name
