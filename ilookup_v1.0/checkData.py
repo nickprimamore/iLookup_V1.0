@@ -52,16 +52,16 @@ class CheckAWSData:
 		clusters = clusters["clusterArns"]
 		aws_products = []
 		for cluster in clusters:
-			tags = fetchClusterTags(cluster,region_name)
-			if tag["Product"]:
-				product_name = tag["Product"]
+			tags = self.fetchClusterTags(cluster,region_name)
+			if tags["Product"]:
+				product_name = tags["Product"]
 				aws_products.append(product_name)
 		db_products = db.session.query(Product.product_name).all()
 
 		for product_name in db_products:
 			if product_name not in aws_products:
 				deactivateRecords = DeactivateRecords()
-				deactivateRecords.deactivateProducts(product_name)
+				deactivateRecords.deactivateProduct(product_name)
 
 	def checkClients(slef,region):
 		client = boto3.client("ecs", region_name=region_name)
@@ -69,7 +69,7 @@ class CheckAWSData:
 		clusters = clusters["clusterArns"]
 		aws_clients = []
 		for cluster in clusters:
-			tags = fetchClusterTags(cluster,region_name)
+			tags = self.fetchClusterTags(cluster,region_name)
 			for key in tags:
 				if ("Client") in key:
 					client_name = tags[key]
@@ -81,14 +81,9 @@ class CheckAWSData:
 			if client_name not in aws_clients:
 				deactivateRecords = DeactivateRecords()
 				deactivateRecords.deactivateClients(client_name)
-		for aws_client in aws_clients:
-			if aws_client not in db_clients:
+		# for aws_client in aws_clients:
+		# 	if aws_client not in db_clients:
 				# call populate client function
-
-
-
-
-			
 
 	def fetchClusterTags(self,clusterArn,region_name):
 		client = boto3.client("ecs", region_name=region_name)
@@ -104,5 +99,7 @@ class CheckAWSData:
 		return tagsDict
 
 
-# checkData = CheckAWSData()
+checkData = CheckAWSData()
+checkData.checkProducts("us-east-1")
+checkData.checkProducts("eu-west-2")
 # checkData.checkClusters("London", "eu-west-2")

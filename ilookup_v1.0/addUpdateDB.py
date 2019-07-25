@@ -4,25 +4,35 @@ from datetime import datetime
 
 class AddUpdateRecords:
 	def addUpdateClient(self,old_client_name,new_client_name, product_name, cluster_name, release_number):
-		exists_client = db.session.query(Client.client_name).filter(Client.client_name==new_client_name).first()
+		exists_client = db.session.query(Client.client_name).filter(Client.client_name==new_client_name).scalar() is not None
 		if not exists_client:
 			client = Client(client_name=new_client_name, is_active=True)
 			db.session.add(client)
 			db.session.commit()
 			print("New client is being added!!!!!!!!")
+			# make the old client record as inactive 
 			if old_client_name!="":
+				self.deactivateClient(old_client_name)
 				self.deactivateCPRC(old_client_name, product_name, cluster_name, release_number)
+				
+				# check if the client belongs to multiple clusters
+				# if not then deactivate it
 			self.addCPRC(new_client_name,product_name,cluster_name,release_number)
+
 		if exists_client:
+			client = db.session.query(Client).filter(Client.client_name == new_client_name).first()
+			if client:
+				client.is_active = True
+				db.session.commit()
 			exists_cprc  = self.checkCPRCExists(new_client_name, cluster_name, product_name, release_number)
 			if exists_cprc is not None:
 				#exists_cprc = db.session.query(CPRC).filter_by(client_id=client_id[0]).filter_by(cluster_id=cluster_id[0]).filter_by(product_release_id=product_release_id[0]).first()
 				if exists_cprc.is_active == False:
 					exists_cprc.is_active = True
 					db.session.commit()
+					self.deactivateClient(old_client_name)
+
 					self.deactivateCPRC(old_client_name, product_name, cluster_name, release_number)
-
-
 				return "Client-cprc record already exists"
 			else:
 				self.deactivateCPRC(old_client_name, product_name, cluster_name, release_number)
@@ -183,3 +193,23 @@ class AddUpdateRecords:
 			if exists_cprc:
 				exists = True
 		return exists
+
+	def deactivateClient(self, client_name):
+		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
+
+		if client_id:
+			client_id = client_id[0]
+			print(client_id)
+			
+
+			cluster_count = db.session.query(CPRC.cluster_id).filter(CPRC.client_id==client_id).distinct().all()
+			print(cluster_count)
+
+			if(len(cluster_count)==1):
+				client = db.session.query(Client).filter(Client.client_name==client_name).first()
+				client.is_active = False
+				db.session.commit()
+
+
+			
+

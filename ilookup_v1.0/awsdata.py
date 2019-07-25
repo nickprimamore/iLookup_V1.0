@@ -8,7 +8,7 @@ import pprint
 import re
 
 
-# client = boto3.client("ecs")
+client = boto3.client("ecs")
 
 class AWSData:
 	def newMainFunction(self):
@@ -527,13 +527,13 @@ class AWSData:
 
 
 
-data = AWSData()
+# data = AWSData()
 
-data.newMainFunction()
+# data.newMainFunction()
 
-db.session.commit()
+# db.session.commit()
 
-print("Completed")
+# print("Completed")
 
 # latestRelease = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name=="asg-dev-iconductor-cluster")
 

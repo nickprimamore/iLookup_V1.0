@@ -34,7 +34,7 @@ def load():
 @app.route('/search', methods=['GET'])
 #This search function populats all the search bars with every potential search query from our SQL database
 def search():
-	
+
 	clients = db.session.query(Client).order_by(Client.is_active.desc(), Client.client_name).all()
 	products = db.session.query(Product).order_by(Product.is_active.desc(), Product.product_name).filter(Product.is_active==True).all()
 	releases = db.session.query(Product_Release).order_by(Product_Release.inserted_at).all()
@@ -82,7 +82,7 @@ def search():
 	clientsQ = sorted(clientsQ)
 	clustersQ = sorted(clustersQ)
 	productsQ = sorted(productsQ)
-	releasesQ = sorted(releasesQ) 
+	releasesQ = sorted(releasesQ)
 	regionsQ = sorted(regionsQ)
 	environmentsQ = sorted(environmentsQ)
 
@@ -118,15 +118,26 @@ def update():
 			cluster = objectified["Clusters"][0]
 		if len(objectified["Environments"]) > 0:
 			environment = objectified["Environments"][0]
+		# if "Active" in objectified.keys():
+		# 	is_active = objectified["Active"]
+		# else:
+		# 	is_active = None
+		# print(is_active)
+		is_active = None
 		if "Active" in objectified:
-			is_active = objectified["Active"]
-		else:
-			is_active = None
+			is_active = objectified['Active']
+			if is_active =="True":
+				is_active = True
+			if is_active == "False":
+				is_active = False
+		print("............................")
 		print(is_active)
+
 
 	#This calls the function of DynamicFilter where it gets the actual results
 	dynamicFilter = DynamicFilter()
 	result = dynamicFilter.getFirstFilterResult(client_name=client,product_name=product,release=release,region=region,cluster_name=cluster,environment=environment, is_active=is_active)
+	pprint.pprint(result)
 	clients = []
 	products = []
 	releases = []

@@ -3,10 +3,10 @@
 <script>
   //This deals with the popovers and the cluster modal for releases
   $(document).ready(function() {
-    $('.releaseReview').select2();
+    $('.releaseReview').select2({theme:"classic"});
     $("[data-toggle=popover]").popover({ trigger: "hover" });
   })
-
+  changesMade = false
   //This function is to load the releaseHistory of a certain release number selected, the screen variable checks to see which screen to put that accordion in
   function loadAccordion(screen, cluster_name, release_number) {
     $.ajax({
@@ -188,6 +188,7 @@
         window.setTimeout(function() {
           $("#updatedReleaseAlert").hide('fade');
         }, 3500);
+        changesMade = true
         changedScreens = []
         if ($('#release1').val() == $('#changeRelease').val()) {
           $('.deleteOnClose1').remove()
@@ -283,7 +284,10 @@
     //Clears the change release dropdown and text field when cluster modal is closed
     $('#changeRelease').val(null).trigger('change');
     $('#newRelease').val(null).trigger('change');
-    sendData()
+    if (changesMade) {
+      sendData()
+      changesMade = false
+    }
   })
 
 </script>
@@ -308,7 +312,7 @@
   }
   .insideModal {
     display: flex;
-    flex-direction: column
+    flex-direction: column;
   }
 }
 
@@ -319,20 +323,20 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="cluster-title" id="clusterLabel"></h4>
+        <h4 class="cluster-title" id="clusterLabel" style="font-weight:bold"></h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="insideModal">
-        <div id="release_form" style="width:100%; display: block; border:1px solid #00508F">
-          <label class="modalLabel" for="changeRelease">Change Release Number:</label>
+        <div id="release_form" style="width:100%; display:block">
+          <label class="modalLabel" for="changeRelease" style="margin-left: 8px; margin-top:10px; margin-bottom:2px">Update Release Number:</label>
           <br>
-          <select class="releaseReview" id="changeRelease" style="width:45%">
+          <select class="releaseReview" id="changeRelease" style="width:40.8%; height:500px">
             <!-- <option disabled selected value>Select a release</option> -->
           </select>
-          <input type="text" style="width:36%" id="newRelease" aria-describedby="newRelease" placeholder="Enter new release">
-          <button type="button" class="btn btn-primary" style="background-color:#007ACC" onclick="updateRelease()">Update Release</button>
+          <input type="text" class="form-control" style="width:40.8%; margin-bottom:15px; display:inline; height:37px" id="newRelease" aria-describedby="newRelease" placeholder="Enter new release">
+          <button type="button" class="btn btn-primary" style="background-color:#00508F; height:42px" onclick="updateRelease()">Update Release</button>
         </div>
         <div id="updatedReleaseAlert" class="alert alert-primary collapse">
           <a id="closeUpdatedReleaseAlert" href="#" class="close">&times;</a>
@@ -355,11 +359,11 @@
           <strong>This release number already exists</strong>
         </div>
         <div class="comparisons">
-          <div id="Screen1" style="width:50%">
+          <div id="Screen1" style="width:48%">
             <div class="modalWrapper">
-              <h5 style="width:50%"><div id="accordionHeader1">Release Number</div></h5>
+              <h5 style="width:50%; margin-left:8px"><div id="accordionHeader1">Release Number</div></h5>
               <div style="width:50%">
-              <select class="releaseReview" id="release1" name="releases[]" style="width: 100%">
+              <select class="releaseReview" id="release1" name="releases[]" style="width: 97%">
 
               </select>
               </div>
@@ -369,14 +373,14 @@
 
             </div>
           </div>
-          <div id="divider" style="width: 0.5%; background-color: #00508F">
+          <div id="divider" style="width:1px; background-color:#00508F">
 
           </div>
-          <div id="Screen2" style="width:50%">
+          <div id="Screen2" style="width:51.7%">
             <div class="modalWrapper">
-              <h5 style="width:50%"><div id="accordionHeader2"> Release Number </div></h5>
+              <h5 style="width:50%; margin-left:8px"><div id="accordionHeader2"> Release Number </div></h5>
               <div style="width:50%">
-                <select class="releaseReview" id="release2" name="releases[]" style="width: 100%">
+                <select class="releaseReview" id="release2" name="releases[]" style="width: 97%">
 
                 </select>
               </div>
@@ -418,11 +422,15 @@
     let product = trigger.data('product')
     let clusterName = trigger.data('clustername')
     if (clusterName) {
-      $('.productsTag').val(product).trigger('change')
-      $('.regionsTag').val(region).trigger('change')
+      window.setTimeout(function() {
+        $('.productsTag').val(product).trigger('change')
+      }, 500)
+      window.setTimeout(function() {
+        $('.regionsTag').val(region).trigger('change')
+      }, 1000)
       window.setTimeout(function() {
         $('.clustersTag').val(clusterName).trigger('change')
-      }, 1000)
+      }, 1500)
 
     }
   })
@@ -440,7 +448,7 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px"><i class="fas fa-user-friends"></i></th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Activity</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Status</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Edit</th>
     </tr>
   </thead>
