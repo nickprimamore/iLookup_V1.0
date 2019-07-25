@@ -125,10 +125,14 @@ def update():
 		# print(is_active)
 		is_active = None
 		if "Active" in objectified:
+			print("*******************************************************@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@******************")
+			print(objectified["Active"])
+			print("*******************************************************@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@******************")
+
 			is_active = objectified['Active']
-			if is_active =="True":
+			if is_active ==True:
 				is_active = True
-			if is_active == "False":
+			if is_active == False:
 				is_active = False
 		print("............................")
 		print(is_active)
