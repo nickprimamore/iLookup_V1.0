@@ -188,7 +188,7 @@
       }
     })
 
-  
+
 
 
     //Pre-loads result table with initial information
@@ -218,6 +218,7 @@
     $('.dropdowns').on('change.select2', function(e) {
       console.log("Helllo")
       let values = getValues()
+      console.log(values)
       $.ajax({
         url: '/update',
         type: 'POST',

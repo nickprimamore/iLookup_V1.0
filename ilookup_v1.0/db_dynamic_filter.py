@@ -4,10 +4,11 @@ import pprint, json
 
 class DynamicFilter:
 
-	def getFirstFilterResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None):
+	def getFirstFilterResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None, is_active=None):
 
 			search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
 				Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
+			
 
 			products = []
 			releases = []
@@ -32,6 +33,9 @@ class DynamicFilter:
 
 			if environment:
 				search_result = search_result.filter(Cluster.environment==environment)
+
+			# if (is_active !=None):
+			# 	search_result = search_result.filter(Cluster.is_active==is_active)
 
 			return search_result
 

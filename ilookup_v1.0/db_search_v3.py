@@ -47,7 +47,7 @@ class Search:
 
 		if is_active!= None:
 			#print("Is active condition detected")
-			search_result = search_result.filter(CPRC.is_active==is_active)
+			search_result = search_result.filter(Cluster.is_active==is_active)
 
 		#to date and from date
 		if (toDate and fromDate) is not None:
@@ -85,17 +85,16 @@ class Search:
 			#print(res)
 			result = {}
 
-			if is_active!= None:
-				clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==is_active).all()
-			else:
-				clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).all()
+			all_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
 
 
-
-			clients = self.convertUnicodeToArray(clients)
+			active_clients = self.convertUnicodeToArray(active_clients)
+			all_clients = self.convertUnicodeToArray(all_clients)
 			# if res.CPRC.cprc_id
 
-			result["client_names"] = clients
+			result["active_clients"] = active_clients
+			result["all_clients"] = all_clients
 			result["product_name"] = res.product_name
 			result["release"] = res.release_number
 			result["cluster_name"] = res.cluster_name
@@ -108,7 +107,7 @@ class Search:
 		# 	# get prid and the  corresponding release numbers from PRID Table
 		# 	# shove it here
 
-			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
+			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).order_by(Product_Release.inserted_at.desc()).all()
 			release_numbers = list(set(release_numbers))
 			result["releases"] = self.convertUnicodeToArray(release_numbers)
 		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -193,7 +192,7 @@ class Search:
 		# 	# get prid and the  corresponding release numbers from PRID Table
 		# 	# shove it here
 
-			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
+			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).order_by(Product_Release.inserted_at.desc()).all()
 			release_numbers = list(set(release_numbers))
 			result["releases"] = release_numbers
 		# # 	#print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -237,8 +236,8 @@ class Search:
 		print(clients)
 		return clients
 
-search_result = Search()
-search_result.getSearchResult(product_name="iConductor",release="2019-07-22 13:46:50.454468")
+# search_result = Search()
+# search_result.getSearchResult()
 # print("done!")
 
 #search_result.getClients("asg-dev-iforms-cluster", "5.5.5.5")

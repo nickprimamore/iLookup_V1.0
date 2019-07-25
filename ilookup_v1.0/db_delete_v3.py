@@ -7,19 +7,22 @@ class DeactivateRecords:
 	def deactivateClient(self, client_name=None):
 		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
 
+		print("deactivate client function is called......................")
 		if client_id:
 			client_id = client_id[0]
 			print(client_id)
 			
 
 			cluster_count = db.session.query(CPRC.cluster_id).filter(CPRC.client_id==client_id).distinct().all()
-			#print(cluster_count)
+			print(cluster_count)
 
 			if cluster_count:
 				if(len(cluster_count)>1):
 					#just disable the cprc record 
 					for cluster_id in cluster_count:
-						cprc_records = db.session.query(CPRC).filter(CPRC.client_id==client_id).filter(CPRC.cluster_id==cluster_id).all()
+						print("_-_-_-_-_-_-_-_-_-_-_-_-_-__-___----____---_____-----_________--------___________---------------------")
+						print(cluster_id[0])
+						cprc_records = db.session.query(CPRC).filter(CPRC.client_id==client_id).filter(CPRC.cluster_id==cluster_id[0]).all()
 						for cprc in cprc_records:
 							cprc.is_active = False
 			
@@ -33,6 +36,7 @@ class DeactivateRecords:
 					if len(cprc_records)>0:
 						for cprc in cprc_records:
 							cprc.is_active = False
+					print("deactivated the client")
 
 				db.session.commit()
 		

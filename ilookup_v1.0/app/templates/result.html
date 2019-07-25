@@ -434,6 +434,7 @@
 <script type="text/javascript">
   //Closes the alerts if the "x" button is clicked
   $(document).ready(function () {
+    console.log($('#customControlInline').prop('checked')); // true
     $('#closeUpdatedReleaseAlert').click(function () {
       $('#updatedReleaseAlert').hide('fade');
     });
@@ -483,7 +484,7 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">
             <div class="custom-control custom-checkbox my-1 mr-sm-2" data-toggle="popover" title="Clients" data-content="By default you see only active clients, by checking this box, you also see inactive clients">
-              <input type="checkbox" class="custom-control-input" id="customControlInline inactiveCli">
+              <input type="checkbox" class="custom-control-input" id="customControlInline" class="seeInactiveClients">
               <label class="custom-control-label" for="customControlInline">Clients</label>
             </div>
       </th>
