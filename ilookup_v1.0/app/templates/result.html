@@ -470,6 +470,10 @@
     $('#closeLetterAlert').click(function () {
       $('#letterAlert').hide('fade');
     });
+    $('#addClustersSelect2').val(null).trigger('change');
+    $('#selectRegion').val(null).trigger('change');
+    $('#selectProduct').val(null).trigger('change')
+    $('#tagValue').val(null).trigger('change')
   });
 
   $('#addTagModal').on('show.bs.modal', function(event) {
@@ -477,18 +481,19 @@
     let region = trigger.data('region')
     let product = trigger.data('product')
     let clusterName = trigger.data('clustername')
-    if (clusterName) {
-      window.setTimeout(function() {
-        $('.productsTag').val(product).trigger('change')
-      }, 500)
-      window.setTimeout(function() {
-        $('.regionsTag').val(region).trigger('change')
-      }, 1000)
-      window.setTimeout(function() {
-        $('.clustersTag').val(clusterName).trigger('change')
-      }, 1750)
 
-    }
+    window.setTimeout(function() {
+      $('.productsTag').val(product).trigger('change')
+    }, 500)
+    window.setTimeout(function() {
+      $('.regionsTag').val(region).trigger('change')
+    }, 1000)
+
+    window.setTimeout(function() {
+      $('.clustersTag').val(clusterName).trigger('change')
+    }, 1750)
+
+
   })
 
   $('#loadedCheck').ready(function() {
