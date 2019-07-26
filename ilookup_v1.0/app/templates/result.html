@@ -579,7 +579,7 @@
             {% if inactiveClients|length < 2 %}
               <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% else %}
-              <span id="inactiveClients" style="color: red; float: right"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% endif %}
           {% endif %}
         </td>
