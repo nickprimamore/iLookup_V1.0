@@ -571,9 +571,9 @@
         data-region="{{result.region}}"> {{result.environment}} </td>
         <td style="font-family:Lato Light; font-size:16px; padding-top:14px">
           {% if clients|length < 2 %}
-            <span style="color: green"><i class="fas fa-user" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
+            <span style="color: #00508F"><i class="fas fa-user" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% else %}
-            <span style="color: green"><i class="fas fa-user-friends" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
+            <span style="color: #00508F"><i class="fas fa-user-friends" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% endif %}
           {% if inactiveClients|length > 0 %}
             {% if inactiveClients|length < 2 %}
