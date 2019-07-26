@@ -217,7 +217,6 @@
     //changedOnce is used to administer the disabled functionality so you have to choose a Product in order to select Release and Clusters
     changedOnce = false
     $('.dropdowns').on('change.select2', function(e) {
-      console.log("Helllo")
       let values = getValues()
       $.ajax({
         url: '/update',
@@ -244,7 +243,6 @@
             $("#releases").prop("disabled", true);
             $("#clusters").prop("disabled", true);
             if(changedOnce == false){
-              console.log("hits here?")
               $('#releases').val(null).trigger('change')
               $('#clusters').val(null).trigger('change')
               changedOnce = true
@@ -392,6 +390,8 @@
   function sendData() {
     let values = getValues()
     //send back and Ajax Request with the following information.
+      $('#loadedCheck').show()
+      $('.table').hide()
       $.ajax({
       url: '/result',
       type: 'POST',
