@@ -4,6 +4,7 @@ from app.models import Client, Product, Product_Release, Cluster, Component, Tas
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 from awsdata import AWSData
+from checkData import CheckAWSData
 from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
@@ -134,8 +135,10 @@ def update():
 				is_active = True
 			if is_active == False:
 				is_active = False
-		print("............................")
-		print(is_active)
+			if is_active == "None":
+				is_active = None
+		# print("............................")
+		# print(is_active)
 
 
 	#This calls the function of DynamicFilter where it gets the actual results
@@ -543,6 +546,9 @@ def loadAWSData():
 	print("Loading")
 	awsdata = AWSData()
 	awsdata.newMainFunction()
+	db.session.commit()
+	checkData = CheckAWSData()
+	checkData.checkData()
 	db.session.commit()
 	print("Loaded")
 	return redirect(url_for("load"))

@@ -40,15 +40,17 @@ class AddUpdateRecords:
 
 
 	def checkCPRCExists(self,client_name, cluster_name, product_name, release_number):
+		print(product_name, ">>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<KKKKKKKKKKKKSSSSSSSSSSSSSS")
 		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
 		cluster_id = db.session.query(Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		print(product_id)
-		product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==release_number).first()
-		print(product_release_id)
-		exists_cprc = db.session.query(CPRC).filter_by(client_id=client_id[0]).filter_by(cluster_id=cluster_id[0]).filter_by(product_release_id=product_release_id[0]).first()
-		#if exists_cprc:
-		return exists_cprc
+		if (client_id and product_id and cluster_id):
+			product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==release_number).first()
+			print(product_release_id)
+			if product_release_id:
+				exists_cprc = db.session.query(CPRC).filter_by(client_id=client_id[0]).filter_by(cluster_id=cluster_id[0]).filter_by(product_release_id=product_release_id[0]).first()
+				return exists_cprc
 		#return False
 
 
