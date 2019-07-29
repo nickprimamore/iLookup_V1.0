@@ -27,10 +27,8 @@
           let header = document.getElementById('accordionHeader' + screen.toString())
           console.log(current)
           if (current) {
-            console.log("Yuhhh")
-            header.innerHTML = release_number + '<span style="color: #00FF00;"><i class="fas fa-check"></i></span>'
+            header.innerHTML = release_number + '&nbsp;&nbsp;<span style="color: #00FF00;"><i class="fas fa-check"></i></span>'
           } else {
-            console.log("Huhhh")
             header.innerHTML = release_number
           }
           $( "#accordion" + screen.toString() ).append('<div class="card deleteOnClose' + screen.toString() + '">' +
@@ -116,6 +114,7 @@
     })
     let modal = $(this)
     modal.find('.cluster-title').text('Cluster: ' + clusterName)
+
   })
 
   //This function gets the client information to a certain cluster and puts it into the popover
@@ -425,7 +424,6 @@
             </div>
             <div id="accordion1">
 
-
             </div>
           </div>
           <div id="divider" style="width:1px; background-color:#00508F">
@@ -441,7 +439,6 @@
               </div>
             </div>
             <div id="accordion2">
-
 
             </div>
           </div>
@@ -473,6 +470,10 @@
     $('#closeLetterAlert').click(function () {
       $('#letterAlert').hide('fade');
     });
+    $('#addClustersSelect2').val(null).trigger('change');
+    $('#selectRegion').val(null).trigger('change');
+    $('#selectProduct').val(null).trigger('change')
+    $('#tagValue').val(null).trigger('change')
   });
 
   $('#addTagModal').on('show.bs.modal', function(event) {
@@ -480,18 +481,25 @@
     let region = trigger.data('region')
     let product = trigger.data('product')
     let clusterName = trigger.data('clustername')
-    if (clusterName) {
-      window.setTimeout(function() {
-        $('.productsTag').val(product).trigger('change')
-      }, 500)
-      window.setTimeout(function() {
-        $('.regionsTag').val(region).trigger('change')
-      }, 1000)
-      window.setTimeout(function() {
-        $('.clustersTag').val(clusterName).trigger('change')
-      }, 1750)
 
-    }
+    window.setTimeout(function() {
+      $('.productsTag').val(product).trigger('change')
+    }, 500)
+    window.setTimeout(function() {
+      $('.regionsTag').val(region).trigger('change')
+    }, 1000)
+
+    window.setTimeout(function() {
+      $('.clustersTag').val(clusterName).trigger('change')
+    }, 1750)
+
+
+  })
+
+  $('#loadedCheck').ready(function() {
+    $('#loadedCheck').hide()
+    $('.table').show()
+
   })
 
   function showInactive() {
@@ -502,25 +510,27 @@
     }
   }
 
+
+
+
 </script>
 <table class="table table-hover table-bordered table-striped">
   <thead>
     <tr>
-
       <th scope="col" style="font-family:Lato Light; font-size:16px">Product</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Release #</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">
-            <div class="custom-control custom-checkbox my-1 mr-sm-2" data-toggle="popover" title="Clients" data-content="By default you see only active clients, by checking this box, you also see inactive clients">
-              <input type="checkbox" class="custom-control-input" id="customControlInline" onclick="showInactive()" class="seeInactiveClients">
-              <label class="custom-control-label" for="customControlInline">Clients</label>
-            </div>
+        <div class="custom-control custom-checkbox my-1 mr-sm-2" data-toggle="popover" title="Clients" data-content="By default, only active clients are shown. By checking this box, inactive clients are also shown.">
+          <input type="checkbox" class="custom-control-input" id="customControlInline" onclick="showInactive()" class="seeInactiveClients">
+          <label class="custom-control-label" for="customControlInline">Clients</label>
+        </div>
       </th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Status <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="The status indicates whether or not the cluster has active tasks definitions"></i></span></th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Edit <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Edit" data-content="Click on the pencil icon in order to edit a particular cluster's tags"></i><span></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="All times are in UTC time."></i></span></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Status <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="The status indicates whether or not the cluster has active tasks definitions."></i></span></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Edit <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Edit" data-content="Click on the pencil icon in order to edit a particular cluster's tags."></i><span></th>
     </tr>
   </thead>
   <tbody>
@@ -571,9 +581,9 @@
         data-region="{{result.region}}"> {{result.environment}} </td>
         <td style="font-family:Lato Light; font-size:16px; padding-top:14px">
           {% if clients|length < 2 %}
-            <span style="color: green"><i class="fas fa-user" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
+            <span style="color: #00508F"><i class="fas fa-user" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% else %}
-            <span style="color: green"><i class="fas fa-user-friends" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
+            <span style="color: #00508F"><i class="fas fa-user-friends" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% endif %}
           {% if inactiveClients|length > 0 %}
             {% if inactiveClients|length < 2 %}
@@ -613,6 +623,11 @@
           </span>
         </td>
       </tr>
+        {% if loop.index == results|length %}
+            <div class="spinner-border text-primary" style="margin-left: 48%; margin-top: 20%" id="loadedCheck" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+        {% endif %}
     {% endfor %}
   </tbody>
 </table>

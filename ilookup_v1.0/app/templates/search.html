@@ -217,7 +217,6 @@
     //changedOnce is used to administer the disabled functionality so you have to choose a Product in order to select Release and Clusters
     changedOnce = false
     $('.dropdowns').on('change.select2', function(e) {
-      console.log("Helllo")
       let values = getValues()
       $.ajax({
         url: '/update',
@@ -244,7 +243,6 @@
             $("#releases").prop("disabled", true);
             $("#clusters").prop("disabled", true);
             if(changedOnce == false){
-              console.log("hits here?")
               $('#releases').val(null).trigger('change')
               $('#clusters').val(null).trigger('change')
               changedOnce = true
@@ -392,6 +390,8 @@
   function sendData() {
     let values = getValues()
     //send back and Ajax Request with the following information.
+      $('#loadedCheck').show()
+      $('.table').hide()
       $.ajax({
       url: '/result',
       type: 'POST',
@@ -589,6 +589,14 @@
 
     //This function checks to see if products is selected, in order to determine whether selectRegion and addClustersSelect2
     $('.updateTags').on('change.select2', function(e) {
+      //if product selected, enable region
+      if($('.productsTag').val()[0]){
+        $("#selectRegion").prop("disabled", false);
+      }
+      //if region selected, enable cluster
+      if($('.regionsTag').val()[0]){
+        $("#addClustersSelect2").prop("disabled", false);
+      }
       //if a product is deselected, disable region and cluster
       if(!$('.productsTag').val()[0]){
         $("#selectRegion").prop("disabled", true);
@@ -598,16 +606,9 @@
       //if region is deselected, disable cluster
       if(!$('.regionsTag').val()[0]){
         $("#addClustersSelect2").prop("disabled", true);
-        $('#addClustersSelect2').val(null).trigger('change');
+        $('#addClustersSelect2').val(null);
       }
-      //if product selected, enable region
-      if($('.productsTag').val()[0]){
-        $("#selectRegion").prop("disabled", false);
-      }
-      //if region selected, enable cluster
-      if($('.regionsTag').val()[0]){
-        $("#addClustersSelect2").prop("disabled", false);
-      }
+
       addReleaseTag['product'] = $('.productsTag').val()[0]
       addReleaseTag['region'] = $('.regionsTag').val()[0]
       values = getTagValues()
@@ -625,6 +626,7 @@
           Dates: []
         }),
         success: function (response) {
+          console.log("hoooo")
           $('#selectProduct option').each(function() {
             $("#selectProduct option[value=" +  $(this).val()  + "]").remove()
             $("#selectProduct").select2('close')
@@ -640,6 +642,7 @@
           let newOption
           for (let product in response.productsUp) {
             if (values[0].includes(response.productsUp[product])) {
+              console.log("hm?")
               newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
             } else {
               newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
@@ -648,6 +651,7 @@
           }
           for (let region in response.regionsUp) {
             if (values[1].includes(response.regionsUp[region])) {
+              console.log("hm?")
               newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
             } else {
               newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
@@ -823,7 +827,7 @@
               <p class="modalLabel"> <b> Cluster(s):</b> </p>
                 <select class="clustersTag dependencies" id="addClustersSelect2" style="width:214%" name="addClustersSelect2" multiple="multiple">
                 </select>
-                <small id="multipleClusters" class="form-text text-muted" style="">*Note: multiple clusters can be selected</small>
+                <small id="multipleClusters" class="form-text text-muted" style="">*Note: Multiple clusters can be selected</small>
             </div>
           </form>
           <div class="tags">
