@@ -2,6 +2,7 @@ from app import db
 from app.models import Product, Client, Cluster, Component, Task_Definition, Product_Release, CPRC
 from sqlalchemy import func
 from datetime import datetime
+# from checkData import CheckAWSData
 import boto3
 import json
 import pprint
@@ -56,11 +57,14 @@ class AWSData:
 					self.populateProduct(product_name)
 					#print("Tagging product name", product_name)
 				if ("Release") in key:
-					product_release_number = tags[key]
+					product_release_number = tags[key]	
 				if ("Environment") in key:
 					environment = tags[key]
 
 			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
+			# checkAWSData = CheckAWSData()
+			# checkAWSData.mainFunction(region_name)
+
 				#clients = Client.query.all()
 			# if (product_name!="unknown" and product_release_number!=""):
 			# 	print(product_release_number) # tag/time

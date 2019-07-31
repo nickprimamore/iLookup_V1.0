@@ -732,10 +732,21 @@
       }, 3000);
       return;
     }
+    if (!isValid(addReleaseTag['tagValue'])) {
+      $('#specialKeyAlert').show('fade');
+      window.setTimeout(function() {
+        $('#specialKeyAlert').hide('fade');
+      }, 3000)
+      return;
+    }
     addReleaseTag['clusters'] = $('.clustersTag').val()
     let tagValue = document.getElementById('tagValue').value
     addReleaseTag['tagValue'] = tagValue
     addReleaseTag['tagKey'] = $('.editTag').val()
+
+    function isValid(str){
+      return !/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(str);
+    }
     //This function calls the backend to create a new tag onto a certain cluster which is found through addReleaseTag
     $.ajax({
       url:'/newTag',
@@ -902,6 +913,9 @@
             <div id="noLettersAlert" class="alert alert-danger collapse">
               <a id="closeNoLettersAlert" href="#" class="close">&times;</a>
               <strong>Release number cannot contain any letters/symbols.</strong>
+            <div id="specialKeyAlert" class="alert alert-danger collapse">
+              <a id="closeSpecialKeyAlert" href="#" class="close">&times;</a>
+              <strong>Invalid Keys for AWS Tags</strong>
             </div>
           </form>
         </div>
@@ -946,9 +960,12 @@
       $('#closeDuplicateTagAlert').click(function () {
         $('#duplicateTagAlert').hide('fade');
       });
-      // $('#closeLetterAlert').click(function () {
-      //   $('#letterAlert').hide('fade');
-      // });
+      $('#closeNoLettersAlert').click(function () {
+        $('#noLettersAlert').hide('fade');
+      });
+      $('#closeSpecialKeyAlert').click(function () {
+        $('#specialKeyAlert').hide('fade');
+      })
     });
     $('#addTagModal').on('hidden.bs.modal', function (e) {
       $('#addClustersSelect2').val(null).trigger('change');
