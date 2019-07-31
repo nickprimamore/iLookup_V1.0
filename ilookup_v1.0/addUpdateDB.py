@@ -170,11 +170,11 @@ class AddUpdateRecords:
 			print( product_name, old_release_number, new_release_number)
 			product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 			product_id = product_id[0]
-			print(new_release_number)
+			print(new_release_number, old_release_number)
 			print(product_id)
 			product_release_number = db.session.query(Product_Release).filter(Product_Release.product_id==product_id).filter(Product_Release.release_number==old_release_number).first()
 			print("product_release_number before",product_release_number)
-			product_release_number.release_number = new_release_number
+			product_release_number.release_number = new_release_number 
 			db.session.commit()
 			print("product_release_number after", product_release_number)
 			print("......................................updated Product_Release...................................")

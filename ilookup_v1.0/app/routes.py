@@ -534,7 +534,7 @@ def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTa
 def getReleases(cluster_name):
 	search = Search()
 	releases = search.getReleases(cluster_name)
-	return releases
+	return releasesQ
 
 def getClients(cluster_name, release_number):
 	search = Search()
