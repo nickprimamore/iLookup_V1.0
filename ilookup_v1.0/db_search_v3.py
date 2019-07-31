@@ -89,12 +89,12 @@ class Search:
 
 			clients = self.convertUnicodeToArray(clients)
 
-			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).all()
-			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==False).all()
+			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).distinct().all()
+			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==False).distinct(). all()
 
-
-			active_clients = self.convertUnicodeToArray(active_clients)
-			inactive_clients = self.convertUnicodeToArray(inactive_clients)
+    	
+			active_clients = self.convertUnicodeToArray(list(set(active_clients)))
+			inactive_clients = self.convertUnicodeToArray(list(set(inactive_clients)))
 			# if res.CPRC.cprc_id
 
 			result["client_names"] = clients
@@ -187,9 +187,9 @@ class Search:
 			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).all()
 			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==False).all()
 
-
-			active_clients = self.convertUnicodeToArray(active_clients)
-			inactive_clients = self.convertUnicodeToArray(inactive_clients)
+			#print(list(set(active_clients)))
+			active_clients = self.convertUnicodeToArray(list(set(active_clients)))
+			inactive_clients = self.convertUnicodeToArray(list(set(inactive_clients)))
 
 			result["client_names"] = clients
 			result["active_clients"] = active_clients
@@ -201,6 +201,7 @@ class Search:
 			result["environment"] = res.environment
 			result["is_active"] = res.is_active
 			result["inserted_at"] = res.inserted_at
+
 
 		# 	#call cprc to fetch records based on same client, cluster
 		# 	# get prid and the  corresponding release numbers from PRID Table
@@ -251,7 +252,7 @@ class Search:
 		return clients
 
 # search_result = Search()
-# search_result.getSearchResult()
+# search_result.getLatestReleases()
 # print("done!")
 
 #search_result.getClients("asg-dev-iforms-cluster", "5.5.5.5")
