@@ -675,14 +675,27 @@
   function newTag() {
     //These ensure form validation
     if ($('.editTag').val() == 'Release'){
-      let newRel = $('#tagValue').val();
+      let newRel = document.getElementById('tagValue').value;
+
+      //Creates a set to eventually check if the release number only has numbers and no letters
+      const numberSet = new Set(['0','1','2','3','4','5','6','7','8','9']);
+
+      //Counts the amount of dots in the release number (should be 3)
       let dotCount = 0;
       let index;
       for(index = 0; index < newRel.length; index++){
         if(newRel.charAt(index) === '.'){
           dotCount++;
         }
+        else if(numberSet.has(newRel.charAt(index)) == false){
+          $('#noLettersAlert').show('fade');
+          window.setTimeout(function() {
+            $("#noLettersAlert").hide('fade');
+          }, 3500);
+          return;
+        }
       }
+      //Checking for incorrect format of the release number entered
       if(newRel.length > 11 || newRel.length < 7 || dotCount != 3){
         $('#releaseFormatAlert').show('fade');
         window.setTimeout(function() {
@@ -886,6 +899,10 @@
               <a id="closeReleaseFormatAlert" href="#" class="close">&times;</a>
               <strong>Please check the release number format.</strong>
             </div>
+            <div id="noLettersAlert" class="alert alert-danger collapse">
+              <a id="closeNoLettersAlert" href="#" class="close">&times;</a>
+              <strong>Release number cannot contain any letters/symbols.</strong>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
@@ -929,6 +946,9 @@
       $('#closeDuplicateTagAlert').click(function () {
         $('#duplicateTagAlert').hide('fade');
       });
+      // $('#closeLetterAlert').click(function () {
+      //   $('#letterAlert').hide('fade');
+      // });
     });
     $('#addTagModal').on('hidden.bs.modal', function (e) {
       $('#addClustersSelect2').val(null).trigger('change');
