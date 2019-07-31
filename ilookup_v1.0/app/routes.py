@@ -197,7 +197,7 @@ def createTag():
 	clusterArns = clusters["clusterArns"]
 	client_names = []
 	old_product_name = "unknown"
-	
+
 	#This forloop goes through the clusters selected, then the one below goes through each Cluster in the AWS data, and then we parse through that and then find the selected cluster on AWS updating that cluster's tag
 	for cluster in objectified["tagQuery"]["clusters"]:
 		for awsCluster in clusterArns:
