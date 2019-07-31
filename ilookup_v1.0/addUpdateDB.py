@@ -40,15 +40,17 @@ class AddUpdateRecords:
 
 
 	def checkCPRCExists(self,client_name, cluster_name, product_name, release_number):
+		print(product_name, ">>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<KKKKKKKKKKKKSSSSSSSSSSSSSS")
 		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
 		cluster_id = db.session.query(Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		print(product_id)
-		product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==release_number).first()
-		print(product_release_id)
-		exists_cprc = db.session.query(CPRC).filter_by(client_id=client_id[0]).filter_by(cluster_id=cluster_id[0]).filter_by(product_release_id=product_release_id[0]).first()
-		#if exists_cprc:
-		return exists_cprc
+		if (client_id and product_id and cluster_id):
+			product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==release_number).first()
+			print(product_release_id)
+			if product_release_id:
+				exists_cprc = db.session.query(CPRC).filter_by(client_id=client_id[0]).filter_by(cluster_id=cluster_id[0]).filter_by(product_release_id=product_release_id[0]).first()
+				return exists_cprc
 		#return False
 
 
@@ -56,7 +58,14 @@ class AddUpdateRecords:
 		new_product_id = db.session.query(Product.product_id).filter_by(product_name=new_product_name).first()
 
 		if new_product_id is not None:
+			print("product already exists")
 			new_product_id = new_product_id[0]
+			product_release = db.session.query(Product_Release).filter(Product.product_id==Product_Release.product_id).filter(Product.product_name==new_product_name).filter(Product_Release.release_number==release_number).first()
+			if not product_release:
+				product_release = Product_Release(product_id=new_product_id,release_number=release_number, inserted_at=datetime.utcnow())
+				db.session.add(product_release)
+				db.session.commit()
+				print("new product release added for existing product..................................")
 		# product_id = product_id[0]
 		#print(product_id)
 		exists_product = db.session.query(Product.product_id).filter_by(product_id=new_product_id).scalar() is not None
@@ -77,6 +86,7 @@ class AddUpdateRecords:
 
 				for client_name in client_names:
 					self.deactivateCPRC(client_name, old_product_name, cluster_name, release_number)
+					print("Going ionto addCPRC function")
 					self.addCPRC(client_name, new_product_name, cluster_name, release_number)
 					print("Product already exists in database")
 			else:

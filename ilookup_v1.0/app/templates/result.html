@@ -523,14 +523,14 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Environment</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">
-            <div class="custom-control custom-checkbox my-1 mr-sm-2" data-toggle="popover" title="Clients" data-content="By default you see only active clients, by checking this box, you also see inactive clients">
-              <input type="checkbox" class="custom-control-input" id="customControlInline" onclick="showInactive()" class="seeInactiveClients">
-              <label class="custom-control-label" for="customControlInline">Clients</label>
-            </div>
+        <div class="custom-control custom-checkbox my-1 mr-sm-2" data-toggle="popover" title="Clients" data-content="By default, only active clients are shown. By checking this box, inactive clients are also shown.">
+          <input type="checkbox" class="custom-control-input" id="customControlInline" onclick="showInactive()" class="seeInactiveClients">
+          <label class="custom-control-label" for="customControlInline">Clients</label>
+        </div>
       </th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released</th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Status <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="The status indicates whether or not the cluster has active tasks definitions"></i></span></th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Edit <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Edit" data-content="Click on the pencil icon in order to edit a particular cluster's tags"></i><span></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="All times are in UTC time."></i></span></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Status <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="The status indicates whether or not the cluster has active tasks definitions."></i></span></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Edit <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Edit" data-content="Click on the pencil icon in order to edit a particular cluster's tags."></i><span></th>
     </tr>
   </thead>
   <tbody>
@@ -581,9 +581,9 @@
         data-region="{{result.region}}"> {{result.environment}} </td>
         <td style="font-family:Lato Light; font-size:16px; padding-top:14px">
           {% if clients|length < 2 %}
-            <span style="color:#00508F"><i class="fas fa-user" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
+            <span style="color: #00508F"><i class="fas fa-user" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% else %}
-            <span style="color:#00508F"><i class="fas fa-user-friends" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
+            <span style="color: #00508F"><i class="fas fa-user-friends" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% endif %}
           {% if inactiveClients|length > 0 %}
             {% if inactiveClients|length < 2 %}
