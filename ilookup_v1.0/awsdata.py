@@ -7,33 +7,26 @@ import boto3
 import json
 import pprint
 import re
+from regions import regionObject
 
 
 client = boto3.client("ecs")
 
 class AWSData:
 	def newMainFunction(self):
-		nvirginia = "us-east-1"
-		london = "eu-west-2"
-		print("Running London Region")
-		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		self.mainFunction(london)
-		print("Running N. Virginia Region")
-		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		self.mainFunction(nvirginia)
+		for region in regionObject:
+			self.mainFunction(regionObject[region])
 
 	def mainFunction(self,region_name):
 		client = boto3.client("ecs", region_name=region_name)
 		clusters = client.list_clusters()
+		print(clusters)
 		clusters = clusters["clusterArns"]
 
 		for cluster in clusters:
 			cluster_split = cluster.split(":")
 			region = cluster_split[3]
-			if region=="us-east-1":
-				region = "N. Virginia"
-			else:
-				region = "London"
+			region = list(regionObject.keys())[list(regionObject.values()).index(region)]
 
 			mysplit= cluster.split("/")
 
@@ -57,7 +50,7 @@ class AWSData:
 					self.populateProduct(product_name)
 					#print("Tagging product name", product_name)
 				if ("Release") in key:
-					product_release_number = tags[key]	
+					product_release_number = tags[key]
 				if ("Environment") in key:
 					environment = tags[key]
 
