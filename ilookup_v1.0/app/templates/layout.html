@@ -74,6 +74,7 @@
 
 		<!-- This function appends the loading spinner and fetching data text when the refresh AWS data button is clicked -->
 		<script type="text/javascript">
+			//This function allows for the UI to show that the AWS data is reloading
 			function loading(){
 				spinnerHTML = '<div class="spinner-border text-primary"></div>';
 				$('.spinner').append(spinnerHTML);
@@ -83,6 +84,7 @@
 				fetchingHTML = '<p style="color:#00508F; font-family:Lato Light; font-size:17; font-weight: bold; margin-right:13">Fetching AWS Data...</p>';
 				$('.fetching').append(fetchingHTML);
 			}
+			//This function gathers the data from the table, and then download it onto an excel sheet
 			function exportTableToExcel(tableID, filename = ''){
 			    var downloadLink;
 			    var dataType = 'application/vnd.ms-excel';
@@ -127,12 +129,13 @@
 			  <div class="collapse navbar-collapse" id="navbarText">
 			    <ul class="navbar-nav ml-auto">
 						<li class="nav-item refresh">
+							<!-- excelTable is a table that is hidden at all times just for the sake of having the data be collected from a table-->
+							<button onclick="exportTableToExcel('excelTable')" style="color:#00508F; font-family:Lato Light; font-size:17; font-weight:bold; margin-right:13">
+							 	Export To Excel
+						 	</button>
 			        <a href="/load" onclick="loading()" style="color:#00508F; font-family:Lato Light; font-size:17; font-weight:bold; margin-right:13">
 								Refresh AWS Data
 							</a>
-							<button onclick="exportTableToExcel('excelTable')" style="color:#00508F; font-family:Lato Light; font-size:17; font-weight:bold; margin-right:13">
-							 Export To Excel
-						 </button>
 			      </li>
 						<li class="fetching">
 							<!-- "fetching data" text is appended when refresh button is clicked -->

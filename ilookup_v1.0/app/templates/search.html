@@ -141,6 +141,16 @@
 
     $("#active").prop("checked", true);
 
+    //Pre-loads result table with initial information
+    $.ajax({
+      url:'/result',
+      type: 'GET',
+      success: function(response) {
+        $('#result-tag').html(response)
+      }
+    })
+
+    //This function populates the search bars with valid search filters
     $.ajax({
       url: '/update',
       type: 'POST',
@@ -189,24 +199,6 @@
       }
     })
 
-
-
-
-    //Pre-loads result table with initial information
-    $.ajax({
-      url:'/result',
-      type: 'GET',
-      success: function(response) {
-        $('#result-tag').html(response)
-      }
-    })
-
-    //initializing the select2 for side search bar, .dropdowns is the classname for the main search page
-    $('.dropdowns').select2({
-      theme: 'classic',
-      width: "100%"
-    });
-
     //Closes dropdowns after you unselect to avoid selection errors
     $('.dropdowns').on('select2:unselect', function(e) {
       $('.dropdowns').select2('close')
@@ -242,6 +234,7 @@
           else{
             $("#releases").prop("disabled", true);
             $("#clusters").prop("disabled", true);
+            //This solves a bug of disabling on the chance that multiple were selected, this checks to make sure that the value trigger only occurs the first time it becomes enabled
             if(changedOnce == false){
               $('#releases').val(null).trigger('change')
               $('#clusters').val(null).trigger('change')
@@ -374,6 +367,9 @@
     }
 
     //This is to determine the potential search query of having all, just the active, or just inactive
+    //None means both or neither
+    //True means active was selected
+    //False means inactive was selected
     if ($('#active').prop("checked") == true && ($('#inactive').prop("checked") == true)) {
       actOrIn = "None"
     } else if ($('#active').prop("checked") == true) {
@@ -412,7 +408,7 @@
     })
   }
 
-  //This function clears all Search Bars and the trigger('change') makes for a reupdate on options
+  //This function clears all Search Bars and the trigger('change') makes for a reupdate on options as well as nullify all the other search queries
   function clearSearchBars() {
     $('.dropdowns').val(null).trigger('change');
     $('.date').val('')
@@ -421,6 +417,7 @@
     sendData();
   }
 
+  //This function is for the pure need of having to cause a manual trigger when active / inactive is selected
   function triggerUpdate() {
     $('.dropdowns').trigger('change.select2')
   }
@@ -471,6 +468,7 @@
               </div>
               <div class="searchBar col-md-12">
                 <p class="searchLabel activeSelect"> <b> Active Clusters: </b> </p>
+                <!-- These two divs are the check boxes with onclick handlers -->
                 <div class="form-check form-check-inline">
                   <input class="form-check-input" type="checkbox" id="active" onclick="triggerUpdate()" value="true">
                   <label class="form-check-label" style="color: white" for="active">Active</label>
@@ -509,6 +507,7 @@
 
 
 <!-- Everything below this line deals with the tag modal, we split everything, but the styling up so it becomes easier to navigate -->
+
 <script>
   //This object is to record the tag query
   let addReleaseTag = {}
@@ -580,7 +579,14 @@
            $("#editTag option[value=" + $(this).val() +"]").remove()
          })
          for (resp in response) {
-           let newOption = new Option(resp, resp, true, false)
+           //This part is redoing the select bar for the tags, and used to keep the previously selected option already selected to begin with.
+           let newOption
+           if (addReleaseTag['tagKey'] == resp) {
+             newOption = new Option(resp, resp, true, true)
+           }
+           else {
+             newOption = new Option(resp, resp, true, false)
+           }
            $('.editTag').append(newOption)
          }
        }
@@ -609,6 +615,7 @@
         $('#addClustersSelect2').val(null);
       }
 
+      //the addReleaseTag is getting populated with values after it has been clicked
       addReleaseTag['product'] = $('.productsTag').val()[0]
       addReleaseTag['region'] = $('.regionsTag').val()[0]
       values = getTagValues()
@@ -642,7 +649,6 @@
           let newOption
           for (let product in response.productsUp) {
             if (values[0].includes(response.productsUp[product])) {
-              console.log("hm?")
               newOption = new Option(response.productsUp[product], response.productsUp[product], true, true);
             } else {
               newOption = new Option(response.productsUp[product], response.productsUp[product], true, false);
@@ -651,7 +657,6 @@
           }
           for (let region in response.regionsUp) {
             if (values[1].includes(response.regionsUp[region])) {
-              console.log("hm?")
               newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, true);
             } else {
               newOption = new Option(response.regionsUp[region], response.regionsUp[region], true, false);
@@ -704,6 +709,7 @@
         return;
       }
     }
+    //The following are checking for various different alerts, based on selected values, invalid formats, etc
     if(!$('.productsTag').val()[0]){
       $('#selectProductAlert').show('fade');
       window.setTimeout(function() {
@@ -739,11 +745,12 @@
       }, 3000)
       return;
     }
+    //this part further adds onto the addRelease Tag based on the things you chose after it passes the different things
     addReleaseTag['clusters'] = $('.clustersTag').val()
-    let tagValue = document.getElementById('tagValue').value
-    addReleaseTag['tagValue'] = tagValue
+    addReleaseTag['tagValue'] = document.getElementById('tagValue').value
     addReleaseTag['tagKey'] = $('.editTag').val()
 
+    //this is dealing with the AWS side, to make sure that the characters used in the tagging methodology is actually correct.
     function isValid(str){
       return !/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(str);
     }
@@ -755,7 +762,7 @@
         tagQuery: addReleaseTag
       }),
       success: function(response) {
-        //This rerenders the table
+        //This further checks for alerts from the back end, or it triggers clustersTag which will recreate the table in order to have a level of dynamic changes
         if (response == "Client already exists") {
           $('#duplicateTagAlert').show('fade');
           window.setTimeout(function() {
@@ -772,12 +779,15 @@
           }, 3000);
           changeMade = true
         }
+        //This just clears out the tagValue bar, for better UI experience
+        $('#tagValue').val(null).trigger('change')
       }
     })
   }
 
   //This function deletes a tag
   function deleteTag() {
+    //This will check to make sure that everything is correctly chosen
     if (!$('.editTag').val()) {
       $('#selectBeforeDeleteAlert').show('fade');
       window.setTimeout(function() {
@@ -792,8 +802,10 @@
       }, 3000);
       return;
     }
+    //When deleting this rechecks to make sure there is a Key and cluster chosen otherwise it'll toss an error.
     addReleaseTag['clusters'] = $('.clustersTag').val()
     addReleaseTag['tagKey'] = $('.editTag').val()
+    //This confirm just pops up to double check it wasn't a misclick
     if (confirm("Are you sure you want to delete " + addReleaseTag['tagKey'] + " from the following Cluster(s)?: " + addReleaseTag["clusters"])) {
       $.ajax({
         url:"/deleteTag",
@@ -967,6 +979,7 @@
         $('#specialKeyAlert').hide('fade');
       })
     });
+    //This method is used to clear all the values so results don't overlap if you close and open another modal.
     $('#addTagModal').on('hidden.bs.modal', function (e) {
       $('#addClustersSelect2').val(null).trigger('change');
       $('#selectRegion').val(null).trigger('change');

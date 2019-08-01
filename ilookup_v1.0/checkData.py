@@ -5,6 +5,7 @@ from addUpdateDB import AddUpdateRecords
 from datetime import datetime
 import boto3
 import json, pprint
+from regions import regionObject
 
 class CheckAWSData:
 
@@ -16,10 +17,8 @@ class CheckAWSData:
 
 	def checkData(self):
 		# self.mainFunction("eu-west-2")
-		london_region = "eu-west-2"
-		north_virginia = "us-east-1"
-		self.mainFunction(london_region)
-		self.mainFunction(north_virginia)
+		for region in regionObject:
+			self.mainFunction(regionObject[region])
 
 
 	def checkClusters(self, region, region_name):
@@ -42,7 +41,7 @@ class CheckAWSData:
 					deactivateRecords = DeactivateRecords()
 					deactivateRecords.activateComponent(db_cluster_exists.cluster_id, cluster, uniClient)
 					print("activating cluster and component")
-				
+
 		db_clusters = db.session.query(Cluster).filter(Cluster.region==region).all()
 
 		for cluster in db_clusters:
@@ -51,7 +50,7 @@ class CheckAWSData:
 				deactivateRecords = DeactivateRecords()
 				deactivateRecords.deactivateCluster(cluster_name)
 				print("Deactivating cluster", cluster_name)
-			
+
 		# 		# Deactive CPRC
 		# 		# Deactivate Task Def
 
@@ -84,10 +83,10 @@ class CheckAWSData:
 	def checkProduct(self,product_name,client_names,cluster_name,release):
 		# activate in sql side
 		# 1. check if product already exists in database-> if exists then set is_active = true else add a new entry
-		# 2. find the old product and deactivate that record if to belongs to only one cluster, also deactivate cprc records 
-		# 3. find if there is cprc record for the new product 
+		# 2. find the old product and deactivate that record if to belongs to only one cluster, also deactivate cprc records
+		# 3. find if there is cprc record for the new product
 		#    if it is there for each client and if it is inactive-> make it as active
-		#    else create new cprc records with each client in client_names list 
+		#    else create new cprc records with each client in client_names list
 
 		exists_product = db.session.query(Product).filter(Product.product_name==product_name).first()
 		print(exists_product)
@@ -144,12 +143,12 @@ class CheckAWSData:
 
 	def checkClients(self,product_name,client_names,cluster_name,release):
 		# activate in sql side
-		# repeat this procedure for all clients in client_names list 
+		# repeat this procedure for all clients in client_names list
 		# 1. check if client already exists in database-> if exists then set is_active = true else add a new entry
-		# 2. find the old client and deactivate that record if to belongs to only one cluster, also deactivate cprc records 
-		# 3. find if there is cprc record for the new product 
+		# 2. find the old client and deactivate that record if to belongs to only one cluster, also deactivate cprc records
+		# 3. find if there is cprc record for the new product
 		#    if it is there for each client and if it is inactive-> make it as active
-		#    else create new cprc records               
+		#    else create new cprc records
 		for client_name in client_names:
 			exists_client = db.session.query(Client).filter(Client.client_name==client_name).first()
 			print(exists_client)
@@ -191,7 +190,7 @@ class CheckAWSData:
 				print("End of check client function")
 
 
-		
+
 
 
 
@@ -203,7 +202,7 @@ class CheckAWSData:
 
 
 
-	# def checkProducts(self,region_name): 	
+	# def checkProducts(self,region_name):
 	# 	client = boto3.client("ecs", region_name=region_name)
 	# 	clusters = client.list_clusters()
 	# 	clusters = clusters["clusterArns"]
@@ -231,7 +230,7 @@ class CheckAWSData:
 	# 			if ("Client") in key:
 	# 				client_name = tags[key]
 	# 				aws_clients.append(client_name)
-					
+
 	# 	db_clients = db.session.query(Client.client_name).all()
 
 	# 	for client_name in db_clients:
@@ -245,10 +244,10 @@ class CheckAWSData:
 	def fetchClusterTags(self,clusterArn,region_name):
 		client = boto3.client("ecs", region_name=region_name)
 		res = client.list_tags_for_resource(resourceArn = clusterArn)
-		
+
 		mysplit= clusterArn.split("/")
 		cluster_name=mysplit[1]
-		
+
 		print(cluster_name)
 		tagsDict =  {}
 		for tag in res["tags"]:

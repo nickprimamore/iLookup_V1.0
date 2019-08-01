@@ -14,6 +14,8 @@ import requests
 import json
 import boto3
 import pprint
+#this regions is to get all the regions
+from regions import regionObject
 
 #This is to initial AWS client to the N. Virginia region  -- You need to have it so theres another client for the other regions
 client = boto3.client('ecs')
@@ -188,10 +190,7 @@ def createTag():
 	for values in data:
 		objectified = json.loads(values)
 	#This is put in all the functions to take care of both the London and N.Virginia region
-	if (objectified['tagQuery']['region'] == "London"):
-		region = "eu-west-2"
-	else:
-		region = "us-east-1"
+	region = regionObject[objectified['tagQuery']['region']]
 	uniClient = boto3.client("ecs", region_name=region)
 	clusters = uniClient.list_clusters()
 	clusterArns = clusters["clusterArns"]
@@ -267,10 +266,7 @@ def deleteTag():
 	region = ""
 	for values in data:
 		objectified = json.loads(values)
-	if (objectified['tagQuery']['region'] == "London"):
-		region = "eu-west-2"
-	else:
-		region = "us-east-1"
+	region = regionObject[objectified['tagQuery']['region']]
 	uniClient = boto3.client("ecs", region_name=region)
 	clusters = uniClient.list_clusters()
 	clusterArns = clusters["clusterArns"]
@@ -325,11 +321,10 @@ def getTags():
 		clusterList = objectified['clusterList']
 
 	# clusterList = convertUnicodeToArray(clusterList)
-	print(objectified)
-	if (objectified['region'] == "London"):
-		region = "eu-west-2"
+	if 'region' in objectified.keys():
+		region = regionObject[objectified['region']]
 	else:
-		region = "us-east-1"
+		return ""
 	uniClient = boto3.client("ecs", region_name=region)
 	for cluster in clusterList:
 		clusters = uniClient.list_clusters()
@@ -456,10 +451,9 @@ def updateReleaseTable():
 	data = request.form.keys()
 	for values in data:
 		objectified = json.loads(values)
-	if (objectified['region'] == "London"):
-		region = "eu-west-2"
-	else:
-		region = "us-east-1"
+
+		region = regionObject[objectified['region']]
+
 	uniClient = boto3.client("ecs", region_name=region)
 	print(data)
 	clusters = uniClient.list_clusters()

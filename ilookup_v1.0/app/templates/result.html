@@ -376,6 +376,9 @@
   .custom-control {
     min-height: 0px !important
   }
+  .inactiveClients {
+    display: none
+  }
 }
 
 
@@ -522,9 +525,13 @@
 
   function showInactive() {
     if(document.getElementById('customControlInline').checked) {
-        $("#inactiveClients").show();
+      $.each($('.inactiveClients'), function() {
+        $(this).css('display', 'block')
+      })
     } else {
-        $("#inactiveClients").hide();
+      $.each($('.inactiveClients'), function() {
+        $(this).css('display', 'none')
+      })
     }
   }
 
@@ -606,9 +613,9 @@
           {% endif %}
           {% if inactiveClients|length > 0 %}
             {% if inactiveClients|length < 2 %}
-              <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span class="inactiveClients" style="color: red; float:right; display: none"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% else %}
-              <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span class="inactiveClients" style="color: red; float:right; display: none"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% endif %}
           {% endif %}
         </td>
@@ -672,7 +679,7 @@
       <td> {{result.environment}} </td>
       <td> {{excelClients}} </td>
       <td> {{result.inserted_at[0:11]}} | {{result.inserted_at[11:16]}} </td>
-      <td> {{result.is_active}}</td>
+      <td> {{result.is_active}} </td>
     </tr>
   {% endfor %}
 </table>
