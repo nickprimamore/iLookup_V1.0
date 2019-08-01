@@ -164,12 +164,12 @@ def update():
 		regions.append(res.Cluster.region)
 
 
-	clients = sorted(clients)
-	products = sorted(products)
-	clusters = sorted(clusters)
-	releases = sorted(releases)
-	environments = sorted(environments)
-	regions = sorted(regions)
+	# clients = sorted(clients)
+	# products = sorted(products)
+	# clusters = sorted(clusters)
+	# releases = sorted(releases)
+	# environments = sorted(environments)
+	# regions = sorted(regions)
 
 	#This once again takes care of changing Unicode into normal Arrays
 
@@ -179,6 +179,13 @@ def update():
 	releases = convertUnicodeToArray(list(set(releases)))
 	environments = convertUnicodeToArray(list(set(environments)))
 	regions = convertUnicodeToArray(list(set(regions)))
+
+	clients = sorted(clients)
+	products = sorted(products)
+	clusters = sorted(clusters)
+	releases = sorted(releases)
+	environments = sorted(environments)
+	regions = sorted(regions)
 
 	return jsonify(clientsUp=clients, productsUp=products, clustersUp=clusters, environmentsUp=environments, regionsUp=regions, releasesUp=releases)
 
