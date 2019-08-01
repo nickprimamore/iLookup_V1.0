@@ -91,15 +91,15 @@ class Search:
 
 			# active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(CPRC.is_active==True).distinct().all()
 
-			
+
 			# inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(CPRC.is_active==False).filter(Client.client_name!="UNKNOWN").distinct().all()
 
 
 
 			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(CPRC.is_active==True).all()
 			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(CPRC.is_active==False).filter(Client.client_name!="UNKNOWN").distinct().all()
-			
-		 	inactive_clients = set(inactive_clients)-set(active_clients)
+
+			inactive_clients = set(inactive_clients) - set(active_clients)
 			active_clients = self.convertUnicodeToArray(list(set(active_clients)))
 			inactive_clients = self.convertUnicodeToArray(list(inactive_clients))
 			# if res.CPRC.cprc_id
