@@ -42,8 +42,8 @@ class AWSData:
 			print(cluster_name)
 			#pprint.pprint(tags)
 			client_names = []
-			client_name = "unknown"
-			product_name = "unknown"
+			client_name = "UNKNOWN"
+			product_name = "UNKNOWN"
 			product_release_number = ""
 			environment= "UNKNOWN"
 			for key in tags:
@@ -61,6 +61,18 @@ class AWSData:
 				if ("Environment") in key:
 					environment = tags[key]
 
+			if product_name == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Product", 'value': product_name}])
+				# create product tag
+				# assign UNKNOWN as value
+			if client_name == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Client1", 'value': client_name}])
+				# create Client1 tag
+				# assign UNKNOPWN as value
+			if environment == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Environemnt", 'value': environment}])
+				# create ENVIRONEMNT tag
+				# assign UNKOWN as value
 			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
 			# checkAWSData = CheckAWSData()
 			# checkAWSData.mainFunction(region_name)
@@ -441,7 +453,7 @@ class AWSData:
 												#print(client_id)
 										self.populateCPRC(cluster_name,product_release_id, client_id[0])
 								else:
-									client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
+									client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 									self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 							else:
@@ -451,7 +463,7 @@ class AWSData:
 												#print(client_id)
 										self.populateCPRC(cluster_name,product_release_id, client_id[0])
 								else:
-									client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
+									client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 									self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 
@@ -510,7 +522,7 @@ class AWSData:
 											#print(client_id)
 							self.populateCPRC(cluster_name,product_release_id, client_id[0])
 					else:
-						client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
+						client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 						self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 
@@ -521,7 +533,7 @@ class AWSData:
 											#print(client_id)
 							self.populateCPRC(cluster_name,product_release_id, client_id[0])
 					else:
-						client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
+						client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 						self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 

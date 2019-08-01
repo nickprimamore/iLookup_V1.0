@@ -196,8 +196,8 @@ def createTag():
 	clusters = uniClient.list_clusters()
 	clusterArns = clusters["clusterArns"]
 	client_names = []
-	old_product_name = "unknown"
-	
+	old_product_name = "UNKNOWN"
+
 	#This forloop goes through the clusters selected, then the one below goes through each Cluster in the AWS data, and then we parse through that and then find the selected cluster on AWS updating that cluster's tag
 	for cluster in objectified["tagQuery"]["clusters"]:
 		for awsCluster in clusterArns:
@@ -252,11 +252,14 @@ def createTag():
 					if objectified['tagQuery']["product"]:
 						product_name = objectified['tagQuery']['product']
 					else:
-						product_name = "unknown"
+						product_name = "UNKNOWN"
 					new_release_number = objectified['tagQuery']['tagValue']
 
 					addUpdateRecord = AddUpdateRecords()
 					#updateRelease(objectified['tagQuery']["product"], objectified['tagQuery']['tagValue'], cluster)
+					print("MMMMMMMMMMMMMMMMMMMMMMMMMMMWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+					print(old_release_number)
+					print("MMMMMMMMMMMMMMMMMMMMMMMMMMMWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
 					addUpdateRecord.updateProductRelease(product_name, cluster_name, old_release_number, new_release_number)
 					addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
 	return 'Successfully updated the cluster(s)'
@@ -534,7 +537,7 @@ def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTa
 def getReleases(cluster_name):
 	search = Search()
 	releases = search.getReleases(cluster_name)
-	return releasesQ
+	return releases
 
 def getClients(cluster_name, release_number):
 	search = Search()

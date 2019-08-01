@@ -5,6 +5,7 @@ from datetime import datetime
 class AddUpdateRecords:
 	def addUpdateClient(self,old_client_name,new_client_name, product_name, cluster_name, release_number):
 		exists_client = db.session.query(Client.client_name).filter(Client.client_name==new_client_name).scalar() is not None
+		print(old_client_name,new_client_name, product_name, cluster_name, release_number)
 		if not exists_client:
 			client = Client(client_name=new_client_name, is_active=True)
 			db.session.add(client)
@@ -85,10 +86,11 @@ class AddUpdateRecords:
 				# exists_product = db.session.query(Product.product_id).filter_by(product_id=product_id).all()
 
 				for client_name in client_names:
-					self.deactivateCPRC(client_name, old_product_name, cluster_name, release_number)
-					print("Going ionto addCPRC function")
-					self.addCPRC(client_name, new_product_name, cluster_name, release_number)
-					print("Product already exists in database")
+					# self.deactivateCPRC(client_name, old_product_name, cluster_name, release_number)
+					# print("Going ionto addCPRC function")
+					# self.addCPRC(client_name, new_product_name, cluster_name, release_number)
+					# print("Product already exists in database")
+					self.updateCPRC(client_name, old_product_name, new_product_name, cluster_name, release_number)
 			else:
 				productValue = Product(product_name=new_product_name, is_active=True)
 				db.session.add(productValue)
@@ -100,8 +102,9 @@ class AddUpdateRecords:
 				db.session.add(product_release)
 				db.session.commit()
 				for client_name in client_names:
-					self.deactivateCPRC(client_name, old_product_name, cluster_name, release_number)
-					self.addCPRC(client_name, new_product_name, cluster_name, release_number)
+					# self.deactivateCPRC(client_name, old_product_name, cluster_name, release_number)
+					# self.addCPRC(client_name, new_product_name, cluster_name, release_number)
+					self.updateCPRC(client_name, old_product_name, new_product_name, cluster_name, release_number)
 				
 
 			db.session.commit()
@@ -119,7 +122,7 @@ class AddUpdateRecords:
 		print(cluster_id)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		print(product_id)
-		if product_id:
+		if (product_id and client_id and cluster_id) :
 			product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==release_number).first()
 			print(product_release_id)
 			if product_release_id:
@@ -128,6 +131,7 @@ class AddUpdateRecords:
 				if cprc:
 					cprc.is_active = False
 					db.session.commit()
+					print("............................................Deactivated CPRC...............................")
 					return "Deactivated old cprc record"
 			# set old_client to deactivate
 
@@ -221,5 +225,35 @@ class AddUpdateRecords:
 				db.session.commit()
 
 
-			
+	def updateCPRC(self,client_name, old_product_name, new_product_name, cluster_name, release_number):
+		cluster_id = db.session.query(Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
+		cluster_id = cluster_id[0]
+		print("cluster",cluster_id)
+		old_product_id = db.session.query(Product.product_id).filter(Product.product_name==old_product_name).first()
+		old_product_id = old_product_id[0]
+		print("old product id",old_product_id)
+		new_product_id = db.session.query(Product.product_id).filter(Product.product_name==new_product_name).first()
+		new_product_id = new_product_id[0]
+		print("new product id", new_product_id)
+		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
+		client_id = client_id[0]
+		print("client id",client_id)
+		old_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==old_product_id).first()
+		old_product_release_id = old_product_release_id[0]
+		print("old prid",old_product_release_id)
+		new_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==new_product_id).first()
+		new_product_release_id = new_product_release_id[0]
+		print("new prid",new_product_release_id)
+		cprc = db.session.query(CPRC).filter(CPRC.product_release_id==old_product_release_id).filter(CPRC.cluster_id==cluster_id).filter(CPRC.client_id==client_id).first()
+		print(">?????????????????><<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+		print(cprc)
+		cprc.product_release_id = new_product_release_id
 
+		db.session.commit()
+
+	# def updateProductRelease(self,old_product_name,new_product_name,release_number):
+	# 	old_product_id = db.session.query(Product.product_id).filter(Product.product_name==old_product_name).first()
+	# 	new_product_id = db.session.query(Product.product_id).filter(Product.product_name==new_product_name).first()
+	# 	product_release = db.session.query(Product_Release).filter(Product_Release.product_id==old_product_id).filter(Product_Release.release_number==release_number).first()
+	# 	product_release.product_id=new_product_id
+	# 	db.session.commit()

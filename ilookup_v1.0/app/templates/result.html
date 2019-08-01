@@ -195,6 +195,18 @@
       return;
     }
 
+    if (!isValid(newRel)) {
+      $('#specialRKeyAlert').show('fade');
+      window.setTimeout(function() {
+        $('#specialRKeyAlert').hide('fade');
+      }, 3000)
+      return;
+    }
+
+    function isValid(str){
+      return !/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(str);
+    }
+
     //This calls to the backend and goes to change things on the backend
     $.ajax({
       url:"/updateReleaseTable",
@@ -411,6 +423,9 @@
         <div id="letterAlert" class="alert alert-danger collapse">
           <a id="closeLetterAlert" href="#" class="close">&times;</a>
           <strong>Release number cannot contain any letters/symbols.</strong>
+        </div><div id="specialRKeyAlert" class="alert alert-danger collapse">
+          <a id="closeSpecialRKeyAlert" href="#" class="close">&times;</a>
+          <strong>Invalid Symbols for AWS Tags</strong>
         </div>
         <div class="comparisons">
           <div id="Screen1" style="width:48%">
@@ -470,6 +485,9 @@
     $('#closeLetterAlert').click(function () {
       $('#letterAlert').hide('fade');
     });
+    $('#closeSpecialRKeyAlert').click(function () {
+      $('#specialRKeyAlert').hide('fade');
+    });
     $('#addClustersSelect2').val(null).trigger('change');
     $('#selectRegion').val(null).trigger('change');
     $('#selectProduct').val(null).trigger('change')
@@ -484,14 +502,14 @@
 
     window.setTimeout(function() {
       $('.productsTag').val(product).trigger('change')
-    }, 500)
+    }, 1000)
     window.setTimeout(function() {
       $('.regionsTag').val(region).trigger('change')
-    }, 1000)
+    }, 2000)
 
     window.setTimeout(function() {
       $('.clustersTag').val(clusterName).trigger('change')
-    }, 1750)
+    }, 3000)
 
 
   })
@@ -504,12 +522,15 @@
 
   function showInactive() {
     if(document.getElementById('customControlInline').checked) {
-        $("#inactiveClients").show();
+      $.each($('.inactiveClients'), function() {
+        $(this).css('display', 'block')
+      })
     } else {
-        $("#inactiveClients").hide();
+      $.each($('.inactiveClients'), function() {
+        $(this).css('display', 'none')
+      })
     }
-  }
-
+  } 
 
 
 
@@ -587,9 +608,9 @@
           {% endif %}
           {% if inactiveClients|length > 0 %}
             {% if inactiveClients|length < 2 %}
-              <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span class="inactiveClients" style="color: red; float:right; display: none"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% else %}
-              <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span class="inactiveClients" style="color: red; float:right; display: none"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% endif %}
           {% endif %}
         </td>
