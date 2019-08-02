@@ -76,9 +76,11 @@ class CheckAWSData:
 				if "Environment" in key:
 					environment = tags[key]
 
+			self.checkProductRelease(product_name,cluster_name,release)
 			self.checkProduct(product_name,client_names,cluster_name,release)
 			self.checkClients(product_name,client_names,cluster_name,release)
 			self.checkEnvironmnent(cluster_name, environment)
+			
 
 	def checkProduct(self,product_name,client_names,cluster_name,release):
 		# activate in sql side
@@ -110,7 +112,15 @@ class CheckAWSData:
 			product_release = Product_Release(product_id=product_id[0],release_number=release, inserted_at=datetime.utcnow())
 			db.session.add(product_release)
 			db.session.commit()
+			
+
 			print("......................................................................")
+
+		old_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_release_id==CPRC.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).first()
+		old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id==old_product_release_id[0]).first()
+		print(old_release_number)
+		addUpdateRecord = AddUpdateRecords()
+		addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number[0], release)
 
 		old_products= db.session.query(Product).filter(Product.product_id==Product_Release.product_id,CPRC.product_release_id==Product_Release.product_release_id,CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).all()
 		print(old_products)
@@ -121,6 +131,12 @@ class CheckAWSData:
 					old_product.is_active= False
 					db.session.commit()
 			cprc = db.session.query(CPRC).filter(CPRC.product_release_id==Product_Release.product_release_id,Product.product_id==Product_Release.product_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).all()
+			
+			# old_product_release_id = db.session.query(CPRC.product_release_id).filter(Product_Release.product_release_id==CPRC.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
+			# old_product_release_id = old_product_release_id[0]
+
+			# old_release_number = db.session.query(Product_Release.release_number).filter()
+
 			for record in cprc:
 				record.is_active = False
 				db.session.commit()
@@ -185,61 +201,14 @@ class CheckAWSData:
 				if exists_cprc.is_active == False:
 					exists_cprc.is_active = True
 					db.session.commit()
+					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+					print("Added cprc under u[pdate client  function")
+					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			else:
 				addUpdateRecord.addCPRC(client_name,product_name,cluster_name,release)
 				print("End of check client function")
 
 
-
-
-
-
-
-		# deactivate in sql side
-
-
-
-
-
-
-	# def checkProducts(self,region_name):
-	# 	client = boto3.client("ecs", region_name=region_name)
-	# 	clusters = client.list_clusters()
-	# 	clusters = clusters["clusterArns"]
-	# 	aws_products = []
-	# 	for cluster in clusters:
-	# 		tags = self.fetchClusterTags(cluster,region_name)
-	# 		if tags["Product"]:
-	# 			product_name = tags["Product"]
-	# 			aws_products.append(product_name)
-	# 	db_products = db.session.query(Product.product_name).all()
-
-	# 	for product_name in db_products:
-	# 		if product_name not in aws_products:
-	# # 			deactivateRecords = DeactivateRecords()
-	# # 			deactivateRecords.deactivateProduct(product_name)
-
-	# def checkClients(slef,region):
-	# 	client = boto3.client("ecs", region_name=region_name)
-	# 	clusters = client.list_clusters()
-	# 	clusters = clusters["clusterArns"]
-	# 	aws_clients = []
-	# 	for cluster in clusters:
-	# 		tags = self.fetchClusterTags(cluster,region_name)
-	# 		for key in tags:
-	# 			if ("Client") in key:
-	# 				client_name = tags[key]
-	# 				aws_clients.append(client_name)
-
-	# 	db_clients = db.session.query(Client.client_name).all()
-
-	# 	for client_name in db_clients:
-	# 		if client_name not in aws_clients:
-	# 			deactivateRecords = DeactivateRecords()
-	# 			deactivateRecords.deactivateClients(client_name)
-	# 	# for aws_client in aws_clients:
-		# 	if aws_client not in db_clients:
-				# call populate client function
 
 	def fetchClusterTags(self,clusterArn,region_name):
 		client = boto3.client("ecs", region_name=region_name)
@@ -260,6 +229,49 @@ class CheckAWSData:
 		if cluster:
 			cluster.environment= environment
 			db.session.commit()
+
+	def checkProductRelease(self,product_name,cluster_name,new_release_number):
+		#1. Fetch product_id
+		#2. check if new release number record already exists 
+		#	if not add new one and return product_release_id
+		#4. Fetch cprc records with old release number
+		#4. update the cprc table-> replace old_product_release_id with new one 
+
+		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
+		
+		if product_id:
+			product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
+
+
+			if product_release_id:
+				print("Product_Release already exists")
+			else:
+				product_release = Product_Release(product_id=product_id[0], release_number=new_release_number, inserted_at=datetime.utcnow())
+				db.session.add(product_release)
+				db.session.commit()
+				product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
+			
+			old_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_release_id==CPRC.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).first()
+			print(old_product_release_id)
+			old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id==old_product_release_id[0]).first()
+			print(old_release_number)
+			addUpdateRecord = AddUpdateRecords()
+			addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number[0], new_release_number)
+
+			cprc = db.session.query(CPRC).filter(Cluster.cluster_id==CPRC.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).all()
+			if(len(cprc)>0):
+				for record in cprc:
+					print("::::::::::::::::::::::::::::::::::::::::::::")
+					print(record.product_release_id)
+					record.product_release_id=product_release_id[0]
+					print(record.product_release_id)
+					print("::::::::::::::::::::::::::::::::::::::::::::")
+				db.session.commit()
+
+
+
+
+
 
 
 
