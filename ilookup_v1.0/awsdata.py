@@ -7,33 +7,26 @@ import boto3
 import json
 import pprint
 import re
+from regions import regionObject
 
 
 client = boto3.client("ecs")
 
 class AWSData:
 	def newMainFunction(self):
-		nvirginia = "us-east-1"
-		london = "eu-west-2"
-		print("Running London Region")
-		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		self.mainFunction(london)
-		print("Running N. Virginia Region")
-		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		self.mainFunction(nvirginia)
+		for region in regionObject:
+			self.mainFunction(regionObject[region])
 
 	def mainFunction(self,region_name):
 		client = boto3.client("ecs", region_name=region_name)
 		clusters = client.list_clusters()
+		print(clusters)
 		clusters = clusters["clusterArns"]
 
 		for cluster in clusters:
 			cluster_split = cluster.split(":")
 			region = cluster_split[3]
-			if region=="us-east-1":
-				region = "N. Virginia"
-			else:
-				region = "London"
+			region = list(regionObject.keys())[list(regionObject.values()).index(region)]
 
 			mysplit= cluster.split("/")
 
@@ -42,8 +35,8 @@ class AWSData:
 			print(cluster_name)
 			#pprint.pprint(tags)
 			client_names = []
-			client_name = "unknown"
-			product_name = "unknown"
+			client_name = "UNKNOWN"
+			product_name = "UNKNOWN"
 			product_release_number = ""
 			environment= "UNKNOWN"
 			for key in tags:
@@ -57,10 +50,22 @@ class AWSData:
 					self.populateProduct(product_name)
 					#print("Tagging product name", product_name)
 				if ("Release") in key:
-					product_release_number = tags[key]	
+					product_release_number = tags[key]
 				if ("Environment") in key:
 					environment = tags[key]
 
+			if product_name == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Product", 'value': product_name}])
+				# create product tag
+				# assign UNKNOWN as value
+			if client_name == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Client1", 'value': client_name}])
+				# create Client1 tag
+				# assign UNKNOPWN as value
+			if environment == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Environemnt", 'value': environment}])
+				# create ENVIRONEMNT tag
+				# assign UNKOWN as value
 			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
 			# checkAWSData = CheckAWSData()
 			# checkAWSData.mainFunction(region_name)
@@ -441,7 +446,7 @@ class AWSData:
 												#print(client_id)
 										self.populateCPRC(cluster_name,product_release_id, client_id[0])
 								else:
-									client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
+									client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 									self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 							else:
@@ -451,7 +456,7 @@ class AWSData:
 												#print(client_id)
 										self.populateCPRC(cluster_name,product_release_id, client_id[0])
 								else:
-									client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
+									client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 									self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 
@@ -510,7 +515,7 @@ class AWSData:
 											#print(client_id)
 							self.populateCPRC(cluster_name,product_release_id, client_id[0])
 					else:
-						client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
+						client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 						self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 
@@ -521,7 +526,7 @@ class AWSData:
 											#print(client_id)
 							self.populateCPRC(cluster_name,product_release_id, client_id[0])
 					else:
-						client_id = db.session.query(Client.client_id).filter_by(client_name="unknown").first()
+						client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 						self.populateCPRC(cluster_name,product_release_id, client_id[0])
 
 

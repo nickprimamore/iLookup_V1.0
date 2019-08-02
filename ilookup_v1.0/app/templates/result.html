@@ -390,6 +390,9 @@
   .custom-control {
     min-height: 0px !important
   }
+  .inactiveClients {
+    display: none
+  }
 }
 </style>
 
@@ -509,6 +512,7 @@
     });
   });
 
+  // Sets timeouts for tagging modal to avoid backend issues
   $('#addTagModal').on('show.bs.modal', function(event) {
     let trigger = $(event.relatedTarget)
     let region = trigger.data('region')
@@ -525,26 +529,28 @@
     window.setTimeout(function() {
       $('.clustersTag').val(clusterName).trigger('change')
     }, 3000)
-
-
   })
 
+  // Checks if the table is loaded or not
   $('#loadedCheck').ready(function() {
     $('#loadedCheck').hide()
     $('.table').show()
-
   })
 
+  // Shows red icon for inactive clients
   function showInactive() {
     if(document.getElementById('customControlInline').checked) {
-        $("#inactiveClients").css("display", "block");
+      $.each($('.inactiveClients'), function() {
+        $(this).css('display', 'block')
+      })
     } else {
-        $("#inactiveClients").css("display", "none");
+      $.each($('.inactiveClients'), function() {
+        $(this).css('display', 'none')
+      })
     }
   }
 </script>
 
-<!-- Renders the main search results table -->
 <table class="table table-hover table-bordered table-striped">
   <thead>
     <tr>
@@ -623,9 +629,9 @@
           <!-- checks how many inactive lients there are to determine which red client icon will be displayed (single or multiple) -->
           {% if inactiveClients|length > 0 %}
             {% if inactiveClients|length < 2 %}
-              <span id="inactiveClients" style="color: red; float:right; display:none"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span class="inactiveClients" style="color: red; float:right; display: none"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% else %}
-              <span id="inactiveClients" style="color: red; float:right; display:none"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span class="inactiveClients" style="color: red; float:right; display: none"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% endif %}
           {% endif %}
         </td>
@@ -668,4 +674,30 @@
         {% endif %}
     {% endfor %}
   </tbody>
+</table>
+
+<table id="excelTable" hidden>
+  <tr>
+    <th> Product </th>
+    <th> Release Number </th>
+    <th> Cluster </th>
+    <th> Region </th>
+    <th> Environment </th>
+    <th> Clients </th>
+    <th> Date Released </th>
+    <th> Status </th>
+  </tr>
+  {% for result in results %}
+    {% set excelClients = result.active_clients %}
+    <tr>
+      <td> {{result.product_name}} </td>
+      <td> {{result.release}} </td>
+      <td> {{result.cluster_name}} </td>
+      <td> {{result.region}} </td>
+      <td> {{result.environment}} </td>
+      <td> {{excelClients}} </td>
+      <td> {{result.inserted_at[0:11]}} | {{result.inserted_at[11:16]}} </td>
+      <td> {{result.is_active}} </td>
+    </tr>
+  {% endfor %}
 </table>

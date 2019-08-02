@@ -67,7 +67,7 @@ class Search:
 		maxResult = []
 		for res in maxReleases:
 			#print(res.release_number, res.product_release_id)
-			tempResult = search_result.filter(CPRC.product_release_id==res.product_release_id).all()
+			tempResult = search_result.filter(CPRC.product_release_id==res.product_release_id).filter(CPRC.cluster_id==res.cluster_id).all()
 			#print(tempResult)
 			maxResult = maxResult + (tempResult)
 
@@ -89,12 +89,19 @@ class Search:
 
 			clients = self.convertUnicodeToArray(clients)
 
-			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).distinct().all()
-			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==False).distinct(). all()
+			# active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(CPRC.is_active==True).distinct().all()
 
-    	
+
+			# inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(CPRC.is_active==False).filter(Client.client_name!="UNKNOWN").distinct().all()
+
+
+
+			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(CPRC.is_active==True).all()
+			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(CPRC.is_active==False).filter(Client.client_name!="UNKNOWN").distinct().all()
+
+			inactive_clients = set(inactive_clients) - set(active_clients)
 			active_clients = self.convertUnicodeToArray(list(set(active_clients)))
-			inactive_clients = self.convertUnicodeToArray(list(set(inactive_clients)))
+			inactive_clients = self.convertUnicodeToArray(list(inactive_clients))
 			# if res.CPRC.cprc_id
 
 			result["client_names"] = clients
@@ -169,7 +176,7 @@ class Search:
 		print(maxReleases)
 		for res in maxReleases:
 			#print(res.release_number, res.product_release_id)
-			tempResult = search_result.filter(CPRC.product_release_id==res.product_release_id).all()
+			tempResult = search_result.filter(CPRC.product_release_id==res.product_release_id).filter(CPRC.cluster_id==res.cluster_id).all()
 			#print(tempResult)
 			maxResult = maxResult + (tempResult)
 		# for res in maxResult:
@@ -184,12 +191,21 @@ class Search:
 			clients = self.convertUnicodeToArray(clients)
 			# if res.CPRC.cprc_id
 
-			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==True).all()
-			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(Client.is_active==False).all()
+			# active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(CPRC.is_active==True).all()
+			# inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).filter(CPRC.is_active==False).filter(Client.client_name!="UNKNOWN").all()
 
+			active_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(CPRC.is_active==True).all()
+			inactive_clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(CPRC.is_active==False).filter(Client.client_name!="UNKNOWN").distinct().all()
+			print("????????????????????????????????????????????????????????????")
+			print(set(active_clients))
+			print(set(inactive_clients))
+			print(set(inactive_clients)-set(active_clients))
+			print("????????????????????????????????????????????????????????????")
+			pprint.pprint(inactive_clients)
 			#print(list(set(active_clients)))
+			inactive_clients = set(inactive_clients)-set(active_clients)
 			active_clients = self.convertUnicodeToArray(list(set(active_clients)))
-			inactive_clients = self.convertUnicodeToArray(list(set(inactive_clients)))
+			inactive_clients = self.convertUnicodeToArray(list(inactive_clients))
 
 			result["client_names"] = clients
 			result["active_clients"] = active_clients
