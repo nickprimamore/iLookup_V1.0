@@ -17,6 +17,7 @@
         releaseNum: release_number
       }),
       success: function(response) {
+        //loops through each task definition and gathers its data
         for (task of response) {
           let image = task.image_tag.substring(task.image_tag.length-7, task.image_tag.length)
           let memory = task.memory
@@ -31,6 +32,7 @@
           } else {
             header.innerHTML = release_number
           }
+          //appends the accordian view HTML code with the task definition data just retrived
           $( "#accordion" + screen.toString() ).append('<div class="card deleteOnClose' + screen.toString() + '">' +
             '<div class="card-header" id="headingOne">' +
               '<h5 class="mb-0 deleteOnClose">' +
@@ -92,6 +94,7 @@
       success: function(response) {
         blankOption = new Option("", "", true, false)
         $('#release2').append(blankOption)
+        // Loops through the releases and renders them in the dropdowns
         for (let rel in response) {
           let newOption
           let secondOption
@@ -186,7 +189,7 @@
     }
 
     //If we can't automate the rollback issue, we can implement manual rollback through this.
-    //Release number already exists
+    //Release number already exists and alerts the user
     if (releases.includes(newRel)) {
       $('#existingReleaseAlert').show('fade');
       window.setTimeout(function() {
@@ -195,6 +198,7 @@
       return;
     }
 
+    // Release has an invalid character and alerts the user
     if (!isValid(newRel)) {
       $('#specialRKeyAlert').show('fade');
       window.setTimeout(function() {
@@ -203,11 +207,12 @@
       return;
     }
 
+    // Will be used when checking release validity (cannot contain these charaters - AWS restriction)
     function isValid(str){
       return !/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(str);
     }
 
-    //This calls to the backend and goes to change things on the backend
+    //This calls to the backend and goes to then changes the folowing info on the backend
     $.ajax({
       url:"/updateReleaseTable",
       type:"POST",
@@ -219,6 +224,7 @@
         region: region
       }),
       success: function(response) {
+        // Alerts the user that the release number was successfully updated
         $('#updatedReleaseAlert').show('fade');
         window.setTimeout(function() {
           $("#updatedReleaseAlert").hide('fade');
@@ -227,6 +233,8 @@
         changedScreens = []
         currRel1 = false
         currRel2 = false
+
+        // The following updates the modal after a release change
         if ($('#release1').val() == $('#changeRelease').val()) {
           $('.deleteOnClose1').remove()
           changedScreens.push("1")
@@ -254,6 +262,8 @@
           $("#changeRelease option[value=" + "'" + $(this).val()  + "'" + "]").remove()
           $("#changeRelease").select2('close')
         })
+
+        // Loads the release history into the modal
         $.ajax({
           url:"/getReleaseHistory",
           type: "POST",
@@ -297,6 +307,7 @@
 
   }
 
+  // Clears release screen 1 when the modal is closed
   $('#release1').on('select2:select', function(e) {
     $('.deleteOnClose1').remove()
     currRelease = false
@@ -306,6 +317,7 @@
     loadAccordion(1, clusterName, $('#release1').val(), currRelease)
   })
 
+  // Clears release screen 2 when the modal is closed
   $('#release2').on('select2:select', function(e) {
     $('.deleteOnClose2').remove()
     currRelease = false
@@ -315,6 +327,7 @@
     loadAccordion(2, clusterName, $('#release2').val(), currRelease)
   })
 
+  // More clearing of the screens on close
   $('#clusterDetail').on('hide.bs.modal', function (event){
     let header = document.getElementById('accordionHeader2')
     header.innerHTML = "Release Number"
@@ -344,6 +357,7 @@
 
 </script>
 
+<!-- Styling for the cluster release modal -->
 <style>
   div.modal-header {
     font-family: "Lato Light";
@@ -377,10 +391,9 @@
     min-height: 0px !important
   }
 }
-
-
 </style>
-<!-- This is the modal and it is working with the function above to create multiple unique modal's based on which entry was pressed. -->
+
+<!-- This is the cluster release modal and it is working with the function above to create multiple unique modal's based on which entry was pressed. -->
 <div class="modal fade bd-example-modal-lg" id="clusterDetail" tabindex="-1" role="dialog" aria-labelledby="clusterLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -395,11 +408,12 @@
           <label class="modalLabel" for="changeRelease" style="margin-left: 8px; margin-top:10px; margin-bottom:2px">Update Release Number:</label>
           <br>
           <select class="releaseReview" id="changeRelease" style="width:40.8%; height:500px">
-            <!-- <option disabled selected value>Select a release</option> -->
+
           </select>
           <input type="text" class="form-control" style="width:40.8%; margin-bottom:15px; display:inline; height:37px" id="newRelease" aria-describedby="newRelease" placeholder="Enter new release">
           <button type="button" class="btn btn-primary" style="background-color:#00508F; height:42px" onclick="updateRelease()">Update Release</button>
         </div>
+        <!-- All alerts for when trying to update a release number  -->
         <div id="updatedReleaseAlert" class="alert alert-primary collapse">
           <a id="closeUpdatedReleaseAlert" href="#" class="close">&times;</a>
           <strong>Release number updated!</strong>
@@ -427,7 +441,10 @@
           <a id="closeSpecialRKeyAlert" href="#" class="close">&times;</a>
           <strong>Invalid Symbols for AWS Tags</strong>
         </div>
+
+        <!-- Creates a split-screen view for release comparisons  -->
         <div class="comparisons">
+          <!-- Left screen, initially populated with the current release's task definitions -->
           <div id="Screen1" style="width:48%">
             <div class="modalWrapper">
               <h5 style="width:50%; margin-left:8px"><div id="accordionHeader1">Release Number</div></h5>
@@ -444,6 +461,8 @@
           <div id="divider" style="width:1px; background-color:#00508F">
 
           </div>
+
+          <!-- Right screen, initially black but user can select a release from the dropdown  -->
           <div id="Screen2" style="width:51.7%">
             <div class="modalWrapper">
               <h5 style="width:50%; margin-left:8px"><div id="accordionHeader2"> Release Number </div></h5>
@@ -488,10 +507,6 @@
     $('#closeSpecialRKeyAlert').click(function () {
       $('#specialRKeyAlert').hide('fade');
     });
-    $('#addClustersSelect2').val(null).trigger('change');
-    $('#selectRegion').val(null).trigger('change');
-    $('#selectProduct').val(null).trigger('change')
-    $('#tagValue').val(null).trigger('change')
   });
 
   $('#addTagModal').on('show.bs.modal', function(event) {
@@ -522,19 +537,18 @@
 
   function showInactive() {
     if(document.getElementById('customControlInline').checked) {
-        $("#inactiveClients").show();
+        $("#inactiveClients").css("display", "block");
     } else {
-        $("#inactiveClients").hide();
+        $("#inactiveClients").css("display", "none");
     }
   }
-
-
-
-
 </script>
+
+<!-- Renders the main search results table -->
 <table class="table table-hover table-bordered table-striped">
   <thead>
     <tr>
+      <!-- Column headers for the results table -->
       <th scope="col" style="font-family:Lato Light; font-size:16px">Product</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Release #</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Cluster</th>
@@ -553,7 +567,8 @@
   </thead>
   <tbody>
 
-<!-- This is a for loop to render the search results, and in each th theres a modal, target, clustername etc to show the cluster modal with necessary information regarding the unique row  -->
+<!-- This is a loop to render the search results, and in each "th" and "td" tag theres a modal attribute, so that the cluster modal
+     with release information will show when a row is clicked -->
     {% for result in results %}
       {% set clients = result.active_clients %}
       {% set inactiveClients = result.inactive_clients %}
@@ -562,6 +577,7 @@
         {% set timeRelease = "Update Release" %}
       {% endif %}
       <tr>
+        <!-- For each row, the necessary data is maintained for when a release is updated and data must be sent to backend -->
         <th scope="row" style="font-family:Lato Light; font-size:16px; padding-top:10px" data-toggle="modal"
         data-target="#clusterDetail"
         data-clustername="{{result.cluster_name}}"
@@ -598,16 +614,18 @@
         data-product="{{result.product_name}}"
         data-region="{{result.region}}"> {{result.environment}} </td>
         <td style="font-family:Lato Light; font-size:16px; padding-top:14px">
+          <!-- checks how many clients there are to determine which blue client icon will be displayed (single or multiple) -->
           {% if clients|length < 2 %}
             <span style="color: #00508F"><i class="fas fa-user" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% else %}
             <span style="color: #00508F"><i class="fas fa-user-friends" data-toggle="popover" title="Clients" data-content="{{clients|join(', ')}}"></i></span>
           {% endif %}
+          <!-- checks how many inactive lients there are to determine which red client icon will be displayed (single or multiple) -->
           {% if inactiveClients|length > 0 %}
             {% if inactiveClients|length < 2 %}
-              <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span id="inactiveClients" style="color: red; float:right; display:none"><i class="fas fa-user" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% else %}
-              <span id="inactiveClients" style="color: red; float:right"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
+              <span id="inactiveClients" style="color: red; float:right; display:none"><i class="fas fa-user-friends" data-toggle="popover" title="Inactive Clients" data-content="{{inactiveClients|join(', ')}}"></i></span>
             {% endif %}
           {% endif %}
         </td>
@@ -625,6 +643,7 @@
         data-release="{{result.release}}"
         data-product="{{result.product_name}}"
         data-region="{{result.region}}">
+        <!-- Determines which status icon to display based on if the given cluster is active or inactive -->
           {% if result.is_active %}
             <span class="badge badge-pill badge-success" style="width: 100%"> Active </span>
           {% else %}
@@ -641,6 +660,7 @@
           </span>
         </td>
       </tr>
+      <!-- Loading spinner displays until the search results are rendered in the table -->
         {% if loop.index == results|length %}
             <div class="spinner-border text-primary" style="margin-left: 48%; margin-top: 20%" id="loadedCheck" role="status">
               <span class="sr-only">Loading...</span>
