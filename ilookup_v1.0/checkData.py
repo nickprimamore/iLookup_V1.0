@@ -9,12 +9,6 @@ from regions import regionObject
 
 class CheckAWSData:
 
-	# def mainFunction(self):
-	# 	london_region = "eu-west-2"
-	# 	north_virginia_region = "us-east-1"
-
-	# 	client = boto3.client("ecs")
-
 	def checkData(self):
 		# self.mainFunction("eu-west-2")
 		for region in regionObject:

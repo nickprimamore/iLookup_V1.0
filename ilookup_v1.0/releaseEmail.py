@@ -11,7 +11,6 @@ utility = email.utils
 class Email:
     def getRecords(self):
 
-        print("in record function")
         records = db.session.query(Product.product_name, Cluster.cluster_name, Cluster.environment, Product_Release.release_number, Product_Release.inserted_at).filter(CPRC.cluster_id==Cluster.cluster_id, CPRC.product_release_id==Product_Release.product_release_id, Product.product_id==Product_Release.product_id
         ).filter(func.length(Product_Release.release_number)>11).filter(Cluster.environment!="DEV").all()
 
@@ -21,7 +20,6 @@ class Email:
     def sendEmail(self, clusters):
         # Replace sender@example.com with your "From" address.
         # This address must be verified.
-        #print(releaseChanges)
         SENDER = 'kpatel@acord.org'
         SENDERNAME = 'Krish Patel'
 
