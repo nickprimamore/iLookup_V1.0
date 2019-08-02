@@ -60,9 +60,9 @@ class CheckAWSData:
 			# self.checkProduct(cluster_name)
 			client_names = []
 			for key in tags:
-				if "Product" in key:
+				if "Application" in key:
 					product_name = tags[key]
-				if "Client" in key:
+				if "Customer" in key:
 					client_name = tags[key]
 					client_names.append(client_name)
 				if "Release" in key:

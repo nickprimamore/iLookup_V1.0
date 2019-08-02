@@ -20,8 +20,8 @@ class Email:
     def sendEmail(self, clusters):
         # Replace sender@example.com with your "From" address.
         # This address must be verified.
-        SENDER = 'kpatel@acord.org'
-        SENDERNAME = 'Krish Patel'
+        SENDER = 'ilookup@acord.org'
+        SENDERNAME = 'iLookUp'
 
         # Replace recipient@example.com with a "To" address. If your account
         # is still in the sandbox, this address must be verified.
