@@ -4,11 +4,12 @@ import pprint, json
 
 class DynamicFilter:
 
+	# this function is used to dynamically filter the search dropdowns
 	def getFirstFilterResult(self,client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None, is_active=None):
 
+			#this query fetches all the records 
 			search_result = db.session.query(CPRC, Client, Product_Release, Product, Cluster).filter(CPRC.client_id == Client.client_id, CPRC.product_release_id == Product_Release.product_release_id,
 				Product_Release.product_id ==  Product.product_id, CPRC.cluster_id == Cluster.cluster_id).distinct()
-
 
 			products = []
 			releases = []
@@ -16,6 +17,8 @@ class DynamicFilter:
 			regions = []
 			clusters = []
 			clients = []
+
+			# each if condition filter out the search_result if some value is passed for that parameter
 			if client_name:
 				search_result = search_result.filter(Client.client_name== client_name)
 
@@ -33,8 +36,5 @@ class DynamicFilter:
 
 			if environment:
 				search_result = search_result.filter(Cluster.environment==environment)
-
-			# if (is_active is not None):
-			# 	search_result = search_result.filter(Cluster.is_active==is_active)
 
 			return search_result
