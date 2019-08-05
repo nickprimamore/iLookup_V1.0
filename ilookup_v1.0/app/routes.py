@@ -255,10 +255,7 @@ def createTag():
 				#This checks to update Release functionality and change multiple tables
 				if objectified['tagQuery']['tagKey'] == 'Release':
 					cluster_name = cluster_split[1]
-					if objectified['tagQuery']["product"]:
-						product_name = objectified['tagQuery']['product']
-					else:
-						product_name = "UNKNOWN"
+					product_name = old_product_name
 					new_release_number = objectified['tagQuery']['tagValue']
 
 					addUpdateRecord = AddUpdateRecords()
@@ -290,6 +287,11 @@ def deleteTag():
 				clientNumber = 1
 				for tag in tags:
 					print(tag)
+					if "Release" in tag['key']:
+						release_number = tag['value']
+						print(release_number)
+					if "Application" in tag['key']:
+						product_name = tag['value']
 					if "Custome" in tag['key']:
 						clientCounter = clientCounter + 1
 					if tag['key'] == objectified['tagQuery']['tagKey']:
@@ -298,13 +300,20 @@ def deleteTag():
 						if "Custome" in tag['key']:
 							print(objectified['tagQuery'])
 							client_name = tag['value']
-							print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-							print("Trying to delete a client", )
-							print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-							deactivateRecords = DeactivateRecords()
-							deactivateRecords.deactivateClient(client_name)
-						# END OF NEW CODE
-						uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+							# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+							# print("Trying to delete a client", )
+							# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+						# 	deactivateRecords = DeactivateRecords()
+						# 	deactivateRecords.deactivateClient(client_name, cluster, product_name, release_number)
+						# # END OF NEW CODE
+						# uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+
+				if "Customer" in objectified['tagQuery']['tagKey']:
+					deactivateRecords = DeactivateRecords()
+					deactivateRecords.deactivateClient(client_name, cluster, product_name, release_number)
+					uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[objectified['tagQuery']['tagKey']])
+
+
 				updatedTags = uniClient.list_tags_for_resource(resourceArn=awsCluster)
 				tagzs = updatedTags["tags"]
 				print(tagzs)
@@ -534,9 +543,6 @@ def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTa
 			environment = tag['value']
 	addUpdateRecord = AddUpdateRecords()
 	addUpdateRecord.addUpdateClient(old_client_name,new_client_name,product_name,cluster_name,release_number)
-	#addUpdateRecord.updateEnvironment(cluster_name,environment)
-	# call other addUpdate functions here
-
 
 def getReleases(cluster_name):
 	search = Search()

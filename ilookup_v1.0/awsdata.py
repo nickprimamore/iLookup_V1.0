@@ -118,7 +118,7 @@ class AWSData:
 				print("Added component to database: " + service_name)
 
 			##get the component_id of the corresponding component
-			component_id = db.session.query(Component.component_id).filter_by(component_name=service_name).first()
+			component_id = db.session.query(Component.component_id).filter_by(component_name=service_name).filter_by(cluster_id=cluster_id[0]).first()
 
 			tasks = client.list_tasks(cluster=cluster, serviceName=service)
 			tasks = tasks["taskArns"]
