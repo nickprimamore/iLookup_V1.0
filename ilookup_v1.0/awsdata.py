@@ -507,11 +507,11 @@ class AWSData:
 
 
 # data = AWSData()
-#
+
 # data.newMainFunction()
-#
+
 # db.session.commit()
-#
+
 # print("Completed")
 
 # latestRelease = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name=="asg-dev-iconductor-cluster")
