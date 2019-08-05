@@ -8,7 +8,7 @@ import pprint
 import re
 from regions import regionObject
 
-# this client will be used to make api calls to ecs 
+# this client will be used to make api calls to ecs
 client = boto3.client("ecs")
 
 #this class contains functions to fetch data from AWS and feed them into database
@@ -20,10 +20,10 @@ class AWSData:
 			self.mainFunction(regionObject[region])
 
 	#this function takes the region_name as argument and makes api calls to the aws resources in that region
-	#first it fetches the all the clusters and then for each clusters it fetches the AWS resources 
-	#it calls fetchClusterTafs() function and fetches tag info like product name, clients, environment, 
-	#and release number, then populates Client and Product table 
-	#it also calls populateCluster() function and passes the required information to populate other 
+	#first it fetches the all the clusters and then for each clusters it fetches the AWS resources
+	#it calls fetchClusterTafs() function and fetches tag info like product name, clients, environment,
+	#and release number, then populates Client and Product table
+	#it also calls populateCluster() function and passes the required information to populate other
 	#datbase tables
 	def mainFunction(self,region_name):
 		client = boto3.client("ecs", region_name=region_name)
@@ -52,12 +52,12 @@ class AWSData:
 
 			#this for loop fetches all the tag values for each key in the tag
 			for key in tags:
-				if ("Client") in key:
+				if ("Customer") in key:
 					client_name = tags[key]
 					client_names.append(client_name)
 					self.populateClient(client_name)
-				if ("Product") in key:
-					product_name = tags["Product"]
+				if ("Application") in key:
+					product_name = tags["Application"]
 					self.populateProduct(product_name)
 				if ("Release") in key:
 					product_release_number = tags[key]
@@ -66,16 +66,16 @@ class AWSData:
 
 			#following if conditions check if particular tag is present in the AWS, if not it will add tag with "UNKNOWN" value
 			if product_name == "UNKNOWN":
-				client.tag_resource(resourceArn=cluster, tags=[{'key':"Product", 'value': product_name}])
-				
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Application", 'value': product_name}])
+
 			if client_name == "UNKNOWN":
-				client.tag_resource(resourceArn=cluster, tags=[{'key':"Client1", 'value': client_name}])
-				
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Customer", 'value': client_name}])
+
 			if environment == "UNKNOWN":
-				client.tag_resource(resourceArn=cluster, tags=[{'key':"Environemnt", 'value': environment}])
-			
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Environment", 'value': environment}])
+
 			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
-			
+
 
 	#this function populates the cluster table and then calls populateComponent function
 	#first it checks if the record already exists and if not then only adds new record
@@ -93,10 +93,10 @@ class AWSData:
 		self.populateComponent(cluster_id, cluster,cluster_name,product_release_number, region_name, product_name,client_names)
 
 	#this function populates the component table and then calls CompareTaskDefiniton() function
-	#first it checks if the record already exists and if not then only adds new record	
+	#first it checks if the record already exists and if not then only adds new record
 	def populateComponent(self, cluster_id, cluster,cluster_name, product_release_number, region_name, product_name,client_names):
 		client = boto3.client("ecs", region_name=region_name)
-		
+
 		##fetch the services from AWS
 		services = client.list_services(cluster = cluster)
 		services = services["serviceArns"]
