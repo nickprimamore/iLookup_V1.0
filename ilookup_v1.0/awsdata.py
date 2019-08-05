@@ -118,7 +118,7 @@ class AWSData:
 				print("Added component to database: " + service_name)
 
 			##get the component_id of the corresponding component
-			component_id = db.session.query(Component.component_id).filter_by(component_name=service_name).first()
+			component_id = db.session.query(Component.component_id).filter_by(component_name=service_name).filter_by(cluster_id=cluster_id[0]).first()
 
 			tasks = client.list_tasks(cluster=cluster, serviceName=service)
 			tasks = tasks["taskArns"]
@@ -507,11 +507,11 @@ class AWSData:
 
 
 # data = AWSData()
-
+#
 # data.newMainFunction()
-
+#
 # db.session.commit()
-
+#
 # print("Completed")
 
 # latestRelease = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name=="asg-dev-iconductor-cluster")

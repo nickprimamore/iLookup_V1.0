@@ -255,10 +255,7 @@ def createTag():
 				#This checks to update Release functionality and change multiple tables
 				if objectified['tagQuery']['tagKey'] == 'Release':
 					cluster_name = cluster_split[1]
-					if objectified['tagQuery']["product"]:
-						product_name = objectified['tagQuery']['product']
-					else:
-						product_name = "UNKNOWN"
+					product_name = old_product_name
 					new_release_number = objectified['tagQuery']['tagValue']
 
 					addUpdateRecord = AddUpdateRecords()
