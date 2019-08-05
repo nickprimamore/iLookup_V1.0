@@ -531,9 +531,6 @@ def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTa
 			environment = tag['value']
 	addUpdateRecord = AddUpdateRecords()
 	addUpdateRecord.addUpdateClient(old_client_name,new_client_name,product_name,cluster_name,release_number)
-	#addUpdateRecord.updateEnvironment(cluster_name,environment)
-	# call other addUpdate functions here
-
 
 def getReleases(cluster_name):
 	search = Search()
