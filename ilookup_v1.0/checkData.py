@@ -9,12 +9,6 @@ from regions import regionObject
 
 class CheckAWSData:
 
-	# def mainFunction(self):
-	# 	london_region = "eu-west-2"
-	# 	north_virginia_region = "us-east-1"
-
-	# 	client = boto3.client("ecs")
-
 	def checkData(self):
 		# self.mainFunction("eu-west-2")
 		for region in regionObject:
@@ -66,9 +60,9 @@ class CheckAWSData:
 			# self.checkProduct(cluster_name)
 			client_names = []
 			for key in tags:
-				if "Product" in key:
+				if "Applicatio" in key:
 					product_name = tags[key]
-				if "Client" in key:
+				if "Custome" in key:
 					client_name = tags[key]
 					client_names.append(client_name)
 				if "Release" in key:
@@ -80,7 +74,7 @@ class CheckAWSData:
 			self.checkProduct(product_name,client_names,cluster_name,release)
 			self.checkClients(product_name,client_names,cluster_name,release)
 			self.checkEnvironmnent(cluster_name, environment)
-			
+
 
 	def checkProduct(self,product_name,client_names,cluster_name,release):
 		# activate in sql side
@@ -112,7 +106,7 @@ class CheckAWSData:
 			product_release = Product_Release(product_id=product_id[0],release_number=release, inserted_at=datetime.utcnow())
 			db.session.add(product_release)
 			db.session.commit()
-			
+
 
 			print("......................................................................")
 
@@ -131,7 +125,7 @@ class CheckAWSData:
 					old_product.is_active= False
 					db.session.commit()
 			cprc = db.session.query(CPRC).filter(CPRC.product_release_id==Product_Release.product_release_id,Product.product_id==Product_Release.product_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).all()
-			
+
 			# old_product_release_id = db.session.query(CPRC.product_release_id).filter(Product_Release.product_release_id==CPRC.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
 			# old_product_release_id = old_product_release_id[0]
 
@@ -232,13 +226,13 @@ class CheckAWSData:
 
 	def checkProductRelease(self,product_name,cluster_name,new_release_number):
 		#1. Fetch product_id
-		#2. check if new release number record already exists 
+		#2. check if new release number record already exists
 		#	if not add new one and return product_release_id
 		#4. Fetch cprc records with old release number
-		#4. update the cprc table-> replace old_product_release_id with new one 
+		#4. update the cprc table-> replace old_product_release_id with new one
 
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
-		
+
 		if product_id:
 			product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
 
@@ -250,7 +244,7 @@ class CheckAWSData:
 				db.session.add(product_release)
 				db.session.commit()
 				product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
-			
+
 			old_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_release_id==CPRC.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).first()
 			print(old_product_release_id)
 			old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id==old_product_release_id[0]).first()

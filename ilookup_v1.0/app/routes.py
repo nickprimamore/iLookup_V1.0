@@ -212,12 +212,12 @@ def createTag():
 				currentTags = uniClient.list_tags_for_resource(resourceArn=awsCluster) # old key value pairs
 				tags = currentTags["tags"]
 				for tag in tags:
-					if tag["key"] == "Product":
+					if tag["key"] == "Application":
 						old_product_name = tag["value"]
 					#This checks to see if it's a Release Tag, cause it will be called afterwards in order to update SQL side
 					if tag['key'] == "Release":
 						old_release_number = tag['value']
-					if "Client" in tag['key']:
+					if "Custome" in tag['key']:
 						client_names.append(tag['value'])
 						if objectified['tagQuery']['tagValue'] == tag['value']:
 							return "Client already exists"
@@ -235,19 +235,19 @@ def createTag():
 				uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key':noSpaces, 'value': value}])
 
 				#This checks to see if its a Product and goes to update the Product tags and active/inactive on the SQL sides
-				if "Product" in objectified['tagQuery']['tagKey']:
+				if "Applicatio" in objectified['tagQuery']['tagKey']:
 					new_product_name = objectified['tagQuery']['tagValue']
 					cluster_name = cluster_split[1]
 					addUpdateRecord = AddUpdateRecords()
 					addUpdateRecord.addUpdateProduct(old_product_name,new_product_name,client_names,cluster_name,old_release_number)
 				#This checks to see if its a Client and goes to update the Client tags and active/inactive on the SQL sides
-				if "Client" in objectified['tagQuery']['tagKey']:
+				if "Custome" in objectified['tagQuery']['tagKey']:
 					new_client_key = objectified['tagQuery']['tagKey']
 					new_client_name = objectified['tagQuery']['tagValue']
 					cluster_name = cluster_split[1]
 					fetchClientKeyValue(new_client_key,new_client_name,cluster_name,currentTags)
 				#This checks to see if its an Environment and updates the SQL side with the new environment
-				if "Environment" in objectified['tagQuery']['tagKey']:
+				if "Environmen" in objectified['tagQuery']['tagKey']:
 					cluster_name = cluster_split[1]
 					addUpdateRecord = AddUpdateRecords()
 					addUpdateRecord.updateEnvironment(cluster_name,objectified['tagQuery']['tagValue'].upper())
@@ -290,12 +290,12 @@ def deleteTag():
 				clientNumber = 1
 				for tag in tags:
 					print(tag)
-					if "Client" in tag['key']:
+					if "Custome" in tag['key']:
 						clientCounter = clientCounter + 1
 					if tag['key'] == objectified['tagQuery']['tagKey']:
 						# ADDED NEW CODE
 						print(objectified['tagQuery']['tagKey'])
-						if "Client" in tag['key']:
+						if "Custome" in tag['key']:
 							print(objectified['tagQuery'])
 							client_name = tag['value']
 							print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -309,10 +309,13 @@ def deleteTag():
 				tagzs = updatedTags["tags"]
 				print(tagzs)
 				for tagz in tagzs:
-					if "Client" in tagz['key']:
+					if "Custome" in tagz['key']:
 						if clientNumber <= clientCounter:
 							value = tagz['value']
-							key = "Client" + str(clientNumber)
+							if str(clientNumber) == "1":
+								key="Customer"
+							else:
+								key = "Customer" + str(clientNumber)
 							clientNumber = clientNumber + 1
 							uniClient.untag_resource(resourceArn=awsCluster, tagKeys=[tagz['key']])
 							uniClient.tag_resource(resourceArn=awsCluster, tags=[{"key": key, 'value': value}])
@@ -523,7 +526,7 @@ def fetchClientKeyValue(new_client_key, new_client_name, cluster_name, currentTa
 	for tag in currentTags:
 		if tag['key'] == new_client_key:
 			old_client_name = tag['value']
-		if tag['key'] == "Product":
+		if tag['key'] == "Application":
 			product_name = tag['value']
 		if tag['key'] == "Release":
 			release_number = tag['value']
