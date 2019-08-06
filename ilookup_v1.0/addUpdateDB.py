@@ -103,17 +103,24 @@ class AddUpdateRecords:
 					self.updateCPRC(client_name, old_product_name, new_product_name, cluster_name, release_number)
 			else:
 				productValue = Product(product_name=new_product_name, is_active=True)
+				print(">>>>>>>>>>>>>>>>>>>>>>VVVVVVVVVVVVVVVVVVVVVVVVVV<<<<<<<<<<<<<<<<<<<<")
+				print('product',productValue)
 				db.session.add(productValue)
 				db.session.commit()
 				product_id = db.session.query(Product.product_id).filter_by(product_name=new_product_name).first()
+				print('product id',product_id)
 				inserted_at = datetime.utcnow()
+				print('release_number',release_number)
 				product_release = Product_Release(product_id=product_id[0], release_number=release_number, inserted_at = inserted_at)
+				print('product_release',product_release)
 				db.session.add(product_release)
 				db.session.commit()
 				for client_name in client_names:
-					print(client_name)
+					print('client name',client_name)
+					print("updating cprc")
 					self.updateCPRC(client_name, old_product_name, new_product_name, cluster_name, release_number)
-
+					print(client_name, old_product_name, new_product_name, cluster_name, release_number)
+				print(">>>>>>>>>>>>>>>>>>>>>>VVVVVVVVVVVVVVVVVVVVVVVVVV<<<<<<<<<<<<<<<<<<<<")
 			db.session.commit()
 
 
@@ -245,7 +252,7 @@ class AddUpdateRecords:
 		old_product_release_id = db.session.query(Product_Release.product_release_id).filter(CPRC.product_release_id==Product_Release.product_release_id,Cluster.cluster_id==CPRC.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Product_Release.product_id==old_product_id).first()
 		old_product_release_id = old_product_release_id[0]
 		print(old_product_release_id)
-		new_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==new_product_id).first()
+		new_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==new_product_id).filter(Product_Release.release_number==release_number).first()
 		new_product_release_id = new_product_release_id[0]
 		print(new_product_release_id)
 		cprc = db.session.query(CPRC).filter(CPRC.product_release_id==old_product_release_id).filter(CPRC.cluster_id==cluster_id).filter(CPRC.client_id==client_id).first()
