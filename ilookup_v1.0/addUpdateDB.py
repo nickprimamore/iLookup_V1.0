@@ -160,17 +160,24 @@ class AddUpdateRecords:
 			product_release = Product_Release(product_id=product_id[0], release_number=new_release_number, inserted_at=datetime.utcnow())
 			db.session.add(product_release)
 			db.session.commit()
+			print("added new product release")
 			new_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
 			#new_product_release_id = new_product_release_id[0]
 		#update cprc record
-		cprc = db.session.query(CPRC).filter(CPRC.cluster_id==Cluster.cluster_id, Product_Release.product_release_id==CPRC.product_release_id).filter(Cluster.cluster_name==cluster_name).filter(Product_Release.release_number==old_release_number).all()
+		cprc = db.session.query(CPRC).filter(CPRC.cluster_id==Cluster.cluster_id, Product_Release.product_release_id==CPRC.product_release_id).filter(Cluster.cluster_name==cluster_name).filter(Product_Release.release_number==old_release_number).filter(CPRC.is_active==True).distinct().all()
 		print(cprc)
 		if(len(cprc)>0):
 			for record in cprc:
-				print(record.product_release_id)
+				print("record.product_release_id",record.product_release_id)
 				print(new_product_release_id)
-				record.product_release_id=new_product_release_id[0]
+				if isinstance(new_product_release_id, int):
+					print("i am in isinstance if condition")
+					record.product_release_id=new_product_release_id
+				else:
+					record.product_release_id=new_product_release_id[0]
 			db.session.commit()
+
+			print("updates the cprc records")
 
 			# product_release_exists = True
 			# product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
@@ -195,9 +202,11 @@ class AddUpdateRecords:
 		#exists = False
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
-
+		print("product_id", product_id)
+		print("product_release_id", product_release_id)
 		if product_release_id:
 			product_release_id = product_release_id[0]
+			print("new release number already exists")
 			return product_release_id
 		else:
 			return None
