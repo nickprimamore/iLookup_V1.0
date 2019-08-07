@@ -17,3 +17,4 @@ class Remove:
 remove = Remove()
 remove.removeTags("us-east-1")
 remove.removeTags("eu-west-2")
+
