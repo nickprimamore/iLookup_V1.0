@@ -4,7 +4,7 @@ from app.models import Client, Product, Product_Release, Cluster, Component, Tas
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 from awsdata import AWSData
-from checkData import CheckAWSData
+# from checkData import CheckAWSData
 from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
@@ -487,11 +487,20 @@ def updateReleaseTable():
 	old_release_number = objectified["oldRelease"]
 	new_release_number = objectified["newRelease"]
 	addUpdateRecord = AddUpdateRecords()
-	product_release_exists = addUpdateRecord.updateProductRelease(product_name,cluster_name, old_release_number, new_release_number)
-	if product_release_exists:
-		print("Release already exists. Use some other release number")
+	#product_release_exists = db.session.query(Product_Release.release_number).filter(Product_Release.product)
+	print("Hello/")
+	product_release_exists = db.session.query(Product_Release.release_number).filter(Product_Release.product_id==Product.product_id, Product_Release.product_release_id==CPRC.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Product_Release.release_number==new_release_number).filter(Product.product_name==product_name).filter(Cluster.cluster_name==cluster_name).first()
+	print(".................................",product_release_exists)
+
+	if product_release_exists != None:
+		print("Do we keep coming in here?", product_release_exists)
+		return jsonify(value=True)
+
 	else:
+		#addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
+		addUpdateRecord.updateProductRelease(product_name,cluster_name, old_release_number, new_release_number)
 		addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
+
 		print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
@@ -503,7 +512,7 @@ def updateReleaseTable():
 						if tag["value"] == objectified["oldRelease"]:
 							uniClient.untag_resource(resourceArn=awsCluster, tagKeys=['Release'])
 						uniClient.tag_resource(resourceArn=awsCluster, tags=[{'key': 'Release', 'value': objectified["newRelease"]}])
-	return "Helo"
+	return jsonify(value=False)
 
 
 def search(client_name=None, product_name=None, release=None, cluster_name=None, region=None, environment=None, toDate=None, fromDate=None, is_active=None):
@@ -557,11 +566,11 @@ def getClients(cluster_name, release_number):
 @app.route('/load', methods=['GET','POST'])
 def loadAWSData():
 	print("Loading")
+	# checkData = CheckAWSData()
+	# checkData.checkData()
+	# db.session.commit()
+	# print("Loaded")
 	awsdata = AWSData()
 	awsdata.newMainFunction()
 	db.session.commit()
-	checkData = CheckAWSData()
-	checkData.checkData()
-	db.session.commit()
-	print("Loaded")
 	return redirect(url_for("load"))

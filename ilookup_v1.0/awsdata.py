@@ -327,6 +327,8 @@ class AWSData:
 
 	def populateCPRC(self, cluster_name, product_release_id, client_id):
 
+
+
 		print("////////////////////////////////////////////////////////////////////////////////")
 		print("in cprc function: ", cluster_name, product_release_id, client_id)
 		print("////////////////////////////////////////////////////////////////////////////////")
@@ -341,6 +343,13 @@ class AWSData:
 		if exists_cprc:
 			print("already exists record for cprc")
 		else:
+			#inactive old cprc 
+			cprc = db.session.query(CPRC).filter(Cluster.cluster_id==CPRC.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.client_id==client_id).all()
+			if (len(cprc)> 0 ):
+				for record in cprc:
+					record.is_active = False
+				db.session.commit()
+
 			cprc_value = CPRC(client_id=client_id, cluster_id=cluster_id, product_release_id=product_release_id)
 			db.session.add(cprc_value)
 			#print('inserted new record in product_release table')
@@ -428,6 +437,7 @@ class AWSData:
 								else:
 									client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
 									self.populateCPRC(cluster_name,product_release_id, client_id[0])
+
 
 
 							### This means there will also be a new entry in cprc

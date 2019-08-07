@@ -149,7 +149,9 @@
       }, 3500);
       return;
     }
+    else {
 
+    }
     let newRel = document.getElementById('newRelease').value;
     //Alert for if no release number was entered
     if (!newRel) {
@@ -225,7 +227,16 @@
       }),
       success: function(response) {
         // Alerts the user that the release number was successfully updated
-        $('#updatedReleaseAlert').show('fade');
+        console.log(response)
+        if (response.value) {
+          console.log("We here?")
+          $('#existingReleaseAlert').show('fade');
+          window.setTimeout(function() {
+            $("#existingReleaseAlert").hide('fade');
+          }, 3500);
+        }
+        else {
+          $('#updatedReleaseAlert').show('fade');
         window.setTimeout(function() {
           $("#updatedReleaseAlert").hide('fade');
         }, 3500);
@@ -302,6 +313,7 @@
             }
           }
         })
+        }
       }
     })
 
@@ -566,7 +578,7 @@
           <label class="custom-control-label" for="customControlInline">Clients</label>
         </div>
       </th>
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="All times are in UTC time."></i></span></th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Date" data-content="All times are in UTC time."></i></span></th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Status <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Status" data-content="The status indicates whether or not the cluster has active tasks definitions."></i></span></th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Edit <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Edit" data-content="Click on the pencil icon in order to edit a particular cluster's tags."></i><span></th>
     </tr>

@@ -225,42 +225,55 @@ class CheckAWSData:
 			db.session.commit()
 
 	def checkProductRelease(self,product_name,cluster_name,new_release_number):
-		#1. Fetch product_id
-		#2. check if new release number record already exists
-		#	if not add new one and return product_release_id
-		#4. Fetch cprc records with old release number
-		#4. update the cprc table-> replace old_product_release_id with new one
+		print("????????????????/////////////////////////////////////////////////////////////")
+		print("inside checkProductRelease function")
+		old_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_release_id==CPRC.product_release_id).filter(Product_Release.product_id==Product.product_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).first()
+		print(old_product_release_id)
+		old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id==old_product_release_id[0]).first()
+		print(old_release_number)
+		addUpdateRecord = AddUpdateRecords()
+		addUpdateRecord.updateProductRelease(product_name, cluster_name, old_release_number[0], new_release_number)
+		addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number[0], new_release_number)
+	
 
-		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
+	# def checkProductRelease(self,product_name,cluster_name,new_release_number):
+	# 	#1. Fetch product_id
+	# 	#2. check if new release number record already exists
+	# 	#	if not add new one and return product_release_id
+	# 	#4. Fetch cprc records with old release number
+	# 	#4. update the cprc table-> replace old_product_release_id with new one
 
-		if product_id:
-			product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
+	# 	product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
+
+	# 	if product_id:
+	# 		product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
 
 
-			if product_release_id:
-				print("Product_Release already exists")
-			else:
-				product_release = Product_Release(product_id=product_id[0], release_number=new_release_number, inserted_at=datetime.utcnow())
-				db.session.add(product_release)
-				db.session.commit()
-				product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
+	# 		if product_release_id:
+	# 			print("Product_Release already exists")
+	# 		else:
+	# 			product_release = Product_Release(product_id=product_id[0], release_number=new_release_number, inserted_at=datetime.utcnow())
+	# 			db.session.add(product_release)
+	# 			db.session.commit()
+	# 			product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
 
-			old_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_release_id==CPRC.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).first()
-			print(old_product_release_id)
-			old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id==old_product_release_id[0]).first()
-			print(old_release_number)
-			addUpdateRecord = AddUpdateRecords()
-			addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number[0], new_release_number)
+	# 		old_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_release_id==CPRC.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).first()
+	# 		print(old_product_release_id)
+	# 		old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id==old_product_release_id[0]).first()
+	# 		print(old_release_number)
+	# 		addUpdateRecord = AddUpdateRecords()
+	# 		addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number[0], new_release_number)
 
-			cprc = db.session.query(CPRC).filter(Cluster.cluster_id==CPRC.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).all()
-			if(len(cprc)>0):
-				for record in cprc:
-					print("::::::::::::::::::::::::::::::::::::::::::::")
-					print(record.product_release_id)
-					record.product_release_id=product_release_id[0]
-					print(record.product_release_id)
-					print("::::::::::::::::::::::::::::::::::::::::::::")
-				db.session.commit()
+	# 		cprc = db.session.query(CPRC).filter(Cluster.cluster_id==CPRC.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.is_active==True).all()
+	# 		if(len(cprc)>0):
+	# 			for record in cprc:
+	# 				print("::::::::::::::::::::::::::::::::::::::::::::")
+	# 				print(record.product_release_id)
+	# 				record.product_release_id=product_release_id[0]
+	# 				print(record.product_release_id)
+	# 				print("::::::::::::::::::::::::::::::::::::::::::::")
+	# 			db.session.commit()
+
 
 
 

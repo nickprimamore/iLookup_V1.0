@@ -27,7 +27,7 @@ class DynamicFilter:
 
 			if release:
 				search_result = search_result.filter(Product_Release.release_number==release)
-
+				
 			if cluster_name:
 				search_result = search_result.filter(Cluster.cluster_name==cluster_name)
 

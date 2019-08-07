@@ -73,7 +73,7 @@ class Search:
 		for res in search_result:
 		
 			result = {}
-			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).filter(Product_Release.release_number==res.release_number).all()
+			clients = db.session.query(Client.client_name).filter(CPRC.client_id==Client.client_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(Cluster.cluster_name==res.cluster_name).all()
 			clients = self.convertUnicodeToArray(clients)
 
 			#we are passing list of all active and inactive clients for each cluster 
@@ -98,7 +98,8 @@ class Search:
 			result["inserted_at"] = res.inserted_at
 
 			#this fetches all the release numbers associated with each cluster and corresponding product
-			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).order_by(Product_Release.inserted_at.desc()).all()
+			#release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).order_by(Product_Release.inserted_at.desc()).all()
+			release_numbers = db.session.query(Task_Definition.release_number).filter(Component.component_id==Task_Definition.component_id, Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
 			release_numbers = list(set(release_numbers))
 			result["releases"] = self.convertUnicodeToArray(release_numbers)
 
@@ -164,7 +165,9 @@ class Search:
 			result["is_active"] = res.is_active
 			result["inserted_at"] = res.inserted_at
 
-			release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).order_by(Product_Release.inserted_at.desc()).all()
+			#release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==res.cluster_name).order_by(Product_Release.inserted_at.desc()).all()
+			release_numbers = db.session.query(Task_Definition.release_number).filter(Component.component_id==Task_Definition.component_id, Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==res.cluster_name).all()
+
 			release_numbers = list(set(release_numbers))
 			result["releases"] = release_numbers
 			results.append(result)
@@ -192,7 +195,9 @@ class Search:
 	#this function return all the releases associated to cluster passed as a parameter
 	def getReleases(self, cluster_name=None):
 		release_numbers = []
-		release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).all()
+		#release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).all()
+		release_numbers = db.session.query(Task_Definition.release_number).filter(Component.component_id==Task_Definition.component_id, Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==cluster_name).all()
+
 		release_numbers = list(set(release_numbers))
 
 		return release_numbers
