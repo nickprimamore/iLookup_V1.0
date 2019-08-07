@@ -488,12 +488,12 @@ def updateReleaseTable():
 	new_release_number = objectified["newRelease"]
 	addUpdateRecord = AddUpdateRecords()
 	product_release_exists = addUpdateRecord.updateProductRelease(product_name,cluster_name, old_release_number, new_release_number)
-	addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
+	#addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
 
 	if product_release_exists:
 		print("Release already exists. Use some other release number")
 	else:
-		#addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
+		addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
 		print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
