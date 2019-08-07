@@ -149,7 +149,9 @@
       }, 3500);
       return;
     }
+    else {
 
+    }
     let newRel = document.getElementById('newRelease').value;
     //Alert for if no release number was entered
     if (!newRel) {
@@ -225,7 +227,16 @@
       }),
       success: function(response) {
         // Alerts the user that the release number was successfully updated
-        $('#updatedReleaseAlert').show('fade');
+        console.log(response)
+        if (response.value) {
+          console.log("We here?")
+          $('#existingReleaseAlert').show('fade');
+          window.setTimeout(function() {
+            $("#existingReleaseAlert").hide('fade');
+          }, 3500);
+        }
+        else {
+          $('#updatedReleaseAlert').show('fade');
         window.setTimeout(function() {
           $("#updatedReleaseAlert").hide('fade');
         }, 3500);
@@ -302,6 +313,7 @@
             }
           }
         })
+        }
       }
     })
 
