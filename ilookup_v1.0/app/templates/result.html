@@ -149,7 +149,9 @@
       }, 3500);
       return;
     }
+    else {
 
+    }
     let newRel = document.getElementById('newRelease').value;
     //Alert for if no release number was entered
     if (!newRel) {
@@ -225,7 +227,16 @@
       }),
       success: function(response) {
         // Alerts the user that the release number was successfully updated
-        $('#updatedReleaseAlert').show('fade');
+        console.log(response)
+        if (response.value) {
+          console.log("We here?")
+          $('#existingReleaseAlert').show('fade');
+          window.setTimeout(function() {
+            $("#existingReleaseAlert").hide('fade');
+          }, 3500);
+        }
+        else {
+          $('#updatedReleaseAlert').show('fade');
         window.setTimeout(function() {
           $("#updatedReleaseAlert").hide('fade');
         }, 3500);
@@ -302,6 +313,7 @@
             }
           }
         })
+        }
       }
     })
 
@@ -555,7 +567,7 @@
   <thead>
     <tr>
       <!-- Column headers for the results table -->
-      <th scope="col" style="font-family:Lato Light; font-size:16px">Product</th>
+      <th scope="col" style="font-family:Lato Light; font-size:16px">Application</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Release #</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Cluster</th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Region</th>
@@ -563,7 +575,7 @@
       <th scope="col" style="font-family:Lato Light; font-size:16px">
         <div class="custom-control custom-checkbox my-1 mr-sm-2" data-toggle="popover" title="Clients" data-content="By default, only active clients are shown. By checking this box, inactive clients are also shown.">
           <input type="checkbox" class="custom-control-input" id="customControlInline" onclick="showInactive()" class="seeInactiveClients">
-          <label class="custom-control-label" for="customControlInline">Clients</label>
+          <label class="custom-control-label" for="customControlInline">Customers</label>
         </div>
       </th>
       <th scope="col" style="font-family:Lato Light; font-size:16px">Date Released <span style="color: #00508F"><i class="fas fa-question-circle" data-toggle="popover" title="Date" data-content="All times are in UTC time."></i></span></th>
