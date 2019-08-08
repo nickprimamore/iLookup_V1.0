@@ -40,19 +40,23 @@ If You Want To ...:
 
   Have new tags into the Database and AWS:
     1. In DeleteTag and NewTag route functions in routes.py, you have to add a new if statement with tag['key'] == 'NewTag'
-    2. In that, you can focus on calling a new function based on whatever tag you are now adding, to update certain parts of the database.
+    2. In that, you can focus on calling a new function based on whatever tag you are now adding, to update certain parts of the 
+       database.
     3. Most of the functions regarding this are in addUpdateDB.py
 
   Change Email Notifications:
     1. Open releaseEmail.py
-    2. If you want to add or change recipients of the email, contact IT to add / remove you from the distribution list under ilookup@acord.org
-    3. If you want to change the format of the email, add lines of html code in string format into htmlStr variable, and process data however you please.
-      *The current way data is processed is by querying the database and finding all time stamps in a release number and having non dev environments be taken into a list.
+    2. If you want to add or change recipients of the email, contact IT to add / remove you from the distribution list under 
+       ilookup@acord.org
+    3. If you want to change the format of the email, add lines of html code in string format into htmlStr variable, and process 
+       data however you please.
+      *The current way data is processed is by querying the database and finding all time stamps in a release number and having 
+       non dev environments be taken into a list.*
 
   Alter Cluster Modal:
     *This issue should be fixed, however if there is ever a change of it going too fast, or if you want to increase the speed.
-    1. In the $('#addTagModal').on('show.bs.modal', function(event)) there are timeouts set, to ensure that it processes without overriding one another for dynamic updating.
-       Just set the timeout state lower or higher accordingly.
+    1. In the $('#addTagModal').on('show.bs.modal', function(event)) there are timeouts set, to ensure that it processes without 
+       overriding one another for dynamic updating. Just set the timeout state lower or higher accordingly.
 
   Fix A Grayed Screen:
     1. For some reason, the screen will go gray sometimes when the release history modal is closed. This issue hasn't been pinpointed.
@@ -60,8 +64,8 @@ If You Want To ...:
 
   Alter Information Shown On Excel Sheet:
     1. If you want to change the filename, go to layout.html and under exportTableToExcel, change the filename.
-    2. If you want to change the table itself, go to result.html and at the very end of the page, there is a table with id="excelTable",
-       which produces the table that will be exported onto excel.
+    2. If you want to change the table itself, go to result.html and at the very end of the page, there is a table 
+       with id="excelTable", which produces the table that will be exported onto excel.
     *The reason why we don't use the actual result table is because of the icons involved, which cause the excel sheet to get corrupted.
 
   Add A New Table in Database:
