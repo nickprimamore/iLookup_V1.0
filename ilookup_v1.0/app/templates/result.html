@@ -522,6 +522,11 @@
     $('#closeSpecialRKeyAlert').click(function () {
       $('#specialRKeyAlert').hide('fade');
     });
+    // This fixes the cluster modal issue of not populating the first time around.
+    $('#addClustersSelect2').val(null).trigger('change');
+    $('#selectRegion').val(null).trigger('change');
+    $('#selectProduct').val(null).trigger('change')
+    $('#tagValue').val(null).trigger('change')
   });
 
   // Sets timeouts for tagging modal to avoid backend issues
