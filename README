@@ -28,11 +28,12 @@ Other benefits of iLookup include:
 If You Want To ...:
 
   Create A New Database:
-    1. Create a new schema in MySQL
-    2. Change the DATABASE_URI in the config file to go to the new schema.
-    3. Run Python3 db_create.py
-    4. Run Python3 awsdata.py
-    5. Flask Run and you're data should be there.
+    1. Connect to RDS on MySQL Workbench
+    2. Open the RDS connection
+    3. Create a new schema in MySQL
+    4. Change the DATABASE_URI in the config file to go to the new schema.
+    5. Run python3 db_create.py
+    6. Run python3 awsdata.py or load up ilookup.acordsolutions.net and press "Refresh AWS Data"
 
   Add A New Region:
     1. Open regions.py file
