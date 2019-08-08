@@ -72,7 +72,7 @@ If You Want To ...:
     1. If you want to change the filename, go to layout.html and under exportTableToExcel, change the filename.
     2. If you want to change the table itself, go to result.html and at the very end of the page, there is a table with id="excelTable",
        which produces the table that will be exported onto excel.
-    *The reason why we don't use the actual result table is because of the icons involved, which cause the excel sheet to get corrupted.
+   *The reason why we don't use the actual result table is because of the icons involved, which cause the excel sheet to get corrupted.*
 
   -Add A New Table in Database:
     1. Open Models.py
@@ -81,7 +81,7 @@ If You Want To ...:
 
   -Modify Select Bars:
     1. Approach the select2 documentation, and you can find various triggers, etc, to help understand the code better.
-    * https://select2.org/
+    * https://select2.org/ *
 
 
 Conclusion:
