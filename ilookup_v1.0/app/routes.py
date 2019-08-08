@@ -4,7 +4,7 @@ from app.models import Client, Product, Product_Release, Cluster, Component, Tas
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 from awsdata import AWSData
-# from checkData import CheckAWSData
+from checkData import CheckAWSData
 from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
@@ -486,8 +486,7 @@ def updateReleaseTable():
 	cluster_name = objectified["clusterName"]
 	old_release_number = objectified["oldRelease"]
 	new_release_number = objectified["newRelease"]
-	addUpdateRecord = AddUpdateRecords()
-	#product_release_exists = db.session.query(Product_Release.release_number).filter(Product_Release.product)
+	addUpdateRecord = AddUpdateRecords	#product_release_exists = db.session.query(Product_Release.release_number).filter(Product_Release.product)
 	print("Hello/")
 	product_release_exists = db.session.query(Product_Release.release_number).filter(Product_Release.product_id==Product.product_id, Product_Release.product_release_id==CPRC.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Product_Release.release_number==new_release_number).filter(Product.product_name==product_name).filter(Cluster.cluster_name==cluster_name).first()
 	print(".................................",product_release_exists)

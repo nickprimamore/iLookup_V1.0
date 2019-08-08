@@ -84,6 +84,7 @@ class AWSData:
 		exists_cluster = db.session.query(Cluster.cluster_name).filter_by(cluster_name=cluster_name).filter_by(region=region).scalar() is not None
 		if exists_cluster:
 			print("cluster already exists")
+
 		else:
 			cluster_value = Cluster(cluster_name=cluster_name, environment=environment,region=region,is_active=True)
 			db.session.add(cluster_value)
@@ -132,7 +133,10 @@ class AWSData:
 			print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
 			print(tasks)
 			print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
-		self.compareTaskDefinition(cluster,cluster_name,product_release_number,region_name, cluster_task_list, product_name,client_names)
+		if self.checkRollback(cluster, cluster_name, product_release_number, region_name,cluster_task_list, product_name, client_names):
+			print("rollBACK")
+		else:
+			self.compareTaskDefinition(cluster,cluster_name,product_release_number,region_name, cluster_task_list, product_name,client_names)
 			#self.populateTaskDefinition(component_id, cluster, service, latest_product_release_number, region_name)
 
 
@@ -380,15 +384,22 @@ class AWSData:
 			print("In compareTaskDefinition function", product_name, product_release_number, client_names)
 			print("==================================================")
 
+
+
+		
+
 			if len(db_task_defs)>0:
 				db_task_def_names = []
 				for db_task in db_task_defs:
 					db_task_def_names.append(db_task.task_definition_name)
+
+
 				for cluster_task in cluster_task_list:
 					#print("printing aws task..........",cluster_task["task"])
 					# Assuming no new task added or old task deleted just revision number changed
 
-					# check for emtpy list or None type object
+					# check for emtpy list or None type objec
+
 					if len(cluster_task['task']) >0:
 
 						task_descriptions = client.describe_tasks(cluster = cluster, tasks = cluster_task["task"])
@@ -511,12 +522,151 @@ class AWSData:
 
 
 
+	def checkRollback(self, cluster, cluster_name, product_release_number, region_name,cluster_task_list, product_name, client_names):
+		client = boto3.client("ecs", region_name=region_name)
+		#1. Fetch tasks from aws for any cluster 
+		# #print(cluster_task_list)
+		# #2. get lastest task defs from AWS(active ones) and release numbers 
+		# release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, Product.product_id==Product_Release.product_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Product.product_name==product_name).order_by(Product_Release.inserted_at.desc()).all()
+		# print(release_numbers[1][0])
+
+
+		# db_task_defs = db.session.query(Task_Definition.task_definition_name).filter(Task_Definition.component_id==Component.component_id,Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.release_number== release_numbers[1][0]).all()
+		# pprint.pprint(db_task_defs)
+
+		# 3. compare aws task defs with latest ones in database
+
+		#    if match then return 
+		#    else get the second last task defs using releases list 
+		#		 if match then 
+		#			
+		# 		else 
+		# 			return false and call compareTaskDefinition()
+
+		print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&................")
+		#print(cluster, cluster_name, product_release_number, region_name,cluster_task_list, product_name, client_names)
+		release_numbers = db.session.query(Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id, Product.product_id==Product_Release.product_id, CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Product.product_name==product_name).order_by(Product_Release.inserted_at.desc()).all()
+		print(release_numbers)
+
+		if (len(release_numbers)>1):
+			rollback_defs = db.session.query(Cluster.cluster_name, Component.component_name, Task_Definition.task_definition_name,Task_Definition.revision, Task_Definition.is_active).filter(Task_Definition.component_id==Component.component_id,Cluster.cluster_id==Component.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.release_number==release_numbers[1][0]).all()
+			
+			#db task defintion names list 
+			db_task_def_names = []
+			for db_task in rollback_defs:
+				db_task_def_names.append(db_task.task_definition_name)	
+
+			print(db_task_def_names)
+
+			#AWS Tasks
+			aws_task_list = []
+
+			print(cluster_task_list)
+
+			if(len(cluster_task_list)>0):
+				for cluster_task in cluster_task_list:
+					if cluster_task["task"]:
+						task_descriptions = client.describe_tasks(cluster = cluster, tasks = cluster_task["task"])
+						task_descriptions = task_descriptions["tasks"]
+						task_def_description = task_descriptions[0]["taskDefinitionArn"]
+						newsplit = task_def_description.split("/")
+						task_def = newsplit[1]
+						aws_task_list.append(task_def)
+
+				print(aws_task_list)
+
+				#check for length
+				if(len(db_task_def_names)!=len(aws_task_list)):
+					print("No rollBACK")
+					return False
+
+				else:
+					db_task_def_names.sort()
+					aws_task_list.sort()
+					pprint.pprint(db_task_def_names)
+					pprint.pprint(aws_task_list)
+					print("^^^^^^^^^^^^^^^^^^^^^^^^LISTTTT^^^^^^^^^^^^^^^^^^^^^")
+					if db_task_def_names==aws_task_list:
+						releaseNum = str(release_numbers[1][0])
+						oldReleaseNum = str(release_numbers[1][0])
+						newerVersion = ""
+						if "R" in str(releaseNum):
+							newInt = int(releaseNum[-1]) + 1
+							releaseNum = releaseNum[:-1] + str(newInt)
+
+							product_release_id = self.populateProductRelease(product_name, releaseNum)
+							if len(client_names) > 0:
+								for client in client_names:
+									client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
+													#print(client_id)
+									self.populateCPRC(cluster_name,product_release_id, client_id[0])
+							else:
+								client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
+								self.populateCPRC(cluster_name,product_release_id, client_id[0])
+
+							for cluster_task in cluster_task_list:
+								component_id = cluster_task["component_id"]
+								service = cluster_task["service"]
+								self.populateTaskDefinition(component_id,cluster,service,releaseNum,region_name)
+							return False
+
+						else:
+						   	releaseNum = releaseNum + " R1"
+						   	newerVersion = oldReleaseNum + " R2"
+
+							product_release = db.session.query(Product_Release).filter(Product.product_id==Product_Release.product_id).filter(Product_Release.release_number==oldReleaseNum).filter(Product.product_name==product_name).first()
+							product_release.release_number = releaseNum
+							db.session.commit()
+
+							task_defs = db.session.query(Task_Definition).filter(Cluster.cluster_id==Component.cluster_id,Component.component_id==Task_Definition.component_id).filter(Cluster.cluster_name==cluster_name).filter(Task_Definition.release_number==oldReleaseNum).all()
+							print(task_defs)
+							for res in task_defs:
+								res.release_number = releaseNum
+							db.session.commit()
+
+							new_product_release_id = self.populateProductRelease(product_name, newerVersion)
+							if len(client_names) > 0:
+								for client in client_names:
+									client_id = db.session.query(Client.client_id).filter_by(client_name=client).first()
+													#print(client_id)
+									self.populateCPRC(cluster_name, new_product_release_id, client_id[0])
+							else:
+								client_id = db.session.query(Client.client_id).filter_by(client_name="UNKNOWN").first()
+								self.populateCPRC(cluster_name, new_product_release_id, client_id[0])
+								
+
+							for cluster_task in cluster_task_list:
+								component_id = cluster_task["component_id"]
+								service = cluster_task["service"]
+								self.populateTaskDefinition(component_id,cluster,service,newerVersion,region_name)
+
+
+							print("populaed task definition")
+
+
+							return True
+
+					else:
+						print("not same")
+						return False
+
+
+
+
+
+
+			
+
+
+
 
 
 
 
 
 # data = AWSData()
+
+# #data.checkRollback('arn:aws:ecs:us-east-1:735360830536:cluster/Bnft-CarConn-qa-us-cluster', 'Bnft-CarConn-qa-us-cluster', '2019-08-07 15:50:36.408291 R1', 'us-east-1', [{'component_id': (56,), 'service': 'arn:aws:ecs:us-east-1:735360830536:service/Bnft-CarConn-qa-us-cluster/iasg-qa-carrier-connect-fuse-svc', 'task': ['arn:aws:ecs:us-east-1:735360830536:task/Bnft-CarConn-qa-us-cluster/f601e386d37642e7bd0e6ce2fc05c064']}], 'UNKNOWN', ['UNKNOWN'])
 
 # data.newMainFunction()
 

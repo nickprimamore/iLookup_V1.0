@@ -9,4 +9,5 @@ class Config(object):
 	SQLALCHEMY_DATABASE_URI = "mysql+pymysql://ilookupdb:ilookupdb@ilookupdb.cqoaspdapbvm.us-east-1.rds.amazonaws.com:3306/AWSData"
 
 
+
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
