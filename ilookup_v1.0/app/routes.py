@@ -499,7 +499,7 @@ def updateReleaseTable():
 		#addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
 		addUpdateRecord.updateProductRelease(product_name,cluster_name, old_release_number, new_release_number)
 		addUpdateRecord.updateTaskDefinition(cluster_name, old_release_number, new_release_number)
-
+		
 		print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 		for awsCluster in clusterArns:
 			cluster_split = awsCluster.split("/")
