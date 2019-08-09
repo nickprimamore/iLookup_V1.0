@@ -1,93 +1,96 @@
-Welcome to iLookup!
-
-Introduction:
-
-Problem:
-Currently, there is no centralized way to keep track of ASG product releases. There is also no
-simple way to search through AWS resources to gather relative data such as client information,
-product release numbers, and product components.
-
-Past/Current Solution:
-Release Engineer maintains a detailed excel document in Dropbox to keep track of
-the information mentioned above.
-
-Our Solution:
-iLookup, an in-house web based application that can be used to search and filter all ASG software
-products that are hosted on AWS, based on various search criteria such as clients, products, regions, etc.
-
-Technologies/Languages Used:
-Python/Flask, HTML/CSS/JavaScript, AJAX, JSON, Nginx, Gunicorn, Amazon EC2/ECS/RDS, MySQL, Ubuntu 16.04 Server
-
-Other benefits of iLookup include:
-•	Manage Release History (Audit Trail)
-•	Tag Resources (Updating AWS Clusters)
-•	Maintain Client History (Add / Remove)
-•	Email Notifications (New Releases)
-
-
-If You Want To ...:
-
-  -Create A New Database:
-    1. Connect to RDS on MySQL Workbench
-      Username: ilookupdb
-      Password: ilookupdb
-    2. Open the RDS connection
-    3. Create a new schema in MySQL
-    4. Change the DATABASE_URI in the config file to go to the new schema.
-    5. Run python3 db_create.py
-    6. Run python3 awsdata.py or load up ilookup.acordsolutions.net and press "Refresh AWS Data"
-
-  -Add A New Region:
-    1. Open regions.py file
-    2. Add another key:value pair to regionObject. i.e: "Ohio": "us-east-1"
-
-  -Have new tags into the Database and AWS:
-    1. In DeleteTag and NewTag route functions in routes.py, you have to add a new if statement with tag['key'] == 'NewTag'
+Welcome to iLookup! 
+ 
+Introduction: 
+ 
+Problem: 
+Currently, there is no centralized way to keep track of ASG product releases. There is also no 
+simple way to search through AWS resources to gather relative data such as client information, 
+product release numbers, and product components. 
+ 
+Past/Current Solution: 
+Release Engineer maintains a detailed excel document in Dropbox to keep track of 
+the information mentioned above. 
+ 
+Our Solution: 
+iLookup, an in-house web based application that can be used to search and filter all ASG software 
+products that are hosted on AWS, based on various search criteria such as clients, products, regions, etc. 
+ 
+Technologies/Languages Used: 
+Python/Flask, HTML/CSS/JavaScript, AJAX, JSON, Nginx, Gunicorn, Cron, Amazon EC2/ECS/RDS, MySQL, Ubuntu 16.04 Server 
+ 
+Other benefits of iLookup include: 
+•   Manage Release History (Audit Trail) 
+•   Tag Resources (Updating AWS Clusters) 
+•   Maintain Client History (Add / Remove) 
+•   Email Notifications (New Releases) 
+ 
+ 
+If You Want To ...: 
+ 
+  -Create A New Database: 
+    1. Connect to RDS on MySQL Workbench 
+      Username: ilookupdb 
+      Password: ilookupdb 
+    2. Open the RDS connection 
+    3. Create a new schema in MySQL 
+    4. Change the DATABASE_URI in the config file to go to the new schema. 
+    5. Run python3 db_create.py 
+    6. Run python3 awsdata.py or load up ilookup.acordsolutions.net and press "Refresh AWS Data" 
+ 
+  -Add A New Region: 
+    1. Open regions.py file 
+    2. Add another key:value pair to regionObject. i.e: "Ohio": "us-east-1" 
+ 
+  -Have new tags into the Database and AWS: 
+    1. In DeleteTag and NewTag route functions in routes.py, you have to add a new if statement with tag['key'] == 'NewTag' 
     2. In that, you can focus on calling a new function based on whatever tag you are now adding, to update certain parts of 
-       the database.
-    3. Most of the functions regarding this are in addUpdateDB.py
-
-  -Change Email Notifications:
-    1. Open releaseEmail.py
+       the database. 
+    3. Most of the functions regarding this are in addUpdateDB.py 
+ 
+  -Change Email Notifications: 
+    1. Open releaseEmail.py 
     2. If you want to add or change recipients of the email, contact IT to add / remove you from the distribution list under 
-       ilookup@acord.org
+       ilookup@acord.org 
     3. If you want to change the format of the email, add lines of html code in string format into htmlStr variable, and 
-       process data however you please.
+       process data however you please. 
        *The current way data is processed is by querying the database and finding all time stamps in a release number and having 
-       non-dev environments be taken into a list.*
-
-  -Alter Cluster Modal:
-    *This issue should be fixed, however if there is ever a change of it going too fast, or if you want to increase the speed.
+       non-dev environments be taken into a list.* 
+ 
+  -Alter Cluster Modal: 
+    *This issue should be fixed, however if there is ever a change of it going too fast, or if you want to increase the speed. 
     1. In the $('#addTagModal').on('show.bs.modal', function(event)) there are timeouts set, to ensure that it processes without 
-       overriding one another for dynamic updating. Just set the timeout state lower or higher accordingly.
-
-  -Fix A Grayed Screen:
-    1. For some reason, the screen will go gray sometimes when the release history modal is closed. This issue hasn't been pinpointed.
-    2. Refresh the page; it'll go away. It's a pretty rare occurrence.
-
-  -Create a New EC2 to Host iLookup
-    1.Run "build.sh" which will set up Nginx and Gunicorn for the application to run
-
-  -Alter Information Shown On Excel Sheet:
-    1. If you want to change the filename, go to layout.html and under exportTableToExcel, change the filename.
-    2. If you want to change the table itself, go to result.html and at the very end of the page, there is a table with id="excelTable",
-       which produces the table that will be exported onto excel.
-   *The reason why we don't use the actual result table is because of the icons involved, which cause the excel sheet to get corrupted.*
-
-  -Add A New Table in Database:
-    1. Open Models.py
-    2. Create the new model for that table
-    3. Make sure to import that model into all other files (routes, awsdata, checkData)
-
-  -Modify Select Bars:
-    1. Approach the select2 documentation, and you can find various triggers, etc, to help understand the code better.
-    * https://select2.org/ *
-
-
-Conclusion:
-
-Special thanks to ACORD Solutions Group for the opportunity to develop iLookup, as well as all the help
-along the way from Corey, Ken, Pat, Swathi, Wilson, Jatin, Jay, Leo, and VB.
-
-Thanks,
-Krish Patel, Nick Primamore, Sayef Iqbal, Rucha Guntoorkar
+       overriding one another for dynamic updating. Just set the timeout state lower or higher accordingly. 
+ 
+  -Fix A Grayed Screen: 
+    1. For some reason, the screen will go gray sometimes when the release history modal is closed. This issue hasn't been pinpointed. 
+    2. Refresh the page; it'll go away. It's a pretty rare occurrence. 
+ 
+  -Create a New EC2 to Host iLookup 
+    1.Run "build.sh" which will set up Nginx and Gunicorn for the application to run 
+ 
+  -Alter Information Shown On Excel Sheet: 
+    1. If you want to change the filename, go to layout.html and under exportTableToExcel, change the filename. 
+    2. If you want to change the table itself, go to result.html and at the very end of the page, there is a table with id="excelTable", 
+       which produces the table that will be exported onto excel. 
+   *The reason why we don't use the actual result table is because of the icons involved, which cause the excel sheet to get corrupted.* 
+ 
+  -Add A New Table in Database: 
+    1. Open Models.py 
+    2. Create the new model for that table 
+    3. Make sure to import that model into all other files (routes, awsdata, checkData) 
+ 
+  -Modify Select Bars: 
+    1. Approach the select2 documentation, and you can find various triggers, etc, to help understand the code better. 
+    * https://select2.org/ * 
+ 
+ 
+*Note: There is cron job in place to automatically pull in AWS data periodically. If you want to be 100% sure that you have the latest data while  
+       on iLookup, click "Refresh AWS Data" in the top-right corner of the page.* 
+        
+ 
+Conclusion: 
+ 
+Special thanks to ACORD Solutions Group for the opportunity to develop iLookup, as well as all the help 
+along the way from Corey, Ken, Pat, Swathi, Wilson, Jatin, Jay, Leo, and VB. 
+ 
+Developed by: Krish Patel, Nick Primamore, Sayef Iqbal, and Rucha Guntoorkar 
