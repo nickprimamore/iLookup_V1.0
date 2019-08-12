@@ -10,7 +10,7 @@ import sys
 from regions import regionObject
 
 # this client object will be used to make api calls to ecs
-#client = boto3.client("ecs")
+client = boto3.client("ecs")
 
 
 f=open("errorLog.txt", "a+")
@@ -33,56 +33,56 @@ class AWSData:
 	#database tables
 	def mainFunction(self,region_name):
 
-		try:
-			client = boto3.client("ecs", region_name=region_name)
 
-			#this api call fetches list of clients for the region passed as argument
-			clusters = client.list_clusters()
-			clusters = clusters["clusterArns"]
+		client = boto3.client("ecs", region_name=region_name)
 
-			#this for loop fetches aws tags for each cluster listed above by calling fetchClusterTags() function
-			for cluster in clusters:
-				cluster_split = cluster.split(":")
-				region = cluster_split[3]
-				region = list(regionObject.keys())[list(regionObject.values()).index(region)]
+		#this api call fetches list of clients for the region passed as argument
+		clusters = client.list_clusters()
+		clusters = clusters["clusterArns"]
 
-				mysplit= cluster.split("/")
+		#this for loop fetches aws tags for each cluster listed above by calling fetchClusterTags() function
+		for cluster in clusters:
+			cluster_split = cluster.split(":")
+			region = cluster_split[3]
+			region = list(regionObject.keys())[list(regionObject.values()).index(region)]
 
-				cluster_name=mysplit[1]
-				tags = self.fetchClusterTags(cluster,cluster_name,region_name)
+			mysplit= cluster.split("/")
 
-				#the following variables are assigned with some default values in case if the tag value is missing
-				client_names = []
-				client_name = "UNKNOWN"
-				product_name = "UNKNOWN"
-				product_release_number = ""
-				environment= "UNKNOWN"
+			cluster_name=mysplit[1]
+			tags = self.fetchClusterTags(cluster,cluster_name,region_name)
 
-				#this for loop fetches all the tag values for each key in the tag
-				for key in tags:
-					if ("Customer") in key:
-						client_name = tags[key]
-						client_names.append(client_name)
-						self.populateClient(client_name)
-					if ("Application") in key:
-						product_name = tags["Application"]
-						self.populateProduct(product_name)
-					if ("Release") in key:
-						product_release_number = tags[key]
-					if ("Environment") in key:
-						environment = tags[key]
+			#the following variables are assigned with some default values in case if the tag value is missing
+			client_names = []
+			client_name = "UNKNOWN"
+			product_name = "UNKNOWN"
+			product_release_number = ""
+			environment= "UNKNOWN"
 
-				# #following if conditions check if particular tag is present in the AWS, if not it will add tag with "UNKNOWN" value
-				if product_name == "UNKNOWN":
-					client.tag_resource(resourceArn=cluster, tags=[{'key':"Application", 'value': product_name}])
+			#this for loop fetches all the tag values for each key in the tag
+			for key in tags:
+				if ("Customer") in key:
+					client_name = tags[key]
+					client_names.append(client_name)
+					self.populateClient(client_name)
+				if ("Application") in key:
+					product_name = tags["Application"]
+					self.populateProduct(product_name)
+				if ("Release") in key:
+					product_release_number = tags[key]
+				if ("Environment") in key:
+					environment = tags[key]
 
-				if client_name == "UNKNOWN":
-					client.tag_resource(resourceArn=cluster, tags=[{'key':"Customer", 'value': client_name}])
+			# #following if conditions check if particular tag is present in the AWS, if not it will add tag with "UNKNOWN" value
+			if product_name == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Application", 'value': product_name}])
 
-				if environment == "UNKNOWN":
-					client.tag_resource(resourceArn=cluster, tags=[{'key':"Environment", 'value': environment}])
+			if client_name == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Customer", 'value': client_name}])
 
-				self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
+			if environment == "UNKNOWN":
+				client.tag_resource(resourceArn=cluster, tags=[{'key':"Environment", 'value': environment}])
+
+			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
 
 		except Exception as ex:
 			date = datetime.utcnow()
