@@ -11,6 +11,8 @@ class AddUpdateRecords:
 
 		#check if the new client already exists or not
 		exists_client = db.session.query(Client.client_name).filter(Client.client_name==new_client_name).scalar() is not None
+
+		#if not exists then add new client record
 		if not exists_client:
 			client = Client(client_name=new_client_name, is_active=True)
 			db.session.add(client)
@@ -22,8 +24,7 @@ class AddUpdateRecords:
 				self.deactivateClient(old_client_name)
 				self.deactivateCPRC(old_client_name, product_name, cluster_name, release_number)
 
-				# check if the client belongs to multiple clusters
-				# if not then deactivate it
+			#add new cprc record with new client 
 			self.addCPRC(new_client_name,product_name,cluster_name,release_number)
 
 		#if the new client already exists then mark it as active client, deactivate cprc for old and add new cprc record
@@ -43,13 +44,14 @@ class AddUpdateRecords:
 
 					self.deactivateCPRC(old_client_name, product_name, cluster_name, release_number)
 				return "Client-cprc record already exists"
-			#else add new cprc record
+			#else add new cprc record and deactivate the old record 
 			else:
 				self.deactivateCPRC(old_client_name, product_name, cluster_name, release_number)
 				self.addCPRC(new_client_name,product_name,cluster_name,release_number)
 
 	#this function checks if cprc record already exists and returns the boolean value
 	def checkCPRCExists(self,client_name, cluster_name, product_name, release_number):
+
 		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
 		cluster_id = db.session.query(Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
@@ -67,6 +69,7 @@ class AddUpdateRecords:
 	# 2. It checks for product release for new product, if not exist then creates the new reocrd
 	# 3. Updates the cprc for the new product, replaces the old product_release_id with the new_product_release by calling updateCPRC() function
 	def addUpdateProduct(self,old_product_name,new_product_name,client_names, cluster_name,release_number):
+
 		print(old_product_name,new_product_name,client_names, cluster_name,release_number)
 		#checks if new product exists or not
 		new_product_id = db.session.query(Product.product_id).filter_by(product_name=new_product_name).first()
@@ -126,6 +129,7 @@ class AddUpdateRecords:
 
 	# deactivates the CPRC record for the given arguments
 	def deactivateCPRC(self,client_name, product_name, cluster_name, release_number):
+
 		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
 		cluster_id = db.session.query(Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
@@ -140,6 +144,7 @@ class AddUpdateRecords:
 
 	# adds new cprc record in the database
 	def addCPRC(self,client_name, product_name, cluster_name, release_number):
+
 		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
 		cluster_id = db.session.query(Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
@@ -153,14 +158,18 @@ class AddUpdateRecords:
 
 	#uodates the environment for the given cluster
 	def updateEnvironment(self,cluster_name,environment):
+
 		cluster = db.session.query(Cluster).filter(Cluster.cluster_name==cluster_name).first()
 		cluster.environment = environment
 		db.session.commit()
 
 	#updates product_release record
 	def updateProductRelease(self, product_name, cluster_name, old_release_number, new_release_number):
+
 		new_product_release_id = self.checkRelease(product_name, cluster_name, old_release_number, new_release_number)
 		print( product_name, cluster_name, old_release_number, new_release_number)
+
+		#hecks if the record already exists, if not then add the new record 
 		if new_product_release_id:
 			print("release number already exists")
 		else:
@@ -174,7 +183,8 @@ class AddUpdateRecords:
 			new_product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
 			print(new_product_release_id)
 			#new_product_release_id = new_product_release_id[0]
-		#update cprc record
+
+		#update cprc record with new product_release_id 
 		cprc = db.session.query(CPRC).filter(CPRC.cluster_id==Cluster.cluster_id, Product_Release.product_release_id==CPRC.product_release_id).filter(Cluster.cluster_name==cluster_name).filter(Product_Release.release_number==old_release_number).distinct().all()
 		
 		print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTT',cprc)
@@ -191,17 +201,10 @@ class AddUpdateRecords:
 
 			print("updates the cprc records")
 
-			# product_release_exists = True
-			# product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
-			# product_id = product_id[0]
-
-			# product_release_number = db.session.query(Product_Release).filter(Product_Release.product_id==product_id).filter(Product_Release.release_number==old_release_number).first()
-			# product_release_number.release_number = new_release_number
-			# db.session.commit()
-			# return False
 
 	#updates the task definition, replaces old_release_number with new_release_number
 	def updateTaskDefinition(self, cluster_name, old_release_number, new_release_number):
+
 		print("....................... i am in task definition..........................")
 		print(cluster_name, old_release_number, new_release_number)
 		# changed is active for task def
@@ -215,7 +218,7 @@ class AddUpdateRecords:
 
 	#Check validation for inserting new release number
 	def checkRelease(self, product_name, cluster_name, old_release_number, new_release_number):
-		#exists = False
+	
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
 		print("product_id", product_id)
@@ -227,16 +230,10 @@ class AddUpdateRecords:
 		else:
 			return None
 
-		# if exists_product_release:
-		# 	product_release_id = db.session.query(Product_Release.product_release_id).filter(Product_Release.product_id==product_id[0]).filter(Product_Release.release_number==new_release_number).first()
-		# 	exists_cprc = db.session.query(CPRC.cprc_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(CPRC.product_release_id==product_release_id[0]).filter(Cluster.cluster_name==cluster_name).scalar() is not None
-
-		# 	if exists_cprc:
-		# 		exists = True
-		# return exists
 
 	#deactivates the client record if it belongs to only one cluster
 	def deactivateClient(self, client_name):
+
 		client_id = db.session.query(Client.client_id).filter(Client.client_name==client_name).first()
 
 		if client_id:
@@ -254,6 +251,7 @@ class AddUpdateRecords:
 
 	#updates the cprc record, changes product_release_id with new product_release_id
 	def updateCPRC(self,client_name, old_product_name, new_product_name, cluster_name, release_number):
+		
 		print(client_name, old_product_name, new_product_name, cluster_name, release_number)
 		cluster_id = db.session.query(Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name).first()
 		cluster_id = cluster_id[0]

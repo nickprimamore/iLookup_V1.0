@@ -486,7 +486,7 @@ def updateReleaseTable():
 	cluster_name = objectified["clusterName"]
 	old_release_number = objectified["oldRelease"]
 	new_release_number = objectified["newRelease"]
-	addUpdateRecord = AddUpdateRecords	#product_release_exists = db.session.query(Product_Release.release_number).filter(Product_Release.product)
+	addUpdateRecord = AddUpdateRecords()	#product_release_exists = db.session.query(Product_Release.release_number).filter(Product_Release.product)
 	print("Hello/")
 	product_release_exists = db.session.query(Product_Release.release_number).filter(Product_Release.product_id==Product.product_id, Product_Release.product_release_id==CPRC.product_release_id, CPRC.cluster_id==Cluster.cluster_id).filter(Product_Release.release_number==new_release_number).filter(Product.product_name==product_name).filter(Cluster.cluster_name==cluster_name).first()
 	print(".................................",product_release_exists)

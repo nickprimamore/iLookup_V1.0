@@ -8,73 +8,81 @@ import pprint
 import re
 from regions import regionObject
 
-# this client will be used to make api calls to ecs
-client = boto3.client("ecs")
+# this client object will be used to make api calls to ecs
+#client = boto3.client("ecs")
 
 #this class contains functions to fetch data from AWS and feed them into database
 class AWSData:
 
-	#this is the main function and it calls mainFunction() and passes the region name as argument
+	#this is the main function and it calls mainFunction() and passes the region name as argument to mainFunction
 	def newMainFunction(self):
+
 		for region in regionObject:
 			self.mainFunction(regionObject[region])
+
+
 
 	#this function takes the region_name as argument and makes api calls to the aws resources in that region
 	#first it fetches the all the clusters and then for each clusters it fetches the AWS resources
 	#it calls fetchClusterTafs() function and fetches tag info like product name, clients, environment,
 	#and release number, then populates Client and Product table
 	#it also calls populateCluster() function and passes the required information to populate other
-	#datbase tables
+	#database tables
 	def mainFunction(self,region_name):
-		client = boto3.client("ecs", region_name=region_name)
 
-		#this api call fetches list of clients for the region passed as argument
-		clusters = client.list_clusters()
-		clusters = clusters["clusterArns"]
+		try:
+			client = boto3.client("ecs", region_name=region_name)
 
-		#this for loop fetches aws tags for each cluster listed above by calling fetchClusterTags() function
-		for cluster in clusters:
-			cluster_split = cluster.split(":")
-			region = cluster_split[3]
-			region = list(regionObject.keys())[list(regionObject.values()).index(region)]
+			#this api call fetches list of clients for the region passed as argument
+			clusters = client.list_clusters()
+			clusters = clusters["clusterArns"]
 
-			mysplit= cluster.split("/")
+			#this for loop fetches aws tags for each cluster listed above by calling fetchClusterTags() function
+			for cluster in clusters:
+				cluster_split = cluster.split(":")
+				region = cluster_split[3]
+				region = list(regionObject.keys())[list(regionObject.values()).index(region)]
 
-			cluster_name=mysplit[1]
-			tags = self.fetchClusterTags(cluster,cluster_name,region_name)
+				mysplit= cluster.split("/")
 
-			#the following variables are assigned with some default values in case if the tag is missing
-			client_names = []
-			client_name = "UNKNOWN"
-			product_name = "UNKNOWN"
-			product_release_number = ""
-			environment= "UNKNOWN"
+				cluster_name=mysplit[1]
+				tags = self.fetchClusterTags(cluster,cluster_name,region_name)
 
-			#this for loop fetches all the tag values for each key in the tag
-			for key in tags:
-				if ("Customer") in key:
-					client_name = tags[key]
-					client_names.append(client_name)
-					self.populateClient(client_name)
-				if ("Application") in key:
-					product_name = tags["Application"]
-					self.populateProduct(product_name)
-				if ("Release") in key:
-					product_release_number = tags[key]
-				if ("Environment") in key:
-					environment = tags[key]
+				#the following variables are assigned with some default values in case if the tag value is missing
+				client_names = []
+				client_name = "UNKNOWN"
+				product_name = "UNKNOWN"
+				product_release_number = ""
+				environment= "UNKNOWN"
 
-			# #following if conditions check if particular tag is present in the AWS, if not it will add tag with "UNKNOWN" value
-			if product_name == "UNKNOWN":
-				client.tag_resource(resourceArn=cluster, tags=[{'key':"Application", 'value': product_name}])
+				#this for loop fetches all the tag values for each key in the tag
+				for key in tags:
+					if ("Customer") in key:
+						client_name = tags[key]
+						client_names.append(client_name)
+						self.populateClient(client_name)
+					if ("Application") in key:
+						product_name = tags["Application"]
+						self.populateProduct(product_name)
+					if ("Release") in key:
+						product_release_number = tags[key]
+					if ("Environment") in key:
+						environment = tags[key]
 
-			if client_name == "UNKNOWN":
-				client.tag_resource(resourceArn=cluster, tags=[{'key':"Customer", 'value': client_name}])
+				# #following if conditions check if particular tag is present in the AWS, if not it will add tag with "UNKNOWN" value
+				if product_name == "UNKNOWN":
+					client.tag_resource(resourceArn=cluster, tags=[{'key':"Application", 'value': product_name}])
 
-			if environment == "UNKNOWN":
-				client.tag_resource(resourceArn=cluster, tags=[{'key':"Environment", 'value': environment}])
+				if client_name == "UNKNOWN":
+					client.tag_resource(resourceArn=cluster, tags=[{'key':"Customer", 'value': client_name}])
 
-			self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
+				if environment == "UNKNOWN":
+					client.tag_resource(resourceArn=cluster, tags=[{'key':"Environment", 'value': environment}])
+
+				self.populateClusters(cluster, cluster_name,environment,region,product_release_number,region_name, product_name,client_names )
+
+		except Exception as ex:
+			print(ex.args, "ERROR")
 
 
 	#this function populates the cluster table and then calls populateComponent function
@@ -88,7 +96,7 @@ class AWSData:
 		else:
 			cluster_value = Cluster(cluster_name=cluster_name, environment=environment,region=region,is_active=True)
 			db.session.add(cluster_value)
-			#print("New cluster is added to database")
+			print("New cluster is added to database")
 
 		cluster_id = db.session.query(Cluster.cluster_id).filter_by(cluster_name=cluster_name).first()
 		self.populateComponent(cluster_id, cluster,cluster_name,product_release_number, region_name, product_name,client_names)
@@ -116,7 +124,7 @@ class AWSData:
 				print(service_name)
 				component = Component(component_name = service_name, cluster_id= cluster_id[0], is_active=True)
 				db.session.add(component)
-				#print("Added component to database: " + service_name)
+				print("Added component to database: " + service_name)
 
 			##get the component_id of the corresponding component
 			component_id = db.session.query(Component.component_id).filter_by(component_name=service_name).filter_by(cluster_id=cluster_id[0]).first()
@@ -125,22 +133,21 @@ class AWSData:
 			tasks = tasks["taskArns"]
 			task_component_dict = {}
 			task_component_dict["component_id"] = component_id
-			print(tasks)
 			task_component_dict["task"] = tasks
 			task_component_dict["service"] = service
 			cluster_task_list.append(task_component_dict)
 
-			# print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
-			# print(tasks)
-			# print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
+			
 		#if self.checkRollback(cluster, cluster_name, product_release_number, region_name,cluster_task_list, product_name, client_names):
 		#  	print("rollBACK")
 		# else:
 		self.compareTaskDefinition(cluster,cluster_name,product_release_number,region_name, cluster_task_list, product_name,client_names)
-			#self.populateTaskDefinition(component_id, cluster, service, latest_product_release_number, region_name)
 
 
+	#this function checks if the task definition record already exists in the database
+	#if not then it adds new record to the database
 	def populateTaskDefinition(self, component_id,cluster, service, product_release_number, region_name ):
+
 		client = boto3.client("ecs", region_name=region_name)
 		tasks = client.list_tasks(cluster = cluster, serviceName = service)
 		tasks = tasks["taskArns"]
@@ -184,89 +191,85 @@ class AWSData:
 					print("Added task_definition to database: " + task_def)
 
 
-				#print("================================")
-
-
+	#this function checks for the latest release number and return the latest release number
+	#also updates the aws tag with new release number
 	def checkForLatestRelease(self, product_name, tag_release_number, cluster, region_name, cluster_name):
-
-		print("in checkForLatestRelease function..................")
-		print(product_name, tag_release_number, cluster, region_name, cluster_name)
-		print(".....................................................")
 
 		print(product_name,tag_release_number)
 		product_id = db.session.query(Product.product_id).filter(Product.product_name==product_name).first()
 		product_id = product_id[0]
-		#print(product_id)
-		# latestTime = db.session.query(func.max(Product_Release.inserted_at).label("inserted_at"), Product_Release.release_number, Product_Release.product_id)
-		# #print(latestTime)
-		# latestTime = latestTime.group_by(Product_Release.product_id).filter(Product_Release.product_id==product_id).first()
-
+	
+		#gets the product_release_id with max release number for the give cluster
 		latestTime = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name)
-
 		latestTime = latestTime.group_by(CPRC.cluster_id).all()
+
+		old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id == latestTime[0][0]).first()
 		#print(latestRelease)
-		# print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		# print(latestTime)
+		print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		print(latestTime)
+		print("latest time release number", latestTime[0][2])
+
 		# print(tag_release_number)
-		# print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		#release_number = latestTime[0]
 
+		#this if-else statement makes sure to get the correct new release number
+		#if latestTime is null and there is no aws tag value for release  number then new timestamp is created and
+		#returned as the new release number 
+		# else if latestTime and tag release number is not none then both values are compared
+		#if they are equal means new release number must be there i.e. timestamp needs to be created
 		if (latestTime is None) or (len(latestTime)<1):
 			tag_release_number = tag_release_number.lstrip()
 			tag_release_number = tag_release_number.rstrip()
-			#if tag_release_number == "" or tag_release_number=="unknown":
-			#print("JWNDNWDNWINDIWNDIWNDIWNDIWNIDNIWNDIWNDIWN")
+			
 			if not tag_release_number:
 				current_time = datetime.utcnow()
 				release_number = current_time
 			else:
 				release_number = tag_release_number
-				#print("im in loop 1")
-		#if latestTime[0][2]:
+				
 		else:
 			if tag_release_number:
-				# print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-				# print("latest time release number, tag_release_number", latestTime[0][2], tag_release_number)
-				# print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
-				if latestTime[0][2] == tag_release_number:
+				old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id == latestTime[0][0]).first()
+				print("/////////////////////////////////////////////////////////////////////////")
+				print("old release_number", old_release_number[0])
+				print(type(old_release_number))
+				print("tag_release_number", tag_release_number)
+				print(type(tag_release_number))
+				print("/////////////////////////////////////////////////////////////////////////")
+
+				if old_release_number[0] == tag_release_number:
 					print("tag is not empty and two release numbers are equal!............")
 					current_time = datetime.utcnow()
 					release_number = current_time
 				else:
+					print("in the else part of else-if")
 					release_number = tag_release_number
+
+
 			else:
 				print("release number aws tag is empty")
 				current_time = datetime.utcnow()
 				release_number = current_time
 
 
-
-
-			# update aws release tag here
-		#if (tag_release_number != "") and (tag_release_number!=None):
-		# else:
-		# 	#print(latestTime)
-		# 	release_number = tag_release_number
-			#print("im in loop 2")
-
-		#print(release_number)
-
-		# call aws
-		# print("?????????????????>>>>>>>>>>>>>>>>>>>????????????????????")
-		# print(cluster)
-		# print("?????????????????>>>>>>>>>>>>>>>>>>>????????????????????")
 		client = boto3.client("ecs", region_name=region_name)
 		release_number = str(release_number)
 		
 		print("?????????????????>>>>>>>>>>>>>>>>>>>????????????????????")
 		print("Latest release_number is: " , release_number)
 		print("?????????????????>>>>>>>>>>>>>>>>>>>????????????????????")
+
+		#updates the AWS tag 
 		client.tag_resource(resourceArn=cluster, tags=[{'key':"Release", 'value': release_number}])
 
 		return release_number
 
+
+	#this function fetches the AWS tag for the given cluster and region and returns it in the key:value format
 	def fetchClusterTags(self,clusterArn, cluster_name,region_name):
+
 		client = boto3.client("ecs", region_name=region_name)
 		res = client.list_tags_for_resource(resourceArn = clusterArn)
 		tagsDict =  {}
@@ -275,73 +278,74 @@ class AWSData:
 			tagsDict[tag["key"]] = tag["value"]
 		return tagsDict
 
+
+	#this function populates the product table
+	#it checks if the product already exists, if it does not exists then creates new record 
 	def populateProduct(self, product_name):
+
 		product_id = db.session.query(Product.product_id).filter_by(product_name=product_name).first()
-		#print("This is product id for", product_name,product_id)
 		if product_id is not None:
 			product_id = product_id[0]
-		# product_id = product_id[0]
-		#print(product_id)
+		
 		exists_product = db.session.query(Product.product_id).filter_by(product_id=product_id).scalar() is not None
 
-		#print("New entry is added in product table")y(Product.product_id).filter_by(product_id=product_id).scalar() is not None
 		if exists_product:
 			print("Product already exists in database")
 		else:
 			productValue = Product(product_name=product_name, is_active=True)
 			db.session.add(productValue)
 			db.session.commit()
+			print("new product is added")
 
+
+	#this function populates the client table
+	#it checks if the client already exists, if it does not exists then creates new record 
 	def populateClient(self, client_name):
+
 		client_id = db.session.query(Client.client_id).filter_by(client_name=client_name).first()
-		print("this is client id.......", client_id, client_name)
-		#print(client_id)
+
 		if client_id is not None:
 			client_id = client_id[0]
-		#print(client_id)
+	
 		exists_client = db.session.query(Client.client_id).filter_by(client_id=client_id).scalar() is not None
+
 		if exists_client:
 			print("Client already exists in database")
 		else:
 			clientValue = Client(client_name=client_name,is_active=True)
 			db.session.add(clientValue)
 			db.session.commit()
-			#print("New entry is added in client table")
+			print("New entry is added in client table")
 
+	#this function populates the product_release table
+	#it checks if the product_release record already exists, if it does not exists then creates new record 
 	def populateProductRelease(self, product_name, release_number):
 
 		product_id = db.session.query(Product.product_id).filter_by(product_name=product_name).first()
 		if product_id is not None:
 			product_id = product_id[0]
-		#print(product_id)
+
 		exists_product_release = db.session.query(Product_Release.product_release_id).filter_by(product_id=product_id).filter_by(release_number=release_number).scalar() is not None
 
-		#print(exists_product_release)
 		if exists_product_release:
 			print("already exists record for product_release")
 
 		else:
 			product_release_value = Product_Release(product_id=product_id, release_number=release_number, inserted_at=datetime.utcnow())
 			db.session.add(product_release_value)
-			#print('inserted new record in product_release table')
+			print('inserted new record in product_release table')
 
 		product_release_id = db.session.query(Product_Release.product_release_id).filter_by(product_id=product_id).filter_by(release_number=release_number).first()
 		product_release_id = product_release_id[0]
-		#print(product_release_id)
 
 		db.session.commit()
 		return product_release_id
 
 
-
+	#this function populates the cprc table
+	#it checks if the cprc record already exists, if it does not exists then creates new record
+	#it also deactivates old cprc records 
 	def populateCPRC(self, cluster_name, product_release_id, client_id):
-
-
-
-		print("////////////////////////////////////////////////////////////////////////////////")
-		print("in cprc function: ", cluster_name, product_release_id, client_id)
-		print("////////////////////////////////////////////////////////////////////////////////")
-
 
 		cluster_id = db.session.query(Cluster.cluster_id).filter_by(cluster_name=cluster_name).first()
 		if cluster_id is not None:
@@ -352,7 +356,6 @@ class AWSData:
 		if exists_cprc:
 			print("already exists record for cprc")
 		else:
-			#inactive old cprc 
 			cprc = db.session.query(CPRC).filter(Cluster.cluster_id==CPRC.cluster_id).filter(Cluster.cluster_name==cluster_name).filter(CPRC.client_id==client_id).all()
 			if (len(cprc)> 0 ):
 				for record in cprc:
@@ -361,24 +364,18 @@ class AWSData:
 
 			cprc_value = CPRC(client_id=client_id, cluster_id=cluster_id, product_release_id=product_release_id)
 			db.session.add(cprc_value)
-			#print('inserted new record in product_release table')
 			db.session.commit()
 			print("Added new record in CPRC")
 
+
+	#this function fetches the task definitions from aws and fetches the active task definitons(latest ones) from database
+	#compares both the task definitions, if they are not same means there is new release for that cluster and new task definitions are added to the database
+	#if there are new prior records of the task_definitions for that cluster then we directly add new task_definitions from aws to database
 	def compareTaskDefinition(self,cluster, cluster_name, product_release_number, region_name,cluster_task_list, product_name, client_names):
 		client = boto3.client("ecs", region_name=region_name)
-		# print("Printing cluster and service", cluster,service)
-		# tasks = client.list_tasks(cluster = cluster, serviceName = service)
-		# tasks = tasks["taskArns"]
-		#tasks = []
-		# for cluster_task in cluster_task_list:
-		# 	component_id = cluster_task["component_id"]
-		# 	task = cluster_task["task"]
-		# 	tasks.append(task)
 
 		size = len(cluster_task_list)
 
-		#pprint.pprint(cluster_task_list)
 
 		if size > 0:
 			#task_descriptions = client.describe_tasks(cluster=cluster, tasks= tasks)
@@ -724,8 +721,7 @@ class AWSData:
 
 # data = AWSData()
 
-# # # #data.checkRollback('arn:aws:ecs:us-east-1:735360830536:cluster/Bnft-CarConn-qa-us-cluster', 'Bnft-CarConn-qa-us-cluster', '2019-08-07 15:50:36.408291 R1', 'us-east-1', [{'component_id': (56,), 'service': 'arn:aws:ecs:us-east-1:735360830536:service/Bnft-CarConn-qa-us-cluster/iasg-qa-carrier-connect-fuse-svc', 'task': ['arn:aws:ecs:us-east-1:735360830536:task/Bnft-CarConn-qa-us-cluster/f601e386d37642e7bd0e6ce2fc05c064']}], 'UNKNOWN', ['UNKNOWN'])
-
+# # # # #data.checkRollback('arn:aws:ecs:us-east-1:735360830536:cluster/Bnft-CarConn-qa-us-cluster', 'Bnft-CarConn-qa-us-cluster', '2019-08-07 15:50:36.408291 R1', 'us-east-1', [{'component_id': (56,), 'service': 'arn:aws:ecs:us-east-1:735360830536:service/Bnft-CarConn-qa-us-cluster/iasg-qa-carrier-connect-fuse-svc', 'task': ['arn:aws:ecs:us-east-1:735360830536:task/Bnft-CarConn-qa-us-cluster/f601e386d37642e7bd0e6ce2fc05c064']}], 'UNKNOWN', ['UNKNOWN'])
 # data.newMainFunction()
 
 # db.session.commit()
