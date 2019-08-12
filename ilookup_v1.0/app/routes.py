@@ -4,7 +4,7 @@ from app.models import Client, Product, Product_Release, Cluster, Component, Tas
 from sqlalchemy import create_engine, Table, select, MetaData
 from flask_sqlalchemy import SQLAlchemy
 from awsdata import AWSData
-from checkData import CheckAWSData
+#from checkData import CheckAWSData
 from db_search_v3 import Search
 from db_update_release import Update_Release
 from db_dynamic_filter import DynamicFilter
@@ -571,5 +571,5 @@ def loadAWSData():
 	# print("Loaded")
 	awsdata = AWSData()
 	awsdata.newMainFunction()
-	db.session.commit()
+	#db.session.commit()
 	return redirect(url_for("load"))
