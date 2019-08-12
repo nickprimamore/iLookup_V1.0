@@ -202,11 +202,11 @@ class AWSData:
 		latestTime = db.session.query(func.max(CPRC.product_release_id).label("product_release_id"),CPRC.cluster_id,Product_Release.release_number).filter(CPRC.product_release_id==Product_Release.product_release_id).filter(CPRC.cluster_id==Cluster.cluster_id).filter(Cluster.cluster_name==cluster_name)
 		latestTime = latestTime.group_by(CPRC.cluster_id).all()
 
-		old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id == latestTime[0][0]).first()
+		#old_release_number = db.session.query(Product_Release.release_number).filter(Product_Release.product_release_id == latestTime[0][0]).first()
 		#print(latestRelease)
-		print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		print(latestTime)
-		print("latest time release number", latestTime[0][2])
+		# print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		# print(latestTime)
+		# print("latest time release number", latestTime[0][2])
 
 		# print(tag_release_number)
 		print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
