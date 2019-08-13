@@ -87,7 +87,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: mainFunction - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: mainFunction - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -112,7 +112,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: populateClusters - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: populateClusters - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 	#this function populates the component table and then calls CompareTaskDefiniton() function
@@ -161,7 +161,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: populateComponent - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: populateComponent - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -215,7 +215,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: populateTaskDefinition - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: populateTaskDefinition - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -299,7 +299,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: checkForLatestRelease - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: checkForLatestRelease - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -319,7 +319,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: fetchClusterTags - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: fetchClusterTags - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -346,7 +346,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: populateProduct - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: populateProduct - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -374,7 +374,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: populateClient - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: populateClient - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -406,7 +406,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: populateProductRelease - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: populateProductRelease - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -440,7 +440,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: populateCPRC - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: populateCPRC - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 
@@ -617,7 +617,7 @@ class AWSData:
 		except Exception as ex:
 			date = datetime.utcnow()
 			tb = sys.exc_info()[2]
-			errorMsg = str(date) + " - Function: compareTaskDefinition - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
+			errorMsg = str(date) + " - File: AWSData.py - Function: compareTaskDefinition - " + str(ex.args) + " - on line " + str(tb.tb_lineno) + " \r\n"
 			f.write(errorMsg)
 			f.close()
 

@@ -1,1 +1,0 @@
-2019-08-12 20:27:13.499861 - Function: mainFunction - ("'AWSData' object has no attribute 'populateCluters'",) - on line 85 
