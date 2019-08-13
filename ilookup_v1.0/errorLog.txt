@@ -1,0 +1,5 @@
+<<<<<<< HEAD
+=======
+2019-08-12 20:27:13.499861 - Function: mainFunction - ("'AWSData' object has no attribute 'populateCluters'",) - on line 85 
+2019-08-13 13:25:52.098631 - Function: load - ("global name 'render_templat' is not defined",) - on line 41 
+>>>>>>> 410e60ed619d2ca704342dbb05e63891d8e88b1c
